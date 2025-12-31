@@ -17,18 +17,20 @@ namespace Mouseion.Common.Cloud
 
     public class MouseionCloudRequestBuilder : IMouseionCloudRequestBuilder
     {
-        // Default TMDB read-only API token (can be overridden via TMDB_API_TOKEN env var)
-        // This is a public read-only token for TMDB API, not a secret credential
-#pragma warning disable S6418 // Hard-coded secrets
-        private const string DefaultTmdbToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxYTczNzMzMDE5NjFkMDNmOTdmODUzYTg3NmRkMTIxMiIsInN1YiI6IjU4NjRmNTkyYzNhMzY4MGFiNjAxNzUzNCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.gh1BwogCCKOda6xj9FRMgAAj_RYKMMPC3oNlcBtlmwk";
-#pragma warning restore S6418
-
         public MouseionCloudRequestBuilder()
         {
             Services = new HttpRequestBuilder("https://radarr.servarr.com/v1/")
                 .CreateFactory();
 
-            var tmdbToken = Environment.GetEnvironmentVariable("TMDB_API_TOKEN") ?? DefaultTmdbToken;
+            // TMDB API token must be provided via TMDB_API_TOKEN environment variable
+            var tmdbToken = Environment.GetEnvironmentVariable("TMDB_API_TOKEN");
+            if (string.IsNullOrWhiteSpace(tmdbToken))
+            {
+                throw new InvalidOperationException(
+                    "TMDB_API_TOKEN environment variable is required. " +
+                    "Get a free API key from https://www.themoviedb.org/settings/api");
+            }
+
             TMDB = new HttpRequestBuilder("https://api.themoviedb.org/{api}/{route}/{id}{secondaryRoute}")
                 .SetHeader("Authorization", $"Bearer {tmdbToken}")
                 .CreateFactory();
