@@ -24,9 +24,9 @@ RUN dotnet publish src/Mouseion.Host/Mouseion.Host.csproj -c Release -o /app/pub
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 
-# Create non-root user
-RUN groupadd -r mouseion --gid=1000 && \
-    useradd -r -g mouseion --uid=1000 --home-dir=/app --shell=/bin/bash mouseion && \
+# Create non-root user (handle existing GID)
+RUN (groupadd -r mouseion --gid=1000 2>/dev/null || groupadd -r mouseion) && \
+    (useradd -r -g mouseion --uid=1000 --home-dir=/app --shell=/bin/bash mouseion 2>/dev/null || useradd -r -g mouseion --home-dir=/app --shell=/bin/bash mouseion) && \
     mkdir -p /config && \
     chown -R mouseion:mouseion /app /config
 

@@ -43,16 +43,16 @@
   - File: `src/Mouseion.Common/Crypto/HashConverter.cs`
   - Severity: HIGH
 
-- [ ] **Command Injection - PowerShell**
-  - File: `src/Mouseion.Common/Processes/ProcessProvider.cs:355-373`
-  - Fix: Escape arguments, remove `-ExecutionPolicy Bypass`
-  - Status: DEFERRED (Windows-only feature, low priority for self-hosted)
+- [x] **Command Injection - PowerShell** ✅ FIXED (2025-12-31)
+  - Solution: Implemented EscapePowerShellArg() with single-quote escaping
+  - File: `src/Mouseion.Common/Processes/ProcessProvider.cs:417-428`
+  - Removed `-ExecutionPolicy Bypass` security risk
   - Severity: HIGH
 
-- [ ] **Command Injection - cmd.exe**
-  - File: `src/Mouseion.Common/Processes/ProcessProvider.cs:355-373`
-  - Fix: Properly escape arguments
-  - Status: DEFERRED (Windows-only feature, low priority for self-hosted)
+- [x] **Command Injection - cmd.exe** ✅ FIXED (2025-12-31)
+  - Solution: Implemented EscapeCommandLineArg() with cmd.exe metacharacter escaping
+  - File: `src/Mouseion.Common/Processes/ProcessProvider.cs:387-412`
+  - Escapes: &, |, <, >, ^, ", %
   - Severity: HIGH
 
 - [x] **Missing HTTP Security Headers** ✅ FIXED (2025-12-31)
