@@ -1,5 +1,5 @@
 # Multi-stage build for Mouseion
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy solution and project files
@@ -21,7 +21,7 @@ RUN dotnet build Mouseion.sln -c Release --no-restore
 RUN dotnet publish src/Mouseion.Host/Mouseion.Host.csproj -c Release -o /app/publish --no-restore
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 
 # Create non-root user

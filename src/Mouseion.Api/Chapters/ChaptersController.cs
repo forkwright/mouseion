@@ -4,25 +4,34 @@
 // Copyright (C) 2010-2025 Radarr Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mouseion.Core.Datastore;
+using Mouseion.Common.EnvironmentInfo;
+using Mouseion.Common.Security;
 using Mouseion.Core.MediaFiles;
 
 namespace Mouseion.Api.Chapters;
 
 [ApiController]
 [Route("api/v3/chapters")]
+[Authorize]
 public class ChaptersController : ControllerBase
 {
     private readonly IMediaFileRepository _mediaFileRepository;
     private readonly IMediaAnalyzer _mediaAnalyzer;
+    private readonly IPathValidator _pathValidator;
+    private readonly IAppFolderInfo _appFolderInfo;
 
     public ChaptersController(
         IMediaFileRepository mediaFileRepository,
-        IMediaAnalyzer mediaAnalyzer)
+        IMediaAnalyzer mediaAnalyzer,
+        IPathValidator pathValidator,
+        IAppFolderInfo appFolderInfo)
     {
         _mediaFileRepository = mediaFileRepository;
         _mediaAnalyzer = mediaAnalyzer;
+        _pathValidator = pathValidator;
+        _appFolderInfo = appFolderInfo;
     }
 
     [HttpGet("{mediaFileId:int}")]
@@ -34,12 +43,24 @@ public class ChaptersController : ControllerBase
             return NotFound(new { error = $"MediaFile {mediaFileId} not found" });
         }
 
-        if (!System.IO.File.Exists(mediaFile.Path))
+        // Validate path to prevent path traversal
+        try
         {
-            return NotFound(new { error = $"File not found: {mediaFile.Path}" });
-        }
+            var validatedPath = _pathValidator.ValidateAndNormalizePath(
+                mediaFile.Path,
+                _appFolderInfo.AppDataFolder);
 
-        var chapters = _mediaAnalyzer.GetChapters(mediaFile.Path);
-        return Ok(chapters);
+            if (!System.IO.File.Exists(validatedPath))
+            {
+                return NotFound(new { error = "File not found" });
+            }
+
+            var chapters = _mediaAnalyzer.GetChapters(validatedPath);
+            return Ok(chapters);
+        }
+        catch (System.Security.SecurityException)
+        {
+            return Forbid();
+        }
     }
 }
