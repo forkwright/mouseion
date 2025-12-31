@@ -45,7 +45,7 @@ public class ConnectionStringFactory : IConnectionStringFactory
         return new DatabaseConnectionInfo
         {
             DatabaseType = type,
-            ConnectionString = $"Data Source={dbPath};Version=3;"
+            ConnectionString = $"Data Source={dbPath}"
         };
     }
 }
