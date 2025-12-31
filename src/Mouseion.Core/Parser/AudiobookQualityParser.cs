@@ -47,16 +47,34 @@ public static class AudiobookQualityParser
         }
 
         name = name.Trim();
-        var normalizedName = name.Replace('_', ' ').Trim();
 
-        var result = ParseQualityName(normalizedName);
-
-        if (result.Quality == Quality.AudiobookUnknown && !name.ContainsInvalidPathChars())
+        // Try extension-based detection first for files with audiobook extensions
+        if (!name.ContainsInvalidPathChars())
         {
-            result = ParseFromExtension(name, result, logger);
+            var extension = Path.GetExtension(name);
+            if (!string.IsNullOrEmpty(extension) && MediaFileExtensions.AudiobookExtensions.Contains(extension))
+            {
+                // Strip extension before parsing name to avoid false matches (e.g., ".m4b" matching "m4b" format)
+                var nameWithoutExtension = Path.GetFileNameWithoutExtension(name);
+                var normalizedName = nameWithoutExtension.Replace('_', ' ').Trim();
+                var result = ParseQualityName(normalizedName);
+
+                // If name parsing found quality, use it (e.g., "Author - Title [MP3 320].m4b")
+                // Otherwise, use extension-based default
+                if (result.Quality != Quality.AudiobookUnknown)
+                {
+                    return result;
+                }
+
+                result.Quality = MediaFileExtensions.GetQualityForExtension(extension);
+                result.SourceDetectionSource = QualityDetectionSource.Extension;
+                return result;
+            }
         }
 
-        return result;
+        // Fall back to name-based parsing (for non-file inputs or files without extensions)
+        var normalizedNameFallback = name.Replace('_', ' ').Trim();
+        return ParseQualityName(normalizedNameFallback);
     }
 
     private static QualityModel ParseFromExtension(string name, QualityModel result, ILogger? logger = null)
