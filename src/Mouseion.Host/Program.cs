@@ -37,6 +37,10 @@ try
     container.Register(typeof(IBasicRepository<>), typeof(BasicRepository<>), Reuse.Singleton);
     container.Register<ISignalRMessageBroadcaster, SignalRMessageBroadcaster>(Reuse.Singleton);
 
+    // Register MediaFile services
+    container.Register<Mouseion.Core.MediaFiles.IMediaFileRepository, Mouseion.Core.MediaFiles.MediaFileRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.IMediaAnalyzer, Mouseion.Core.MediaFiles.MediaAnalyzer>(Reuse.Singleton);
+
     // Create ASP.NET Core builder
     var builder = WebApplication.CreateBuilder(args);
 
