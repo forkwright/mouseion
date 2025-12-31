@@ -194,13 +194,13 @@ public static class MusicQualityParser
             var bitrateMatch = BitrateRegex.Match(name);
 
             var quality = TryParseFromFormat(formatMatch, bitDepthSampleRateMatch, hiResMatch, bitrateMatch);
-            if (quality != null)
+            if (quality is not null)
             {
                 return CreateResult(quality);
             }
 
             quality = TryParseFromBitDepthOrLossless(name, bitDepthSampleRateMatch, hiResMatch);
-            if (quality != null)
+            if (quality is not null)
             {
                 return CreateResult(quality);
             }

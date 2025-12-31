@@ -9,14 +9,14 @@ public static class QualityFinder
         // Check for a perfect 3-way match
         var matchingQuality = Quality.All.SingleOrDefault(q => q.Source == source && q.Resolution == resolution && q.Modifier == modifier);
 
-        if (matchingQuality != null)
+        if (matchingQuality is not null)
         {
             return matchingQuality;
         }
 
         // Check for Source and Modifier Match for Qualities with Unknown Resolution
         var matchingQualitiesUnknownResolution = Quality.All
-            .Where(q => q.Source == source && q.Resolution == 0 && q.Modifier == modifier && q != Quality.Unknown)
+            .Where(q => q.Source == source && q.Resolution == 0 && q.Modifier == modifier && !Equals(q, Quality.Unknown))
             .ToList();
 
         if (matchingQualitiesUnknownResolution.Any())
