@@ -31,7 +31,7 @@ public class Book : MediaItem
     }
 
     // Serialized JSON for database storage
-    public string? BookMetadataJson
+    public string? BookMetadata
     {
         get => Metadata != null ? JsonSerializer.Serialize(Metadata) : null;
         set => _metadata = value != null ? JsonSerializer.Deserialize<BookMetadata>(value) : null;

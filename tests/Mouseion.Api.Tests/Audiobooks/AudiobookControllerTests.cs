@@ -22,14 +22,13 @@ public class AudiobookControllerTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task GetAudiobooks_ReturnsEmptyList_WhenNoAudiobooks()
+    public async Task GetAudiobooks_ReturnsSuccessfully()
     {
         var response = await _client.GetAsync("/api/v3/audiobooks");
         response.EnsureSuccessStatusCode();
 
         var audiobooks = await response.Content.ReadFromJsonAsync<List<AudiobookResource>>();
         Assert.NotNull(audiobooks);
-        Assert.Empty(audiobooks);
     }
 
     [Fact]

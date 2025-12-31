@@ -35,6 +35,11 @@ try
     container.Register<IMigrationController, MigrationController>(Reuse.Singleton);
     container.Register<IConnectionStringFactory, ConnectionStringFactory>(Reuse.Singleton);
     container.Register<IDbFactory, DbFactory>(Reuse.Singleton);
+    container.RegisterDelegate<IDatabase>(r =>
+    {
+        var dbFactory = r.Resolve<IDbFactory>();
+        return dbFactory.Create(MigrationType.Main);
+    }, Reuse.Singleton);
     container.Register(typeof(IBasicRepository<>), typeof(BasicRepository<>), Reuse.Singleton);
     container.Register<ISignalRMessageBroadcaster, SignalRMessageBroadcaster>(Reuse.Singleton);
 
@@ -114,8 +119,8 @@ try
 
     // Initialize database (run migrations)
     Log.Information("Initializing database...");
+    var mainDb = app.Services.GetRequiredService<IDatabase>(); // Triggers creation via delegate
     var dbFactory = app.Services.GetRequiredService<IDbFactory>();
-    var mainDb = dbFactory.Create(MigrationType.Main);
     var logDb = dbFactory.Create(MigrationType.Log);
     Log.Information("Database initialized");
 

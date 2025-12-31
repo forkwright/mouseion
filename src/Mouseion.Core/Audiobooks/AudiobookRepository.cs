@@ -21,8 +21,22 @@ public interface IAudiobookRepository : IBasicRepository<Audiobook>
 public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookRepository
 {
     public AudiobookRepository(IDatabase database)
-        : base(database)
+        : base(database, "MediaItems")
     {
+    }
+
+    public override IEnumerable<Audiobook> All()
+    {
+        using var conn = _database.OpenConnection();
+        return conn.Query<Audiobook>("SELECT * FROM \"MediaItems\" WHERE \"MediaType\" = 5");
+    }
+
+    public override Audiobook? Find(int id)
+    {
+        using var conn = _database.OpenConnection();
+        return conn.QuerySingleOrDefault<Audiobook>(
+            "SELECT * FROM \"MediaItems\" WHERE \"Id\" = @Id AND \"MediaType\" = 5",
+            new { Id = id });
     }
 
     public Audiobook? FindByTitle(string title, int year)

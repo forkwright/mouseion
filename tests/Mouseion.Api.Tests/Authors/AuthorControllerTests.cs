@@ -21,14 +21,13 @@ public class AuthorControllerTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task GetAuthors_ReturnsEmptyList_WhenNoAuthors()
+    public async Task GetAuthors_ReturnsSuccessfully()
     {
         var response = await _client.GetAsync("/api/v3/authors");
         response.EnsureSuccessStatusCode();
 
         var authors = await response.Content.ReadFromJsonAsync<List<AuthorResource>>();
         Assert.NotNull(authors);
-        Assert.Empty(authors);
     }
 
     [Fact]

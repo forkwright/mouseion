@@ -27,7 +27,7 @@ public class AuthorRepository : BasicRepository<Author>, IAuthorRepository
     public Author? FindByName(string name)
     {
         using var conn = _database.OpenConnection();
-        return conn.QuerySingleOrDefault<Author>(
+        return conn.QueryFirstOrDefault<Author>(
             $"SELECT * FROM \"{_table}\" WHERE \"Name\" = @Name",
             new { Name = name });
     }
@@ -35,7 +35,7 @@ public class AuthorRepository : BasicRepository<Author>, IAuthorRepository
     public Author? FindByForeignId(string foreignAuthorId)
     {
         using var conn = _database.OpenConnection();
-        return conn.QuerySingleOrDefault<Author>(
+        return conn.QueryFirstOrDefault<Author>(
             $"SELECT * FROM \"{_table}\" WHERE \"ForeignAuthorId\" = @ForeignAuthorId",
             new { ForeignAuthorId = foreignAuthorId });
     }

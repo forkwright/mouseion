@@ -21,8 +21,22 @@ public interface IBookRepository : IBasicRepository<Book>
 public class BookRepository : BasicRepository<Book>, IBookRepository
 {
     public BookRepository(IDatabase database)
-        : base(database)
+        : base(database, "MediaItems")
     {
+    }
+
+    public override IEnumerable<Book> All()
+    {
+        using var conn = _database.OpenConnection();
+        return conn.Query<Book>("SELECT * FROM \"MediaItems\" WHERE \"MediaType\" = 4");
+    }
+
+    public override Book? Find(int id)
+    {
+        using var conn = _database.OpenConnection();
+        return conn.QuerySingleOrDefault<Book>(
+            "SELECT * FROM \"MediaItems\" WHERE \"Id\" = @Id AND \"MediaType\" = 4",
+            new { Id = id });
     }
 
     public Book? FindByTitle(string title, int year)

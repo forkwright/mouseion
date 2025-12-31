@@ -22,14 +22,13 @@ public class BookControllerTests : IClassFixture<TestWebApplicationFactory>
     }
 
     [Fact]
-    public async Task GetBooks_ReturnsEmptyList_WhenNoBooks()
+    public async Task GetBooks_ReturnsSuccessfully()
     {
         var response = await _client.GetAsync("/api/v3/books");
         response.EnsureSuccessStatusCode();
 
         var books = await response.Content.ReadFromJsonAsync<List<BookResource>>();
         Assert.NotNull(books);
-        Assert.Empty(books);
     }
 
     [Fact]

@@ -30,6 +30,12 @@ public class BasicRepository<TModel> : IBasicRepository<TModel>
         _table = typeof(TModel).Name + "s";
     }
 
+    protected BasicRepository(IDatabase database, string tableName)
+    {
+        _database = database;
+        _table = tableName;
+    }
+
     public virtual IEnumerable<TModel> All()
     {
         using var conn = _database.OpenConnection();
@@ -53,7 +59,7 @@ public class BasicRepository<TModel> : IBasicRepository<TModel>
         return model;
     }
 
-    public TModel? Find(int id)
+    public virtual TModel? Find(int id)
     {
         using var conn = _database.OpenConnection();
         return conn.QuerySingleOrDefault<TModel>(
@@ -117,9 +123,7 @@ public class BasicRepository<TModel> : IBasicRepository<TModel>
 
     private string BuildInsertSqlSQLite(TModel model)
     {
-        var properties = typeof(TModel).GetProperties()
-            .Where(p => p.Name != "Id")
-            .ToList();
+        var properties = GetDatabaseProperties();
 
         var columns = string.Join(", ", properties.Select(p => $"\"{p.Name}\""));
         var values = string.Join(", ", properties.Select(p => $"@{p.Name}"));
@@ -129,9 +133,7 @@ public class BasicRepository<TModel> : IBasicRepository<TModel>
 
     private string BuildInsertSqlPostgreSQL(TModel model)
     {
-        var properties = typeof(TModel).GetProperties()
-            .Where(p => p.Name != "Id")
-            .ToList();
+        var properties = GetDatabaseProperties();
 
         var columns = string.Join(", ", properties.Select(p => $"\"{p.Name}\""));
         var values = string.Join(", ", properties.Select(p => $"@{p.Name}"));
@@ -141,12 +143,34 @@ public class BasicRepository<TModel> : IBasicRepository<TModel>
 
     private string BuildUpdateSql(TModel model)
     {
-        var properties = typeof(TModel).GetProperties()
-            .Where(p => p.Name != "Id")
-            .ToList();
+        var properties = GetDatabaseProperties();
 
         var setClause = string.Join(", ", properties.Select(p => $"\"{p.Name}\" = @{p.Name}"));
 
         return $"UPDATE \"{_table}\" SET {setClause} WHERE \"Id\" = @Id";
+    }
+
+    private static System.Reflection.PropertyInfo[] GetDatabaseProperties()
+    {
+        return typeof(TModel).GetProperties()
+            .Where(p => p.Name != "Id")
+            .Where(p => IsDatabaseType(p.PropertyType))
+            .ToArray();
+    }
+
+    private static bool IsDatabaseType(Type type)
+    {
+        // Primitive types, strings, enums, nullables, DateTimes are database types
+        if (type.IsPrimitive || type == typeof(string) || type.IsEnum || type == typeof(DateTime))
+            return true;
+
+        // Nullable<T>
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            var underlyingType = Nullable.GetUnderlyingType(type);
+            return underlyingType != null && IsDatabaseType(underlyingType);
+        }
+
+        return false;
     }
 }

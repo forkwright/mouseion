@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Mouseion.Common.EnvironmentInfo;
-using Mouseion.Core.Datastore;
 
 namespace Mouseion.Api.Tests;
 
@@ -30,15 +29,14 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureTestServices(services =>
         {
-            // Use in-memory database for testing
-            var dbPath = Path.Combine(Path.GetTempPath(), $"mouseion_test_{Guid.NewGuid()}.db");
-
-            // Override IAppFolderInfo to use temp directory
+            // Override IAppFolderInfo to use temp directory for test database
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAppFolderInfo));
             if (descriptor != null)
             {
                 services.Remove(descriptor);
             }
+
+            var dbPath = Path.Combine(Path.GetTempPath(), $"mouseion_test_{Guid.NewGuid()}.db");
             services.AddSingleton<IAppFolderInfo>(new TestAppFolderInfo(dbPath));
         });
 

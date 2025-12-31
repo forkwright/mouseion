@@ -31,7 +31,7 @@ public class Audiobook : MediaItem
     }
 
     // Serialized JSON for database storage
-    public string? AudiobookMetadataJson
+    public string? AudiobookMetadata
     {
         get => Metadata != null ? JsonSerializer.Serialize(Metadata) : null;
         set => _metadata = value != null ? JsonSerializer.Deserialize<AudiobookMetadata>(value) : null;
