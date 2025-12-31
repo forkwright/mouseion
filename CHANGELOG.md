@@ -9,7 +9,7 @@ All notable changes to Mouseion will be documented in this file.
 Ground-up rewrite of Mouseion based on Radarr architecture with clean `Mouseion.*` namespace.
 
 **Timeline**: 8 weeks (40 working days)
-**Goal**: Production-ready backend for Akroasis media player integration
+**Goal**: Backend for media player integration
 
 ---
 
@@ -121,7 +121,7 @@ Ground-up rewrite of Mouseion based on Radarr architecture with clean `Mouseion.
 - **Fresh Repository** - Clean start with modern stack
   - Before: Radarr fork with `NzbDrone.*` namespace
   - After: Ground-up rewrite with `Mouseion.*` namespace
-  - Rationale: Clean slate enables better API design for Akroasis
+  - Rationale: Clean slate enables better API design
   - Stack: .NET 8.0, React 19, Serilog, OpenTelemetry
 
 **Project Structure**:
@@ -153,12 +153,10 @@ src/
 - Listening history tracking
 - Bulk operations
 
-### Akroasis Coordination
+### Client Integration
 - **Integration Point**: Week 3 (streaming endpoint ready)
 - **Chapter Markers**: Week 4 (HIGH priority for audiobook UX)
 - **Full Integration**: Week 8 (all features complete)
-
-**Collaboration**: Via `/home/ck/Projects/Akroasis-wrapper/ai_development_collab.md`
 
 ---
 
