@@ -145,7 +145,7 @@ src/
 - High-resolution audio metadata
 - OpenAPI spec generation
 
-### Phase 2: Akroasis Integration (Weeks 5-8)
+### Phase 2: Client Integration (Weeks 5-8)
 - Delta sync endpoint (`modifiedSince`)
 - File hash in responses
 - Cover art dynamic resizing
