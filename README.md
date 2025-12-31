@@ -77,6 +77,57 @@ dotnet run --project src/Mouseion.Host
 
 Default port: 7878
 
+## Docker
+
+### Quick Start
+
+```bash
+# Using Docker
+docker build -t mouseion .
+docker run -d \
+  --name mouseion \
+  -p 7878:7878 \
+  -v ./config:/config \
+  -v /path/to/media:/media \
+  mouseion:latest
+
+# Using Docker Compose
+docker compose up -d
+```
+
+### Configuration
+
+**Volumes:**
+- `/config` - Application data, database, logs (required)
+- `/media` - Media library (optional, mount as needed)
+
+**Ports:**
+- `7878` - Web UI and API
+
+**Environment Variables:**
+- `MOUSEION_DATA_FOLDER` - Override config path (default: `/config`)
+- PostgreSQL settings (optional, see `docker-compose.yml`)
+
+**Example with media libraries:**
+
+```bash
+docker run -d \
+  --name mouseion \
+  -p 7878:7878 \
+  -v /opt/mouseion/config:/config \
+  -v /mnt/media/movies:/media/movies \
+  -v /mnt/media/audiobooks:/media/audiobooks \
+  mouseion:latest
+```
+
+**Podman:**
+
+Replace `docker` with `podman` in all commands. Rootless mode supported.
+
+### Health Check
+
+Container includes health check at `/ping` endpoint (30s interval).
+
 ## API
 
 Base URL: `http://localhost:7878/api/v3/`

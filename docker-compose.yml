@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  mouseion:
+    image: mouseion:latest
+    container_name: mouseion
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7878:7878"
+    volumes:
+      # Config and database
+      - ./config:/config
+      # Media library (adjust paths as needed)
+      - /path/to/movies:/media/movies
+      - /path/to/audiobooks:/media/audiobooks
+      - /path/to/books:/media/books
+    environment:
+      # Optional: Override default data folder
+      - MOUSEION_DATA_FOLDER=/config
+      # Optional: PostgreSQL instead of SQLite
+      # - MOUSEION_POSTGRES_HOST=postgres
+      # - MOUSEION_POSTGRES_PORT=5432
+      # - MOUSEION_POSTGRES_USER=mouseion
+      # - MOUSEION_POSTGRES_PASSWORD=mouseion
+      # - MOUSEION_POSTGRES_DB=mouseion
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: PostgreSQL for advanced users
+  # postgres:
+  #   image: postgres:16
+  #   container_name: mouseion-postgres
+  #   environment:
+  #     - POSTGRES_USER=mouseion
+  #     - POSTGRES_PASSWORD=mouseion
+  #     - POSTGRES_DB=mouseion
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres-data:

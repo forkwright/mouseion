@@ -1,0 +1,46 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Frontend dev files
+**/node_modules/
+**/dist/
+**/.next/
+
+# Test files
+**/*Tests/
+**/TestResults/
+
+# Logs and databases
+*.log
+*.db
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Misc
+*.env
+*.env.local
+LICENSE
+NOTICE.md
