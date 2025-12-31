@@ -7,14 +7,12 @@ public class Migration_001_InitialSetup : FluentMigrator.Migration
 {
     public override void Up()
     {
-        Create.Table("VersionInfo")
-            .WithColumn("Version").AsInt64().NotNullable()
-            .WithColumn("AppliedOn").AsDateTime().Nullable()
-            .WithColumn("Description").AsString().Nullable();
+        // FluentMigrator creates its own VersionInfo table automatically
+        // This migration exists as a placeholder for the first migration number
     }
 
     public override void Down()
     {
-        Delete.Table("VersionInfo");
+        // Nothing to roll back
     }
 }
