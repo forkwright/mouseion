@@ -89,6 +89,16 @@ Key endpoints:
 - `/progress/{type}/{id}` - Playback progress
 - `/history/listen` - Listening history
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+
+## Support
+
+This project is free and always will be.
+
+Support development: [GitHub Sponsors](https://github.com/sponsors/forkwright)
+
 ## License
 
 GPL-3.0 - See [LICENSE](LICENSE)
