@@ -11,6 +11,11 @@ namespace Mouseion.Core.Authors;
 
 public interface IAuthorRepository : IBasicRepository<Author>
 {
+    Task<Author?> FindByNameAsync(string name, CancellationToken ct = default);
+    Task<Author?> FindByForeignIdAsync(string foreignAuthorId, CancellationToken ct = default);
+    Task<List<Author>> GetMonitoredAsync(CancellationToken ct = default);
+    Task<bool> AuthorPathExistsAsync(string path, CancellationToken ct = default);
+
     Author? FindByName(string name);
     Author? FindByForeignId(string foreignAuthorId);
     List<Author> GetMonitored();
@@ -24,12 +29,28 @@ public class AuthorRepository : BasicRepository<Author>, IAuthorRepository
     {
     }
 
+    public async Task<Author?> FindByNameAsync(string name, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+        return await conn.QueryFirstOrDefaultAsync<Author>(
+            $"SELECT * FROM \"{_table}\" WHERE \"Name\" = @Name",
+            new { Name = name }).ConfigureAwait(false);
+    }
+
     public Author? FindByName(string name)
     {
         using var conn = _database.OpenConnection();
         return conn.QueryFirstOrDefault<Author>(
             $"SELECT * FROM \"{_table}\" WHERE \"Name\" = @Name",
             new { Name = name });
+    }
+
+    public async Task<Author?> FindByForeignIdAsync(string foreignAuthorId, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+        return await conn.QueryFirstOrDefaultAsync<Author>(
+            $"SELECT * FROM \"{_table}\" WHERE \"ForeignAuthorId\" = @ForeignAuthorId",
+            new { ForeignAuthorId = foreignAuthorId }).ConfigureAwait(false);
     }
 
     public Author? FindByForeignId(string foreignAuthorId)
@@ -40,12 +61,30 @@ public class AuthorRepository : BasicRepository<Author>, IAuthorRepository
             new { ForeignAuthorId = foreignAuthorId });
     }
 
+    public async Task<List<Author>> GetMonitoredAsync(CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+        var result = await conn.QueryAsync<Author>(
+            $"SELECT * FROM \"{_table}\" WHERE \"Monitored\" = @Monitored",
+            new { Monitored = true }).ConfigureAwait(false);
+        return result.ToList();
+    }
+
     public List<Author> GetMonitored()
     {
         using var conn = _database.OpenConnection();
         return conn.Query<Author>(
             $"SELECT * FROM \"{_table}\" WHERE \"Monitored\" = @Monitored",
             new { Monitored = true }).ToList();
+    }
+
+    public async Task<bool> AuthorPathExistsAsync(string path, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+        var count = await conn.QuerySingleAsync<int>(
+            $"SELECT COUNT(*) FROM \"{_table}\" WHERE \"Path\" = @Path",
+            new { Path = path }).ConfigureAwait(false);
+        return count > 0;
     }
 
     public bool AuthorPathExists(string path)

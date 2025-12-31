@@ -30,6 +30,35 @@ public class BookInfoProxy : IProvideBookInfo
         _logger = logger;
     }
 
+    public async Task<Book?> GetByExternalIdAsync(string externalId, CancellationToken ct = default)
+    {
+        try
+        {
+            _logger.LogDebug("Fetching book by external ID: {ExternalId}", externalId);
+
+            var workId = externalId.StartsWith("/works/") ? externalId : $"/works/{externalId}";
+            var url = $"{BaseUrl}{workId}.json";
+
+            var request = new HttpRequestBuilder(url)
+                .SetHeader("User-Agent", UserAgent)
+                .Build();
+
+            var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _logger.LogWarning("OpenLibrary returned {StatusCode} for work {WorkId}", response.StatusCode, workId);
+                return null;
+            }
+
+            return ParseWork(response.Content);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching book by external ID: {ExternalId}", externalId);
+            return null;
+        }
+    }
+
     public Book? GetByExternalId(string externalId)
     {
         try
@@ -59,10 +88,43 @@ public class BookInfoProxy : IProvideBookInfo
         }
     }
 
+    public async Task<Book?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        _logger.LogDebug("GetById not supported by OpenLibrary (uses string IDs)");
+        return await Task.FromResult<Book?>(null).ConfigureAwait(false);
+    }
+
     public Book? GetById(int id)
     {
         _logger.LogDebug("GetById not supported by OpenLibrary (uses string IDs)");
         return null;
+    }
+
+    public async Task<List<Book>> SearchByTitleAsync(string title, CancellationToken ct = default)
+    {
+        try
+        {
+            _logger.LogDebug("Searching books by title: {Title}", title);
+
+            var url = $"{SearchUrl}?title={Uri.EscapeDataString(title)}&limit=20";
+            var request = new HttpRequestBuilder(url)
+                .SetHeader("User-Agent", UserAgent)
+                .Build();
+
+            var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _logger.LogWarning("OpenLibrary search returned {StatusCode}", response.StatusCode);
+                return new List<Book>();
+            }
+
+            return ParseSearchResults(response.Content);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching books by title: {Title}", title);
+            return new List<Book>();
+        }
     }
 
     public List<Book> SearchByTitle(string title)
@@ -88,6 +150,33 @@ public class BookInfoProxy : IProvideBookInfo
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error searching books by title: {Title}", title);
+            return new List<Book>();
+        }
+    }
+
+    public async Task<List<Book>> SearchByAuthorAsync(string author, CancellationToken ct = default)
+    {
+        try
+        {
+            _logger.LogDebug("Searching books by author: {Author}", author);
+
+            var url = $"{SearchUrl}?author={Uri.EscapeDataString(author)}&limit=20";
+            var request = new HttpRequestBuilder(url)
+                .SetHeader("User-Agent", UserAgent)
+                .Build();
+
+            var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _logger.LogWarning("OpenLibrary search returned {StatusCode}", response.StatusCode);
+                return new List<Book>();
+            }
+
+            return ParseSearchResults(response.Content);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching books by author: {Author}", author);
             return new List<Book>();
         }
     }
@@ -119,6 +208,33 @@ public class BookInfoProxy : IProvideBookInfo
         }
     }
 
+    public async Task<List<Book>> SearchByIsbnAsync(string isbn, CancellationToken ct = default)
+    {
+        try
+        {
+            _logger.LogDebug("Searching books by ISBN: {Isbn}", isbn);
+
+            var url = $"{SearchUrl}?isbn={Uri.EscapeDataString(isbn)}&limit=5";
+            var request = new HttpRequestBuilder(url)
+                .SetHeader("User-Agent", UserAgent)
+                .Build();
+
+            var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _logger.LogWarning("OpenLibrary search returned {StatusCode}", response.StatusCode);
+                return new List<Book>();
+            }
+
+            return ParseSearchResults(response.Content);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching books by ISBN: {Isbn}", isbn);
+            return new List<Book>();
+        }
+    }
+
     public List<Book> SearchByIsbn(string isbn)
     {
         try
@@ -142,6 +258,33 @@ public class BookInfoProxy : IProvideBookInfo
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error searching books by ISBN: {Isbn}", isbn);
+            return new List<Book>();
+        }
+    }
+
+    public async Task<List<Book>> GetTrendingAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            _logger.LogDebug("Fetching trending books");
+
+            var url = $"{BaseUrl}/trending/daily.json?limit=20";
+            var request = new HttpRequestBuilder(url)
+                .SetHeader("User-Agent", UserAgent)
+                .Build();
+
+            var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _logger.LogWarning("OpenLibrary trending returned {StatusCode}", response.StatusCode);
+                return new List<Book>();
+            }
+
+            return ParseTrendingResults(response.Content);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching trending books");
             return new List<Book>();
         }
     }
@@ -171,6 +314,11 @@ public class BookInfoProxy : IProvideBookInfo
             _logger.LogError(ex, "Error fetching trending books");
             return new List<Book>();
         }
+    }
+
+    public async Task<List<Book>> GetPopularAsync(CancellationToken ct = default)
+    {
+        return await GetTrendingAsync(ct).ConfigureAwait(false);
     }
 
     public List<Book> GetPopular()

@@ -11,6 +11,9 @@ namespace Mouseion.Core.Audiobooks;
 
 public interface IAddAudiobookService
 {
+    Task<Audiobook> AddAudiobookAsync(Audiobook audiobook, CancellationToken ct = default);
+    Task<List<Audiobook>> AddAudiobooksAsync(List<Audiobook> audiobooks, CancellationToken ct = default);
+
     Audiobook AddAudiobook(Audiobook audiobook);
     List<Audiobook> AddAudiobooks(List<Audiobook> audiobooks);
 }
@@ -29,6 +32,43 @@ public class AddAudiobookService : IAddAudiobookService
         _audiobookRepository = audiobookRepository;
         _authorRepository = authorRepository;
         _logger = logger;
+    }
+
+    public async Task<Audiobook> AddAudiobookAsync(Audiobook audiobook, CancellationToken ct = default)
+    {
+        ValidateAudiobook(audiobook);
+
+        // Verify author exists
+        if (audiobook.AuthorId.HasValue)
+        {
+            var author = await _authorRepository.FindAsync(audiobook.AuthorId.Value, ct).ConfigureAwait(false);
+            if (author == null)
+            {
+                throw new ArgumentException($"Author with ID {audiobook.AuthorId.Value} not found", nameof(audiobook));
+            }
+        }
+
+        // Check for existing audiobook
+        if (audiobook.AuthorId.HasValue)
+        {
+            var existing = await _audiobookRepository.FindByTitleAsync(audiobook.Title, audiobook.Year, ct).ConfigureAwait(false);
+            if (existing != null && existing.AuthorId == audiobook.AuthorId)
+            {
+                _logger.LogInformation("Audiobook already exists: {AudiobookTitle} ({Year}) - Narrator: {Narrator}",
+                    existing.Title, existing.Year, existing.Metadata.Narrator);
+                return existing;
+            }
+        }
+
+        // Set defaults
+        audiobook.Added = DateTime.UtcNow;
+        audiobook.Monitored = true;
+
+        var added = await _audiobookRepository.InsertAsync(audiobook, ct).ConfigureAwait(false);
+        _logger.LogInformation("Added audiobook: {AudiobookTitle} ({Year}) - Narrator: {Narrator}, Author ID: {AuthorId}",
+            added.Title, added.Year, added.Metadata.Narrator, added.AuthorId);
+
+        return added;
     }
 
     public Audiobook AddAudiobook(Audiobook audiobook)
@@ -66,6 +106,26 @@ public class AddAudiobookService : IAddAudiobookService
             added.Title, added.Year, added.Metadata.Narrator, added.AuthorId);
 
         return added;
+    }
+
+    public async Task<List<Audiobook>> AddAudiobooksAsync(List<Audiobook> audiobooks, CancellationToken ct = default)
+    {
+        var addedAudiobooks = new List<Audiobook>();
+
+        foreach (var audiobook in audiobooks)
+        {
+            try
+            {
+                var added = await AddAudiobookAsync(audiobook, ct).ConfigureAwait(false);
+                addedAudiobooks.Add(added);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding audiobook: {AudiobookTitle}", audiobook.Title);
+            }
+        }
+
+        return addedAudiobooks;
     }
 
     public List<Audiobook> AddAudiobooks(List<Audiobook> audiobooks)

@@ -33,7 +33,7 @@ public class LookupController : ControllerBase
     }
 
     [HttpGet("books")]
-    public ActionResult<List<BookLookupResource>> SearchBooks([FromQuery] string? title, [FromQuery] string? author, [FromQuery] string? isbn)
+    public async Task<ActionResult<List<BookLookupResource>>> SearchBooks([FromQuery] string? title, [FromQuery] string? author, [FromQuery] string? isbn, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(author) && string.IsNullOrWhiteSpace(isbn))
         {
@@ -44,26 +44,26 @@ public class LookupController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(title))
         {
-            results.AddRange(_bookInfoProvider.SearchByTitle(title));
+            results.AddRange(await _bookInfoProvider.SearchByTitleAsync(title, ct).ConfigureAwait(false));
         }
 
         if (!string.IsNullOrWhiteSpace(author))
         {
-            results.AddRange(_bookInfoProvider.SearchByAuthor(author));
+            results.AddRange(await _bookInfoProvider.SearchByAuthorAsync(author, ct).ConfigureAwait(false));
         }
 
         if (!string.IsNullOrWhiteSpace(isbn))
         {
-            results.AddRange(_bookInfoProvider.SearchByIsbn(isbn));
+            results.AddRange(await _bookInfoProvider.SearchByIsbnAsync(isbn, ct).ConfigureAwait(false));
         }
 
         return Ok(results.Distinct().Select(ToBookLookup).ToList());
     }
 
     [HttpGet("books/{id}")]
-    public ActionResult<BookLookupResource> GetBookById(string id)
+    public async Task<ActionResult<BookLookupResource>> GetBookById(string id, CancellationToken ct = default)
     {
-        var book = _bookInfoProvider.GetByExternalId(id);
+        var book = await _bookInfoProvider.GetByExternalIdAsync(id, ct).ConfigureAwait(false);
         if (book == null)
         {
             return NotFound(new { error = $"Book with ID {id} not found" });
@@ -73,18 +73,19 @@ public class LookupController : ControllerBase
     }
 
     [HttpGet("books/trending")]
-    public ActionResult<List<BookLookupResource>> GetTrendingBooks()
+    public async Task<ActionResult<List<BookLookupResource>>> GetTrendingBooks(CancellationToken ct = default)
     {
-        var books = _bookInfoProvider.GetTrending();
+        var books = await _bookInfoProvider.GetTrendingAsync(ct).ConfigureAwait(false);
         return Ok(books.Select(ToBookLookup).ToList());
     }
 
     [HttpGet("audiobooks")]
-    public ActionResult<List<AudiobookLookupResource>> SearchAudiobooks(
+    public async Task<ActionResult<List<AudiobookLookupResource>>> SearchAudiobooks(
         [FromQuery] string? title,
         [FromQuery] string? author,
         [FromQuery] string? narrator,
-        [FromQuery] string? asin)
+        [FromQuery] string? asin,
+        CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(author) &&
             string.IsNullOrWhiteSpace(narrator) && string.IsNullOrWhiteSpace(asin))
@@ -96,26 +97,26 @@ public class LookupController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(title))
         {
-            results.AddRange(_audiobookInfoProvider.SearchByTitle(title));
+            results.AddRange(await _audiobookInfoProvider.SearchByTitleAsync(title, ct).ConfigureAwait(false));
         }
 
         if (!string.IsNullOrWhiteSpace(author))
         {
-            results.AddRange(_audiobookInfoProvider.SearchByAuthor(author));
+            results.AddRange(await _audiobookInfoProvider.SearchByAuthorAsync(author, ct).ConfigureAwait(false));
         }
 
         if (!string.IsNullOrWhiteSpace(narrator))
         {
-            results.AddRange(_audiobookInfoProvider.SearchByNarrator(narrator));
+            results.AddRange(await _audiobookInfoProvider.SearchByNarratorAsync(narrator, ct).ConfigureAwait(false));
         }
 
         return Ok(results.Distinct().Select(ToAudiobookLookup).ToList());
     }
 
     [HttpGet("audiobooks/{asin}")]
-    public ActionResult<AudiobookLookupResource> GetAudiobookByAsin(string asin)
+    public async Task<ActionResult<AudiobookLookupResource>> GetAudiobookByAsin(string asin, CancellationToken ct = default)
     {
-        var audiobook = _audiobookInfoProvider.GetByAsin(asin);
+        var audiobook = await _audiobookInfoProvider.GetByAsinAsync(asin, ct).ConfigureAwait(false);
         if (audiobook == null)
         {
             return NotFound(new { error = $"Audiobook with ASIN {asin} not found" });
@@ -125,14 +126,14 @@ public class LookupController : ControllerBase
     }
 
     [HttpGet("audiobooks/narrator/{narrator}")]
-    public ActionResult<List<AudiobookLookupResource>> SearchByNarrator(string narrator)
+    public async Task<ActionResult<List<AudiobookLookupResource>>> SearchByNarrator(string narrator, CancellationToken ct = default)
     {
-        var audiobooks = _audiobookInfoProvider.SearchByNarrator(narrator);
+        var audiobooks = await _audiobookInfoProvider.SearchByNarratorAsync(narrator, ct).ConfigureAwait(false);
         return Ok(audiobooks.Select(ToAudiobookLookup).ToList());
     }
 
     [HttpGet("torrents/books")]
-    public ActionResult<List<TorrentLookupResource>> SearchBookTorrents([FromQuery] string? title, [FromQuery] string? author)
+    public async Task<ActionResult<List<TorrentLookupResource>>> SearchBookTorrents([FromQuery] string? title, [FromQuery] string? author, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(author))
         {
@@ -145,15 +146,16 @@ public class LookupController : ControllerBase
             Author = author
         };
 
-        var results = _myAnonamouseIndexer.SearchBooks(criteria);
+        var results = await _myAnonamouseIndexer.SearchBooksAsync(criteria, ct).ConfigureAwait(false);
         return Ok(results.Select(ToTorrentLookup).ToList());
     }
 
     [HttpGet("torrents/audiobooks")]
-    public ActionResult<List<TorrentLookupResource>> SearchAudiobookTorrents(
+    public async Task<ActionResult<List<TorrentLookupResource>>> SearchAudiobookTorrents(
         [FromQuery] string? title,
         [FromQuery] string? author,
-        [FromQuery] string? narrator)
+        [FromQuery] string? narrator,
+        CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(author) && string.IsNullOrWhiteSpace(narrator))
         {
@@ -167,7 +169,7 @@ public class LookupController : ControllerBase
             Narrator = narrator
         };
 
-        var results = _myAnonamouseIndexer.SearchAudiobooks(criteria);
+        var results = await _myAnonamouseIndexer.SearchAudiobooksAsync(criteria, ct).ConfigureAwait(false);
         return Ok(results.Select(ToTorrentLookup).ToList());
     }
 

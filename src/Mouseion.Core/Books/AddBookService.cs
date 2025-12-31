@@ -11,6 +11,9 @@ namespace Mouseion.Core.Books;
 
 public interface IAddBookService
 {
+    Task<Book> AddBookAsync(Book book, CancellationToken ct = default);
+    Task<List<Book>> AddBooksAsync(List<Book> books, CancellationToken ct = default);
+
     Book AddBook(Book book);
     List<Book> AddBooks(List<Book> books);
 }
@@ -29,6 +32,42 @@ public class AddBookService : IAddBookService
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
         _logger = logger;
+    }
+
+    public async Task<Book> AddBookAsync(Book book, CancellationToken ct = default)
+    {
+        ValidateBook(book);
+
+        // Verify author exists
+        if (book.AuthorId.HasValue)
+        {
+            var author = await _authorRepository.FindAsync(book.AuthorId.Value, ct).ConfigureAwait(false);
+            if (author == null)
+            {
+                throw new ArgumentException($"Author with ID {book.AuthorId.Value} not found", nameof(book));
+            }
+        }
+
+        // Check for existing book
+        if (book.AuthorId.HasValue)
+        {
+            var existing = await _bookRepository.FindByTitleAsync(book.Title, book.Year, ct).ConfigureAwait(false);
+            if (existing != null && existing.AuthorId == book.AuthorId)
+            {
+                _logger.LogInformation("Book already exists: {BookTitle} ({Year})", existing.Title, existing.Year);
+                return existing;
+            }
+        }
+
+        // Set defaults
+        book.Added = DateTime.UtcNow;
+        book.Monitored = true;
+
+        var added = await _bookRepository.InsertAsync(book, ct).ConfigureAwait(false);
+        _logger.LogInformation("Added book: {BookTitle} ({Year}) - Author ID: {AuthorId}",
+            added.Title, added.Year, added.AuthorId);
+
+        return added;
     }
 
     public Book AddBook(Book book)
@@ -65,6 +104,26 @@ public class AddBookService : IAddBookService
             added.Title, added.Year, added.AuthorId);
 
         return added;
+    }
+
+    public async Task<List<Book>> AddBooksAsync(List<Book> books, CancellationToken ct = default)
+    {
+        var addedBooks = new List<Book>();
+
+        foreach (var book in books)
+        {
+            try
+            {
+                var added = await AddBookAsync(book, ct).ConfigureAwait(false);
+                addedBooks.Add(added);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding book: {BookTitle}", book.Title);
+            }
+        }
+
+        return addedBooks;
     }
 
     public List<Book> AddBooks(List<Book> books)

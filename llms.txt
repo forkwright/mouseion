@@ -1,0 +1,29 @@
+# Mouseion
+
+> Unified media manager for movies, books, audiobooks, music, TV, podcasts, and comics
+
+Ground-up rewrite with clean architecture. Phase 0 foundation complete, Phase 1 quality system in progress.
+
+## Documentation
+- [CLAUDE.md](CLAUDE.md): Project-specific AI development context
+- [README.md](README.md): Project overview and current status
+- [ROADMAP.md](ROADMAP.md): 16-20 week implementation plan with phase breakdown
+
+## Key Code
+- [src/Mouseion.Core/MediaItems](src/Mouseion.Core/MediaItems): Core media item base classes
+- [src/Mouseion.Core/MediaTypes](src/Mouseion.Core/MediaTypes): MediaType enum (Book=4, Audiobook=5, etc.)
+- [src/Mouseion.Core/Qualities](src/Mouseion.Core/Qualities): 103 quality definitions across all media
+- [src/Mouseion.Core/Datastore](src/Mouseion.Core/Datastore): Repository pattern with async/await
+- [src/Mouseion.Core/Books](src/Mouseion.Core/Books): Book models and repositories
+- [src/Mouseion.Core/Audiobooks](src/Mouseion.Core/Audiobooks): Audiobook models and repositories
+- [src/Mouseion.Core/MetadataSource](src/Mouseion.Core/MetadataSource): OpenLibrary, Audnexus providers
+- [src/Mouseion.Api](src/Mouseion.Api): REST API controllers
+- [src/Mouseion.Host](src/Mouseion.Host): Entry point, DI configuration
+
+## Tests
+- [tests/Mouseion.Core.Tests](tests/Mouseion.Core.Tests): 115 unit tests (quality parsers, business logic)
+- [tests/Mouseion.Api.Tests](tests/Mouseion.Api.Tests): 19 integration tests (API endpoints)
+
+## Configuration
+- [Dockerfile](Dockerfile): Multi-stage build for production deployment
+- [src/Mouseion.Host/Program.cs](src/Mouseion.Host/Program.cs): Application startup and DI setup

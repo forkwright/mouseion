@@ -10,6 +10,14 @@ namespace Mouseion.Core.MetadataSource;
 
 public interface IProvideAudiobookInfo
 {
+    Task<Audiobook?> GetByAsinAsync(string asin, CancellationToken ct = default);
+    Task<Audiobook?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<List<Audiobook>> SearchByTitleAsync(string title, CancellationToken ct = default);
+    Task<List<Audiobook>> SearchByAuthorAsync(string author, CancellationToken ct = default);
+    Task<List<Audiobook>> SearchByNarratorAsync(string narrator, CancellationToken ct = default);
+    Task<List<Audiobook>> GetTrendingAsync(CancellationToken ct = default);
+    Task<List<Audiobook>> GetPopularAsync(CancellationToken ct = default);
+
     Audiobook? GetByAsin(string asin);
     Audiobook? GetById(int id);
     List<Audiobook> SearchByTitle(string title);

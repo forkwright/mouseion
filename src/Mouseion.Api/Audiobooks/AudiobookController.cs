@@ -30,16 +30,16 @@ public class AudiobookController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<AudiobookResource>> GetAudiobooks()
+    public async Task<ActionResult<List<AudiobookResource>>> GetAudiobooks(CancellationToken ct = default)
     {
-        var audiobooks = _audiobookRepository.All().ToList();
+        var audiobooks = await _audiobookRepository.AllAsync(ct).ConfigureAwait(false);
         return Ok(audiobooks.Select(ToResource).ToList());
     }
 
     [HttpGet("{id:int}")]
-    public ActionResult<AudiobookResource> GetAudiobook(int id)
+    public async Task<ActionResult<AudiobookResource>> GetAudiobook(int id, CancellationToken ct = default)
     {
-        var audiobook = _audiobookRepository.Find(id);
+        var audiobook = await _audiobookRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (audiobook == null)
         {
             return NotFound(new { error = $"Audiobook {id} not found" });
@@ -49,54 +49,54 @@ public class AudiobookController : ControllerBase
     }
 
     [HttpGet("author/{authorId:int}")]
-    public ActionResult<List<AudiobookResource>> GetAudiobooksByAuthor(int authorId)
+    public async Task<ActionResult<List<AudiobookResource>>> GetAudiobooksByAuthor(int authorId, CancellationToken ct = default)
     {
-        var audiobooks = _audiobookRepository.GetByAuthorId(authorId);
+        var audiobooks = await _audiobookRepository.GetByAuthorIdAsync(authorId, ct).ConfigureAwait(false);
         return Ok(audiobooks.Select(ToResource).ToList());
     }
 
     [HttpGet("series/{seriesId:int}")]
-    public ActionResult<List<AudiobookResource>> GetAudiobooksBySeries(int seriesId)
+    public async Task<ActionResult<List<AudiobookResource>>> GetAudiobooksBySeries(int seriesId, CancellationToken ct = default)
     {
-        var audiobooks = _audiobookRepository.GetBySeriesId(seriesId);
+        var audiobooks = await _audiobookRepository.GetBySeriesIdAsync(seriesId, ct).ConfigureAwait(false);
         return Ok(audiobooks.Select(ToResource).ToList());
     }
 
     [HttpGet("statistics")]
-    public ActionResult<AudiobookStatistics> GetStatistics()
+    public async Task<ActionResult<AudiobookStatistics>> GetStatistics(CancellationToken ct = default)
     {
-        var stats = _statisticsService.GetStatistics();
+        var stats = await _statisticsService.GetStatisticsAsync(ct).ConfigureAwait(false);
         return Ok(stats);
     }
 
     [HttpGet("statistics/author/{authorId:int}")]
-    public ActionResult<AudiobookStatistics> GetAuthorStatistics(int authorId)
+    public async Task<ActionResult<AudiobookStatistics>> GetAuthorStatistics(int authorId, CancellationToken ct = default)
     {
-        var stats = _statisticsService.GetAuthorStatistics(authorId);
+        var stats = await _statisticsService.GetAuthorStatisticsAsync(authorId, ct).ConfigureAwait(false);
         return Ok(stats);
     }
 
     [HttpGet("statistics/series/{seriesId:int}")]
-    public ActionResult<AudiobookStatistics> GetSeriesStatistics(int seriesId)
+    public async Task<ActionResult<AudiobookStatistics>> GetSeriesStatistics(int seriesId, CancellationToken ct = default)
     {
-        var stats = _statisticsService.GetSeriesStatistics(seriesId);
+        var stats = await _statisticsService.GetSeriesStatisticsAsync(seriesId, ct).ConfigureAwait(false);
         return Ok(stats);
     }
 
     [HttpGet("statistics/narrator/{narrator}")]
-    public ActionResult<AudiobookStatistics> GetNarratorStatistics(string narrator)
+    public async Task<ActionResult<AudiobookStatistics>> GetNarratorStatistics(string narrator, CancellationToken ct = default)
     {
-        var stats = _statisticsService.GetNarratorStatistics(narrator);
+        var stats = await _statisticsService.GetNarratorStatisticsAsync(narrator, ct).ConfigureAwait(false);
         return Ok(stats);
     }
 
     [HttpPost]
-    public ActionResult<AudiobookResource> AddAudiobook([FromBody] AudiobookResource resource)
+    public async Task<ActionResult<AudiobookResource>> AddAudiobook([FromBody] AudiobookResource resource, CancellationToken ct = default)
     {
         try
         {
             var audiobook = ToModel(resource);
-            var added = _addAudiobookService.AddAudiobook(audiobook);
+            var added = await _addAudiobookService.AddAudiobookAsync(audiobook, ct).ConfigureAwait(false);
             return CreatedAtAction(nameof(GetAudiobook), new { id = added.Id }, ToResource(added));
         }
         catch (ArgumentException ex)
@@ -106,12 +106,12 @@ public class AudiobookController : ControllerBase
     }
 
     [HttpPost("batch")]
-    public ActionResult<List<AudiobookResource>> AddAudiobooks([FromBody] List<AudiobookResource> resources)
+    public async Task<ActionResult<List<AudiobookResource>>> AddAudiobooks([FromBody] List<AudiobookResource> resources, CancellationToken ct = default)
     {
         try
         {
             var audiobooks = resources.Select(ToModel).ToList();
-            var added = _addAudiobookService.AddAudiobooks(audiobooks);
+            var added = await _addAudiobookService.AddAudiobooksAsync(audiobooks, ct).ConfigureAwait(false);
             return Ok(added.Select(ToResource).ToList());
         }
         catch (ArgumentException ex)
@@ -121,9 +121,9 @@ public class AudiobookController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public ActionResult<AudiobookResource> UpdateAudiobook(int id, [FromBody] AudiobookResource resource)
+    public async Task<ActionResult<AudiobookResource>> UpdateAudiobook(int id, [FromBody] AudiobookResource resource, CancellationToken ct = default)
     {
-        var audiobook = _audiobookRepository.Find(id);
+        var audiobook = await _audiobookRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (audiobook == null)
         {
             return NotFound(new { error = $"Audiobook {id} not found" });
@@ -138,20 +138,20 @@ public class AudiobookController : ControllerBase
         audiobook.Tags = resource.Tags?.ToHashSet() ?? new HashSet<int>();
         audiobook.Metadata = ToMetadata(resource.Metadata);
 
-        var updated = _audiobookRepository.Update(audiobook);
+        var updated = await _audiobookRepository.UpdateAsync(audiobook, ct).ConfigureAwait(false);
         return Ok(ToResource(updated));
     }
 
     [HttpDelete("{id:int}")]
-    public IActionResult DeleteAudiobook(int id)
+    public async Task<IActionResult> DeleteAudiobook(int id, CancellationToken ct = default)
     {
-        var audiobook = _audiobookRepository.Find(id);
+        var audiobook = await _audiobookRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (audiobook == null)
         {
             return NotFound(new { error = $"Audiobook {id} not found" });
         }
 
-        _audiobookRepository.Delete(id);
+        await _audiobookRepository.DeleteAsync(id, ct).ConfigureAwait(false);
         return NoContent();
     }
 

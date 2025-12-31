@@ -27,16 +27,16 @@ public class AuthorController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<AuthorResource>> GetAuthors()
+    public async Task<ActionResult<List<AuthorResource>>> GetAuthors(CancellationToken ct = default)
     {
-        var authors = _authorRepository.All().ToList();
+        var authors = await _authorRepository.AllAsync(ct).ConfigureAwait(false);
         return Ok(authors.Select(ToResource).ToList());
     }
 
     [HttpGet("{id:int}")]
-    public ActionResult<AuthorResource> GetAuthor(int id)
+    public async Task<ActionResult<AuthorResource>> GetAuthor(int id, CancellationToken ct = default)
     {
-        var author = _authorRepository.Find(id);
+        var author = await _authorRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (author == null)
         {
             return NotFound(new { error = $"Author {id} not found" });
@@ -46,9 +46,9 @@ public class AuthorController : ControllerBase
     }
 
     [HttpGet("foreignId/{foreignId}")]
-    public ActionResult<AuthorResource> GetByForeignId(string foreignId)
+    public async Task<ActionResult<AuthorResource>> GetByForeignId(string foreignId, CancellationToken ct = default)
     {
-        var author = _authorRepository.FindByForeignId(foreignId);
+        var author = await _authorRepository.FindByForeignIdAsync(foreignId, ct).ConfigureAwait(false);
         if (author == null)
         {
             return NotFound(new { error = $"Author with foreign ID {foreignId} not found" });
@@ -58,12 +58,12 @@ public class AuthorController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<AuthorResource> AddAuthor([FromBody] AuthorResource resource)
+    public async Task<ActionResult<AuthorResource>> AddAuthor([FromBody] AuthorResource resource, CancellationToken ct = default)
     {
         try
         {
             var author = ToModel(resource);
-            var added = _addAuthorService.AddAuthor(author);
+            var added = await _addAuthorService.AddAuthorAsync(author, ct).ConfigureAwait(false);
             return CreatedAtAction(nameof(GetAuthor), new { id = added.Id }, ToResource(added));
         }
         catch (ArgumentException ex)
@@ -73,9 +73,9 @@ public class AuthorController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public ActionResult<AuthorResource> UpdateAuthor(int id, [FromBody] AuthorResource resource)
+    public async Task<ActionResult<AuthorResource>> UpdateAuthor(int id, [FromBody] AuthorResource resource, CancellationToken ct = default)
     {
-        var author = _authorRepository.Find(id);
+        var author = await _authorRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (author == null)
         {
             return NotFound(new { error = $"Author {id} not found" });
@@ -91,20 +91,20 @@ public class AuthorController : ControllerBase
         author.QualityProfileId = resource.QualityProfileId;
         author.Tags = resource.Tags?.ToHashSet() ?? new HashSet<int>();
 
-        var updated = _authorRepository.Update(author);
+        var updated = await _authorRepository.UpdateAsync(author, ct).ConfigureAwait(false);
         return Ok(ToResource(updated));
     }
 
     [HttpDelete("{id:int}")]
-    public IActionResult DeleteAuthor(int id)
+    public async Task<IActionResult> DeleteAuthor(int id, CancellationToken ct = default)
     {
-        var author = _authorRepository.Find(id);
+        var author = await _authorRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (author == null)
         {
             return NotFound(new { error = $"Author {id} not found" });
         }
 
-        _authorRepository.Delete(id);
+        await _authorRepository.DeleteAsync(id, ct).ConfigureAwait(false);
         return NoContent();
     }
 

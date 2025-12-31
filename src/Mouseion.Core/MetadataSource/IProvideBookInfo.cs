@@ -10,6 +10,14 @@ namespace Mouseion.Core.MetadataSource;
 
 public interface IProvideBookInfo
 {
+    Task<Book?> GetByExternalIdAsync(string externalId, CancellationToken ct = default);
+    Task<Book?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<List<Book>> SearchByTitleAsync(string title, CancellationToken ct = default);
+    Task<List<Book>> SearchByAuthorAsync(string author, CancellationToken ct = default);
+    Task<List<Book>> SearchByIsbnAsync(string isbn, CancellationToken ct = default);
+    Task<List<Book>> GetTrendingAsync(CancellationToken ct = default);
+    Task<List<Book>> GetPopularAsync(CancellationToken ct = default);
+
     Book? GetByExternalId(string externalId);
     Book? GetById(int id);
     List<Book> SearchByTitle(string title);

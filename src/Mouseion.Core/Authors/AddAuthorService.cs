@@ -10,6 +10,9 @@ namespace Mouseion.Core.Authors;
 
 public interface IAddAuthorService
 {
+    Task<Author> AddAuthorAsync(Author author, CancellationToken ct = default);
+    Task<List<Author>> AddAuthorsAsync(List<Author> authors, CancellationToken ct = default);
+
     Author AddAuthor(Author author);
     List<Author> AddAuthors(List<Author> authors);
 }
@@ -23,6 +26,44 @@ public class AddAuthorService : IAddAuthorService
     {
         _authorRepository = authorRepository;
         _logger = logger;
+    }
+
+    public async Task<Author> AddAuthorAsync(Author author, CancellationToken ct = default)
+    {
+        ValidateAuthor(author);
+
+        // Check for existing author by foreign ID
+        if (!string.IsNullOrWhiteSpace(author.ForeignAuthorId))
+        {
+            var existing = await _authorRepository.FindByForeignIdAsync(author.ForeignAuthorId, ct).ConfigureAwait(false);
+            if (existing != null)
+            {
+                _logger.LogInformation("Author already exists: {AuthorName} (ID: {ForeignId})",
+                    existing.Name, existing.ForeignAuthorId);
+                return existing;
+            }
+        }
+
+        // Check for existing author by name (fallback)
+        var existingByName = await _authorRepository.FindByNameAsync(author.Name, ct).ConfigureAwait(false);
+        if (existingByName != null)
+        {
+            _logger.LogWarning("Author with same name already exists: {AuthorName}", existingByName.Name);
+            return existingByName;
+        }
+
+        // Set defaults
+        if (string.IsNullOrWhiteSpace(author.SortName))
+        {
+            author.SortName = GenerateSortName(author.Name);
+        }
+
+        author.Added = DateTime.UtcNow;
+
+        var added = await _authorRepository.InsertAsync(author, ct).ConfigureAwait(false);
+        _logger.LogInformation("Added author: {AuthorName} (ID: {AuthorId})", added.Name, added.Id);
+
+        return added;
     }
 
     public Author AddAuthor(Author author)
@@ -61,6 +102,26 @@ public class AddAuthorService : IAddAuthorService
         _logger.LogInformation("Added author: {AuthorName} (ID: {AuthorId})", added.Name, added.Id);
 
         return added;
+    }
+
+    public async Task<List<Author>> AddAuthorsAsync(List<Author> authors, CancellationToken ct = default)
+    {
+        var addedAuthors = new List<Author>();
+
+        foreach (var author in authors)
+        {
+            try
+            {
+                var added = await AddAuthorAsync(author, ct).ConfigureAwait(false);
+                addedAuthors.Add(added);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding author: {AuthorName}", author.Name);
+            }
+        }
+
+        return addedAuthors;
     }
 
     public List<Author> AddAuthors(List<Author> authors)

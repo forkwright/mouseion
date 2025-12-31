@@ -36,6 +36,18 @@ public partial class MyAnonamouseIndexer
         _logger = logger;
     }
 
+    public async Task<List<IndexerResult>> SearchBooksAsync(BookSearchCriteria criteria, CancellationToken ct = default)
+    {
+        var searchTerm = BuildSearchTerm(criteria.Author, criteria.Title);
+        return await SearchAsync(searchTerm, "book", ct).ConfigureAwait(false);
+    }
+
+    public async Task<List<IndexerResult>> SearchAudiobooksAsync(AudiobookSearchCriteria criteria, CancellationToken ct = default)
+    {
+        var searchTerm = BuildSearchTerm(criteria.Author, criteria.Title);
+        return await SearchAsync(searchTerm, "audiobook", ct).ConfigureAwait(false);
+    }
+
     public List<IndexerResult> SearchBooks(BookSearchCriteria criteria)
     {
         var searchTerm = BuildSearchTerm(criteria.Author, criteria.Title);
@@ -63,6 +75,51 @@ public partial class MyAnonamouseIndexer
         }
 
         return string.Join(" ", terms);
+    }
+
+    private async Task<List<IndexerResult>> SearchAsync(string searchTerm, string mediaType, CancellationToken ct = default)
+    {
+        var results = new List<IndexerResult>();
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                _logger.LogDebug("Empty search term, skipping search");
+                return results;
+            }
+
+            var sanitizedTerm = SanitizeSearchQuery(searchTerm);
+            if (string.IsNullOrWhiteSpace(sanitizedTerm))
+            {
+                _logger.LogDebug("Search term is empty after sanitization: {OriginalTerm}", searchTerm);
+                return results;
+            }
+
+            _logger.LogDebug("Searching MyAnonamouse for {MediaType}: {SearchTerm}", mediaType, sanitizedTerm);
+
+            var searchUrl = BuildSearchUrl(sanitizedTerm);
+            var request = new HttpRequestBuilder(searchUrl)
+                .SetHeader("User-Agent", "Mouseion/1.0")
+                .SetHeader("Cookie", $"mam_id={_settings.MamId}")
+                .Build();
+
+            var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _logger.LogWarning("MyAnonamouse returned {StatusCode}", response.StatusCode);
+                return results;
+            }
+
+            results = ParseResponse(response.Content);
+            _logger.LogInformation("Found {Count} results for {SearchTerm}", results.Count, sanitizedTerm);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching MyAnonamouse for: {SearchTerm}", searchTerm);
+        }
+
+        return results;
     }
 
     private List<IndexerResult> Search(string searchTerm, string mediaType)

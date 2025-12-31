@@ -30,16 +30,16 @@ public class BookController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<BookResource>> GetBooks()
+    public async Task<ActionResult<List<BookResource>>> GetBooks(CancellationToken ct = default)
     {
-        var books = _bookRepository.All().ToList();
+        var books = await _bookRepository.AllAsync(ct).ConfigureAwait(false);
         return Ok(books.Select(ToResource).ToList());
     }
 
     [HttpGet("{id:int}")]
-    public ActionResult<BookResource> GetBook(int id)
+    public async Task<ActionResult<BookResource>> GetBook(int id, CancellationToken ct = default)
     {
-        var book = _bookRepository.Find(id);
+        var book = await _bookRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (book == null)
         {
             return NotFound(new { error = $"Book {id} not found" });
@@ -49,47 +49,47 @@ public class BookController : ControllerBase
     }
 
     [HttpGet("author/{authorId:int}")]
-    public ActionResult<List<BookResource>> GetBooksByAuthor(int authorId)
+    public async Task<ActionResult<List<BookResource>>> GetBooksByAuthor(int authorId, CancellationToken ct = default)
     {
-        var books = _bookRepository.GetByAuthorId(authorId);
+        var books = await _bookRepository.GetByAuthorIdAsync(authorId, ct).ConfigureAwait(false);
         return Ok(books.Select(ToResource).ToList());
     }
 
     [HttpGet("series/{seriesId:int}")]
-    public ActionResult<List<BookResource>> GetBooksBySeries(int seriesId)
+    public async Task<ActionResult<List<BookResource>>> GetBooksBySeries(int seriesId, CancellationToken ct = default)
     {
-        var books = _bookRepository.GetBySeriesId(seriesId);
+        var books = await _bookRepository.GetBySeriesIdAsync(seriesId, ct).ConfigureAwait(false);
         return Ok(books.Select(ToResource).ToList());
     }
 
     [HttpGet("statistics")]
-    public ActionResult<BookStatistics> GetStatistics()
+    public async Task<ActionResult<BookStatistics>> GetStatistics(CancellationToken ct = default)
     {
-        var stats = _statisticsService.GetStatistics();
+        var stats = await _statisticsService.GetStatisticsAsync(ct).ConfigureAwait(false);
         return Ok(stats);
     }
 
     [HttpGet("statistics/author/{authorId:int}")]
-    public ActionResult<BookStatistics> GetAuthorStatistics(int authorId)
+    public async Task<ActionResult<BookStatistics>> GetAuthorStatistics(int authorId, CancellationToken ct = default)
     {
-        var stats = _statisticsService.GetAuthorStatistics(authorId);
+        var stats = await _statisticsService.GetAuthorStatisticsAsync(authorId, ct).ConfigureAwait(false);
         return Ok(stats);
     }
 
     [HttpGet("statistics/series/{seriesId:int}")]
-    public ActionResult<BookStatistics> GetSeriesStatistics(int seriesId)
+    public async Task<ActionResult<BookStatistics>> GetSeriesStatistics(int seriesId, CancellationToken ct = default)
     {
-        var stats = _statisticsService.GetSeriesStatistics(seriesId);
+        var stats = await _statisticsService.GetSeriesStatisticsAsync(seriesId, ct).ConfigureAwait(false);
         return Ok(stats);
     }
 
     [HttpPost]
-    public ActionResult<BookResource> AddBook([FromBody] BookResource resource)
+    public async Task<ActionResult<BookResource>> AddBook([FromBody] BookResource resource, CancellationToken ct = default)
     {
         try
         {
             var book = ToModel(resource);
-            var added = _addBookService.AddBook(book);
+            var added = await _addBookService.AddBookAsync(book, ct).ConfigureAwait(false);
             return CreatedAtAction(nameof(GetBook), new { id = added.Id }, ToResource(added));
         }
         catch (ArgumentException ex)
@@ -99,12 +99,12 @@ public class BookController : ControllerBase
     }
 
     [HttpPost("batch")]
-    public ActionResult<List<BookResource>> AddBooks([FromBody] List<BookResource> resources)
+    public async Task<ActionResult<List<BookResource>>> AddBooks([FromBody] List<BookResource> resources, CancellationToken ct = default)
     {
         try
         {
             var books = resources.Select(ToModel).ToList();
-            var added = _addBookService.AddBooks(books);
+            var added = await _addBookService.AddBooksAsync(books, ct).ConfigureAwait(false);
             return Ok(added.Select(ToResource).ToList());
         }
         catch (ArgumentException ex)
@@ -114,9 +114,9 @@ public class BookController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public ActionResult<BookResource> UpdateBook(int id, [FromBody] BookResource resource)
+    public async Task<ActionResult<BookResource>> UpdateBook(int id, [FromBody] BookResource resource, CancellationToken ct = default)
     {
-        var book = _bookRepository.Find(id);
+        var book = await _bookRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (book == null)
         {
             return NotFound(new { error = $"Book {id} not found" });
@@ -131,20 +131,20 @@ public class BookController : ControllerBase
         book.Tags = resource.Tags?.ToHashSet() ?? new HashSet<int>();
         book.Metadata = ToMetadata(resource.Metadata);
 
-        var updated = _bookRepository.Update(book);
+        var updated = await _bookRepository.UpdateAsync(book, ct).ConfigureAwait(false);
         return Ok(ToResource(updated));
     }
 
     [HttpDelete("{id:int}")]
-    public IActionResult DeleteBook(int id)
+    public async Task<IActionResult> DeleteBook(int id, CancellationToken ct = default)
     {
-        var book = _bookRepository.Find(id);
+        var book = await _bookRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (book == null)
         {
             return NotFound(new { error = $"Book {id} not found" });
         }
 
-        _bookRepository.Delete(id);
+        await _bookRepository.DeleteAsync(id, ct).ConfigureAwait(false);
         return NoContent();
     }
 

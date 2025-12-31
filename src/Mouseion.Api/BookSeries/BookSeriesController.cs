@@ -23,16 +23,16 @@ public class BookSeriesController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<BookSeriesResource>> GetAllSeries()
+    public async Task<ActionResult<List<BookSeriesResource>>> GetAllSeries(CancellationToken ct = default)
     {
-        var series = _seriesRepository.All().ToList();
+        var series = await _seriesRepository.AllAsync(ct).ConfigureAwait(false);
         return Ok(series.Select(ToResource).ToList());
     }
 
     [HttpGet("{id:int}")]
-    public ActionResult<BookSeriesResource> GetSeries(int id)
+    public async Task<ActionResult<BookSeriesResource>> GetSeries(int id, CancellationToken ct = default)
     {
-        var series = _seriesRepository.Find(id);
+        var series = await _seriesRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (series == null)
         {
             return NotFound(new { error = $"Series {id} not found" });
@@ -42,16 +42,16 @@ public class BookSeriesController : ControllerBase
     }
 
     [HttpGet("author/{authorId:int}")]
-    public ActionResult<List<BookSeriesResource>> GetSeriesByAuthor(int authorId)
+    public async Task<ActionResult<List<BookSeriesResource>>> GetSeriesByAuthor(int authorId, CancellationToken ct = default)
     {
-        var series = _seriesRepository.GetByAuthorId(authorId);
+        var series = await _seriesRepository.GetByAuthorIdAsync(authorId, ct).ConfigureAwait(false);
         return Ok(series.Select(ToResource).ToList());
     }
 
     [HttpGet("foreignId/{foreignId}")]
-    public ActionResult<BookSeriesResource> GetByForeignId(string foreignId)
+    public async Task<ActionResult<BookSeriesResource>> GetByForeignId(string foreignId, CancellationToken ct = default)
     {
-        var series = _seriesRepository.FindByForeignId(foreignId);
+        var series = await _seriesRepository.FindByForeignIdAsync(foreignId, ct).ConfigureAwait(false);
         if (series == null)
         {
             return NotFound(new { error = $"Series with foreign ID {foreignId} not found" });
@@ -61,12 +61,12 @@ public class BookSeriesController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<BookSeriesResource> AddSeries([FromBody] BookSeriesResource resource)
+    public async Task<ActionResult<BookSeriesResource>> AddSeries([FromBody] BookSeriesResource resource, CancellationToken ct = default)
     {
         try
         {
             var series = ToModel(resource);
-            var added = _seriesRepository.Insert(series);
+            var added = await _seriesRepository.InsertAsync(series, ct).ConfigureAwait(false);
             return CreatedAtAction(nameof(GetSeries), new { id = added.Id }, ToResource(added));
         }
         catch (ArgumentException ex)
@@ -76,9 +76,9 @@ public class BookSeriesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public ActionResult<BookSeriesResource> UpdateSeries(int id, [FromBody] BookSeriesResource resource)
+    public async Task<ActionResult<BookSeriesResource>> UpdateSeries(int id, [FromBody] BookSeriesResource resource, CancellationToken ct = default)
     {
-        var series = _seriesRepository.Find(id);
+        var series = await _seriesRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (series == null)
         {
             return NotFound(new { error = $"Series {id} not found" });
@@ -91,20 +91,20 @@ public class BookSeriesController : ControllerBase
         series.AuthorId = resource.AuthorId;
         series.Monitored = resource.Monitored;
 
-        var updated = _seriesRepository.Update(series);
+        var updated = await _seriesRepository.UpdateAsync(series, ct).ConfigureAwait(false);
         return Ok(ToResource(updated));
     }
 
     [HttpDelete("{id:int}")]
-    public IActionResult DeleteSeries(int id)
+    public async Task<IActionResult> DeleteSeries(int id, CancellationToken ct = default)
     {
-        var series = _seriesRepository.Find(id);
+        var series = await _seriesRepository.FindAsync(id, ct).ConfigureAwait(false);
         if (series == null)
         {
             return NotFound(new { error = $"Series {id} not found" });
         }
 
-        _seriesRepository.Delete(id);
+        await _seriesRepository.DeleteAsync(id, ct).ConfigureAwait(false);
         return NoContent();
     }
 
