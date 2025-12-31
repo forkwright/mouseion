@@ -48,6 +48,12 @@ try
     container.Register<Mouseion.Core.Books.IBookRepository, Mouseion.Core.Books.BookRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.Audiobooks.IAudiobookRepository, Mouseion.Core.Audiobooks.AudiobookRepository>(Reuse.Singleton);
 
+    // Register metadata providers
+    container.Register<Mouseion.Common.Http.IHttpClient, Mouseion.Common.Http.HttpClient>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MetadataSource.ResilientMetadataClient>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MetadataSource.IProvideBookInfo, Mouseion.Core.MetadataSource.BookInfoProxy>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MetadataSource.IProvideAudiobookInfo, Mouseion.Core.MetadataSource.AudiobookInfoProxy>(Reuse.Singleton);
+
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
 
