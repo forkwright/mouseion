@@ -42,11 +42,18 @@ try
     container.Register<Mouseion.Core.MediaFiles.IMediaFileRepository, Mouseion.Core.MediaFiles.MediaFileRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.MediaFiles.IMediaAnalyzer, Mouseion.Core.MediaFiles.MediaAnalyzer>(Reuse.Singleton);
 
-    // Register book/audiobook services
+    // Register book/audiobook repositories
     container.Register<Mouseion.Core.Authors.IAuthorRepository, Mouseion.Core.Authors.AuthorRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.BookSeries.IBookSeriesRepository, Mouseion.Core.BookSeries.BookSeriesRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.Books.IBookRepository, Mouseion.Core.Books.BookRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.Audiobooks.IAudiobookRepository, Mouseion.Core.Audiobooks.AudiobookRepository>(Reuse.Singleton);
+
+    // Register book/audiobook services
+    container.Register<Mouseion.Core.Authors.IAddAuthorService, Mouseion.Core.Authors.AddAuthorService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Books.IAddBookService, Mouseion.Core.Books.AddBookService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Audiobooks.IAddAudiobookService, Mouseion.Core.Audiobooks.AddAudiobookService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Books.IBookStatisticsService, Mouseion.Core.Books.BookStatisticsService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Audiobooks.IAudiobookStatisticsService, Mouseion.Core.Audiobooks.AudiobookStatisticsService>(Reuse.Singleton);
 
     // Register metadata providers
     container.Register<Mouseion.Common.Http.IHttpClient, Mouseion.Common.Http.HttpClient>(Reuse.Singleton);
