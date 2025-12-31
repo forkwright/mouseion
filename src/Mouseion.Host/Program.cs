@@ -1,5 +1,6 @@
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
+using Mouseion.Api.Security;
 using Mouseion.Common.EnvironmentInfo;
 using Mouseion.Common.Instrumentation;
 using Mouseion.Core.Datastore;
@@ -41,16 +42,39 @@ try
     container.Register<Mouseion.Core.MediaFiles.IMediaFileRepository, Mouseion.Core.MediaFiles.MediaFileRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.MediaFiles.IMediaAnalyzer, Mouseion.Core.MediaFiles.MediaAnalyzer>(Reuse.Singleton);
 
+    // Register security services
+    container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
+
     // Create ASP.NET Core builder
     var builder = WebApplication.CreateBuilder(args);
 
     // Use DryIoc as service provider
     builder.Host.UseServiceProviderFactory(new DryIocServiceProviderFactory(container));
 
+    // Add security services
+    builder.Services.AddAuthentication(Mouseion.Api.Security.ApiKeyAuthenticationOptions.DefaultScheme)
+        .AddScheme<Mouseion.Api.Security.ApiKeyAuthenticationOptions, Mouseion.Api.Security.ApiKeyAuthenticationHandler>(
+            Mouseion.Api.Security.ApiKeyAuthenticationOptions.DefaultScheme,
+            options => options.ApiKey = builder.Configuration["ApiKey"] ?? string.Empty);
+
+    builder.Services.AddAuthorization();
+
     // Add ASP.NET Core services
     builder.Services.AddControllers();
     builder.Services.AddSignalR();
     builder.Services.AddMouseionTelemetry();
+
+    // Configure CORS (restrictive by default)
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+    });
 
     // Build the app
     var app = builder.Build();
@@ -73,7 +97,12 @@ try
     Log.Information("Database initialized");
 
     // Configure middleware pipeline
+    app.UseSecurityHeaders(); // Custom security headers middleware
+    app.UseHttpsRedirection();
+    app.UseCors();
     app.UseRouting();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     // Map controllers and SignalR hubs
     app.MapControllers();
