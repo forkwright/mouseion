@@ -10,10 +10,10 @@ namespace Mouseion.Core.Qualities;
 
 public class QualityDefinition : ModelBase
 {
-    public Quality Quality { get; set; }
+    public Quality Quality { get; set; } = null!; // Initialized by constructor or deserialization
 
-    public string Title { get; set; }
-    public string GroupName { get; set; }
+    public string Title { get; set; } = null!; // Initialized by constructor or deserialization
+    public string GroupName { get; set; } = null!; // Initialized by deserialization
     public int Weight { get; set; }
 
     public double? MinSize { get; set; }
