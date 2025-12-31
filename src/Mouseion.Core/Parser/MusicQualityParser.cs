@@ -18,14 +18,14 @@ public static class MusicQualityParser
 
         private static readonly Regex BitDepthSampleRateRegex = new(
             @"\b(?:
-            (?<b24_192>24[-_/]?(?:bit[-_/]?)?192(?:khz?)?|192[-_/]?24)|
-            (?<b24_176>24[-_/]?(?:bit[-_/]?)?176(?:\.4)?(?:khz?)?|176[-_/]?24)|
-            (?<b24_96>24[-_/]?(?:bit[-_/]?)?96(?:khz?)?|96[-_/]?24)|
-            (?<b24_88>24[-_/]?(?:bit[-_/]?)?88(?:\.2)?(?:khz?)?|88[-_/]?24)|
-            (?<b24_48>24[-_/]?(?:bit[-_/]?)?48(?:khz?)?|48[-_/]?24)|
-            (?<b24_44>24[-_/]?(?:bit[-_/]?)?44(?:\.1)?(?:khz?)?|44[-_/]?24)|
-            (?<b16_48>16[-_/]?(?:bit[-_/]?)?48(?:khz?)?|48[-_/]?16)|
-            (?<b16_44>16[-_/]?(?:bit[-_/]?)?44(?:\.1)?(?:khz?)?|44[-_/]?16|Redbook|CD[-_]?Quality)
+            (?<b24_192>24[-_/\s]?(?:bit[-_/\s]?)?192(?:khz?)?|192[-_/\s]?24)|
+            (?<b24_176>24[-_/\s]?(?:bit[-_/\s]?)?176(?:\.4)?(?:khz?)?|176[-_/\s]?24)|
+            (?<b24_96>24[-_/\s]?(?:bit[-_/\s]?)?96(?:khz?)?|96[-_/\s]?24)|
+            (?<b24_88>24[-_/\s]?(?:bit[-_/\s]?)?88(?:\.2)?(?:khz?)?|88[-_/\s]?24)|
+            (?<b24_48>24[-_/\s]?(?:bit[-_/\s]?)?48(?:khz?)?|48[-_/\s]?24)|
+            (?<b24_44>24[-_/\s]?(?:bit[-_/\s]?)?44(?:\.1)?(?:khz?)?|44[-_/\s]?24)|
+            (?<b16_48>16[-_/\s]?(?:bit[-_/\s]?)?48(?:khz?)?|48[-_/\s]?16)|
+            (?<b16_44>16[-_/\s]?(?:bit[-_/\s]?)?44(?:\.1)?(?:khz?)?|44[-_/\s]?16|Redbook|CD[-_]?Quality)
         )\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace,
             RegexTimeout);
@@ -44,7 +44,8 @@ public static class MusicQualityParser
             (?<dsd512>DSD[-_]?512|DSD22\.?5|22\.?5[-_]?MHz)|
             (?<dsd256>DSD[-_]?256|DSD11\.?2|11\.?2[-_]?MHz|Quad[-_]?DSD)|
             (?<dsd128>DSD[-_]?128|DSD5\.?6|5\.?6[-_]?MHz|Double[-_]?DSD)|
-            (?<dsd64>DSD[-_]?64|DSD2\.?8|2\.?8[-_]?MHz|SACD|DSF|DFF)
+            (?<dsd64>DSD[-_]?64|DSD2\.?8|2\.?8[-_]?MHz|SACD|DSF|DFF)|
+            (?<dsd>DSD)
         )\b",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace,
             RegexTimeout);
@@ -57,7 +58,7 @@ public static class MusicQualityParser
             (?<aiff>AIFF?)|
             (?<ape>APE|Monkey'?s?[-_]?Audio)|
             (?<wavpack>WavPack|WV)|
-            (?<mqa_studio>MQA[-_]?Studio)|
+            (?<mqa_studio>MQA[-_\s]?Studio)|
             (?<mqa>MQA)|
             (?<mp3>MP3)|
             (?<aac>AAC|M4A)|
@@ -103,16 +104,34 @@ public static class MusicQualityParser
             }
 
             name = name.Trim();
-            var normalizedName = name.Replace('_', ' ').Trim();
 
-            var result = ParseQualityName(normalizedName);
-
-            if (result.Quality == Quality.MusicUnknown && !name.ContainsInvalidPathChars())
+            // Try extension-based detection first for files with music extensions
+            if (!name.ContainsInvalidPathChars())
             {
-                result = ParseFromExtension(name, result, logger);
+                var extension = Path.GetExtension(name);
+                if (!string.IsNullOrEmpty(extension) && MediaFileExtensions.MusicExtensions.Contains(extension))
+                {
+                    // Strip extension before parsing name to avoid false matches (e.g., ".opus" matching "opus" format)
+                    var nameWithoutExtension = Path.GetFileNameWithoutExtension(name);
+                    var normalizedName = nameWithoutExtension.Replace('_', ' ').Trim();
+                    var result = ParseQualityName(normalizedName);
+
+                    // If name parsing found quality, use it (e.g., "Artist - Album [FLAC 24-192].flac")
+                    // Otherwise, use extension-based default
+                    if (result.Quality != Quality.MusicUnknown)
+                    {
+                        return result;
+                    }
+
+                    result.Quality = GetDefaultQualityForExtension(extension);
+                    result.SourceDetectionSource = QualityDetectionSource.Extension;
+                    return result;
+                }
             }
 
-            return result;
+            // Fall back to name-based parsing (for non-file inputs or files without extensions)
+            var normalizedNameFallback = name.Replace('_', ' ').Trim();
+            return ParseQualityName(normalizedNameFallback);
         }
 
         private static QualityModel ParseFromExtension(string name, QualityModel result, ILogger? logger = null)
@@ -240,9 +259,9 @@ public static class MusicQualityParser
                 return Quality.MusicWavPack;
             }
 
-            if (formatMatch.Groups["mp3"].Success || bitrateMatch.Success)
+            if (formatMatch.Groups["opus"].Success)
             {
-                return DetermineMp3Quality(bitrateMatch);
+                return DetermineOpusQuality(bitrateMatch);
             }
 
             if (formatMatch.Groups["aac"].Success)
@@ -255,9 +274,9 @@ public static class MusicQualityParser
                 return DetermineOggQuality(bitrateMatch);
             }
 
-            if (formatMatch.Groups["opus"].Success)
+            if (formatMatch.Groups["mp3"].Success || bitrateMatch.Success)
             {
-                return DetermineOpusQuality(bitrateMatch);
+                return DetermineMp3Quality(bitrateMatch);
             }
 
             if (formatMatch.Groups["wma"].Success)
@@ -298,6 +317,11 @@ public static class MusicQualityParser
             if (match.Groups["dsd128"].Success)
             {
                 return Quality.MusicDSD128;
+            }
+
+            if (match.Groups["dsd64"].Success || match.Groups["dsd"].Success)
+            {
+                return Quality.MusicDSD64;
             }
 
             return Quality.MusicDSD64;
