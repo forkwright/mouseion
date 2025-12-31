@@ -1,0 +1,42 @@
+# Mouseion
+
+> Unified media manager for movies, books, audiobooks, music, podcasts, and TV shows
+
+Fresh ground-up rewrite based on Radarr architecture. Clean `Mouseion.*` namespace, modern stack (.NET 8.0, React 19, Serilog, OpenTelemetry), designed for Akroasis media player integration.
+
+## Documentation
+
+- [CLAUDE.md](CLAUDE.md): Operational rules, code standards, quick commands, API patterns
+- [README.md](README.md): Project overview, directory structure, architecture
+- [CHANGELOG.md](CHANGELOG.md): Rich development history with rationale and alternatives
+- [NOTICE.md](NOTICE.md): Legal notices and attribution
+
+## Key Resources
+
+- [Mouseion.Common.csproj](src/Mouseion.Common/Mouseion.Common.csproj): Project dependencies and configuration
+- [Disk Module](src/Mouseion.Common/Disk/): Cross-platform file operations, transfers, path handling
+- [HTTP Infrastructure](src/Mouseion.Common/Http/): HTTP client, request/response models, RPC builders
+- [Serialization](src/Mouseion.Common/Serializer/): JSON (Newtonsoft + STJ) and XML serialization
+
+## Architecture
+
+**Current Phase**: Phase 0 - Mouseion.Common migration (5 PRs merged)
+
+**Target**: Production-ready backend for bit-perfect audio streaming (Akroasis integration)
+
+**Timeline**: 8 weeks total, Week 3 streaming endpoint ready for integration testing
+
+## Collaboration
+
+**Akroasis Integration**: `/home/ck/Projects/Akroasis-wrapper/ai_development_collab.md`
+- API requirements and responses
+- Code quality cross-reviews
+- Integration milestones
+
+## Standards
+
+- GPL-3.0 license (Radarr derivative)
+- Self-documenting code, minimal comments
+- Industry-standard C# naming (PascalCase classes, camelCase parameters, _camelCase private fields)
+- Performance-conscious patterns (64KB buffers, early exits, compiled regexes)
+- Zero AI tropes in code/docs
