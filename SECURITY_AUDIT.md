@@ -7,16 +7,16 @@
 
 ### 1. Dependencies (2 Critical)
 
-- [ ] **CVE-2013-5042: SignalR 1.1.0 XSS Vulnerability**
-  - Current: Microsoft.AspNetCore.SignalR.Core 1.1.0
-  - Required: Upgrade to 1.1.4+ or migrate to modern SignalR
-  - File: `src/Mouseion.SignalR/Mouseion.SignalR.csproj:9`
+- [x] **CVE-2013-5042: SignalR 1.1.0 XSS Vulnerability** ✅ FIXED (2025-12-31)
+  - Removed: Microsoft.AspNetCore.SignalR.Core 1.1.0
+  - Solution: Use built-in ASP.NET Core SignalR via FrameworkReference
+  - File: `src/Mouseion.SignalR/Mouseion.SignalR.csproj`
   - Severity: HIGH
 
-- [ ] **.NET Version Mismatch**
-  - Issue: .NET 8.0 target using .NET 9.0 packages
-  - Packages: Microsoft.Extensions.Hosting.WindowsServices 9.0.0, Microsoft.Data.Sqlite 9.0.0, Npgsql 9.0.2
-  - Files: `src/Mouseion.Common/Mouseion.Common.csproj`, `src/Mouseion.Core/Mouseion.Core.csproj`
+- [x] **.NET Version Mismatch** ✅ FIXED (2025-12-31)
+  - Upgraded: .NET 8.0 → .NET 10.0 (latest)
+  - All packages aligned to .NET 10.x
+  - CI workflows updated to .NET 10.0.x
   - Severity: MEDIUM
 
 ### 2. Security (7 Critical/High)
