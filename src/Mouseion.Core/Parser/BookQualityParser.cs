@@ -13,12 +13,12 @@ public static class BookQualityParser
     private static readonly Regex FormatRegex = new(
         @"\b(?:
             (?<epub>EPUB|ePub)|
+            (?<azw3>AZW3?|Kindle[-_.\s]?Format[-_.\s]?8|KF8)|
             (?<mobi>MOBI|Kindle)|
-            (?<azw3>AZW3?|Kindle[-_. ]?Format[-_. ]?8|KF8)|
             (?<pdf>PDF)|
-            (?<txt>TXT|Plain[-_. ]?Text)|
-            (?<cbr>CBR|Comic[-_. ]?Book[-_. ]?RAR)|
-            (?<cbz>CBZ|Comic[-_. ]?Book[-_. ]?ZIP)
+            (?<txt>TXT|Plain[-_.\s]?Text)|
+            (?<cbr>CBR|Comic[-_.\s]?Book[-_.\s]?RAR)|
+            (?<cbz>CBZ|Comic[-_.\s]?Book[-_.\s]?ZIP)
         )\b",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace,
         RegexTimeout);
@@ -33,16 +33,34 @@ public static class BookQualityParser
         }
 
         name = name.Trim();
-        var normalizedName = name.Replace('_', ' ').Trim();
 
-        var result = ParseQualityName(normalizedName);
-
-        if (result.Quality == Quality.EbookUnknown && !name.ContainsInvalidPathChars())
+        // Try extension-based detection first for files with ebook extensions
+        if (!name.ContainsInvalidPathChars())
         {
-            result = ParseFromExtension(name, result, logger);
+            var extension = Path.GetExtension(name);
+            if (!string.IsNullOrEmpty(extension) && MediaFileExtensions.EbookExtensions.Contains(extension))
+            {
+                // Strip extension before parsing name to avoid false matches (e.g., ".epub" matching "epub" format)
+                var nameWithoutExtension = Path.GetFileNameWithoutExtension(name);
+                var normalizedName = nameWithoutExtension.Replace('_', ' ').Trim();
+                var result = ParseQualityName(normalizedName);
+
+                // If name parsing found quality, use it (e.g., "Author - Title [PDF].epub")
+                // Otherwise, use extension-based default
+                if (result.Quality != Quality.EbookUnknown)
+                {
+                    return result;
+                }
+
+                result.Quality = MediaFileExtensions.GetQualityForExtension(extension);
+                result.SourceDetectionSource = QualityDetectionSource.Extension;
+                return result;
+            }
         }
 
-        return result;
+        // Fall back to name-based parsing (for non-file inputs or files without extensions)
+        var normalizedNameFallback = name.Replace('_', ' ').Trim();
+        return ParseQualityName(normalizedNameFallback);
     }
 
     private static QualityModel ParseFromExtension(string name, QualityModel result, ILogger? logger = null)
@@ -88,15 +106,16 @@ public static class BookQualityParser
             return result;
         }
 
-        if (formatMatch.Groups["mobi"].Success)
-        {
-            result.Quality = Quality.MOBI;
-            return result;
-        }
-
+        // Check azw3 before mobi to handle "Kindle Format 8" correctly
         if (formatMatch.Groups["azw3"].Success)
         {
             result.Quality = Quality.AZW3;
+            return result;
+        }
+
+        if (formatMatch.Groups["mobi"].Success)
+        {
+            result.Quality = Quality.MOBI;
             return result;
         }
 
