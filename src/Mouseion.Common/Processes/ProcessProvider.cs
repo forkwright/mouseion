@@ -384,7 +384,7 @@ namespace Mouseion.Common.Processes
         /// <summary>
         /// Escapes a command-line argument for cmd.exe to prevent injection attacks
         /// </summary>
-        private string EscapeCommandLineArg(string arg)
+        private static string EscapeCommandLineArg(string arg)
         {
             if (string.IsNullOrWhiteSpace(arg))
             {
@@ -414,7 +414,7 @@ namespace Mouseion.Common.Processes
         /// <summary>
         /// Escapes a PowerShell argument to prevent injection attacks
         /// </summary>
-        private string EscapePowerShellArg(string arg)
+        private static string EscapePowerShellArg(string arg)
         {
             if (string.IsNullOrWhiteSpace(arg))
             {

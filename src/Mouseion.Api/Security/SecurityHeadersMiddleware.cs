@@ -16,7 +16,10 @@ namespace Mouseion.Api.Security
             _next = next;
         }
 
+        // Note: SonarCloud suggests making this static, but middleware pattern requires instance method
+        #pragma warning disable S2325 // Methods and properties that don't access instance data should be static
         public async Task InvokeAsync(HttpContext context)
+        #pragma warning restore S2325
         {
             // Strict-Transport-Security (HSTS)
             context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");

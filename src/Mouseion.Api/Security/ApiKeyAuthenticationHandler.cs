@@ -13,7 +13,6 @@ namespace Mouseion.Api.Security
     public class ApiKeyAuthenticationOptions : AuthenticationSchemeOptions
     {
         public const string DefaultScheme = "ApiKey";
-        public string Scheme => DefaultScheme;
         public string ApiKey { get; set; } = string.Empty;
     }
 
@@ -48,9 +47,9 @@ namespace Mouseion.Api.Security
                 // No API key configured - allow access (development mode)
                 Logger.LogWarning("API key authentication enabled but no key configured - allowing access");
                 var devClaims = new[] { new Claim(ClaimTypes.Name, "api-dev-user") };
-                var devIdentity = new ClaimsIdentity(devClaims, Options.Scheme);
+                var devIdentity = new ClaimsIdentity(devClaims, ApiKeyAuthenticationOptions.DefaultScheme);
                 var devPrincipal = new ClaimsPrincipal(devIdentity);
-                var devTicket = new AuthenticationTicket(devPrincipal, Options.Scheme);
+                var devTicket = new AuthenticationTicket(devPrincipal, ApiKeyAuthenticationOptions.DefaultScheme);
                 return Task.FromResult(AuthenticateResult.Success(devTicket));
             }
 
@@ -60,9 +59,9 @@ namespace Mouseion.Api.Security
             }
 
             var claims = new[] { new Claim(ClaimTypes.Name, "api-user") };
-            var identity = new ClaimsIdentity(claims, Options.Scheme);
+            var identity = new ClaimsIdentity(claims, ApiKeyAuthenticationOptions.DefaultScheme);
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, Options.Scheme);
+            var ticket = new AuthenticationTicket(principal, ApiKeyAuthenticationOptions.DefaultScheme);
 
             return Task.FromResult(AuthenticateResult.Success(ticket));
         }
