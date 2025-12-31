@@ -21,39 +21,44 @@
 
 ### 2. Security (7 Critical/High)
 
-- [ ] **Missing Authentication on API Endpoints**
-  - File: `src/Mouseion.Api/Chapters/ChaptersController.cs:13-45`
-  - Fix: Add `[Authorize]` attribute or API key validation
+- [x] **Missing Authentication on API Endpoints** ✅ FIXED (2025-12-31)
+  - Solution: Added API key authentication via X-Api-Key header
+  - File: `src/Mouseion.Api/Security/ApiKeyAuthenticationHandler.cs`
+  - Applied [Authorize] to ChaptersController
   - Severity: CRITICAL
 
-- [ ] **Path Traversal Vulnerability**
-  - File: `src/Mouseion.Api/Chapters/ChaptersController.cs:28-44`
-  - Fix: Validate and sanitize file paths before access
+- [x] **Path Traversal Vulnerability** ✅ FIXED (2025-12-31)
+  - Solution: Created PathValidator service with path normalization
+  - File: `src/Mouseion.Common/Security/PathValidator.cs`
+  - Integrated into ChaptersController
   - Severity: CRITICAL
 
-- [ ] **MD5 Cryptographic Weakness**
-  - File: `src/Mouseion.Common/Crypto/HashProvider.cs:19-28`
-  - Fix: Replace MD5 with SHA256 for integrity checks
+- [x] **MD5 Cryptographic Weakness** ✅ FIXED (2025-12-31)
+  - Solution: Replaced MD5.Create() with SHA256.Create()
+  - File: `src/Mouseion.Common/Crypto/HashProvider.cs`
   - Severity: HIGH
 
-- [ ] **SHA1 Cryptographic Weakness**
-  - File: `src/Mouseion.Common/Crypto/HashConverter.cs:21-25`
-  - Fix: Replace SHA1 with SHA256
+- [x] **SHA1 Cryptographic Weakness** ✅ FIXED (2025-12-31)
+  - Solution: Replaced SHA1.Create() with SHA256.Create()
+  - File: `src/Mouseion.Common/Crypto/HashConverter.cs`
   - Severity: HIGH
 
 - [ ] **Command Injection - PowerShell**
   - File: `src/Mouseion.Common/Processes/ProcessProvider.cs:355-373`
   - Fix: Escape arguments, remove `-ExecutionPolicy Bypass`
+  - Status: DEFERRED (Windows-only feature, low priority for self-hosted)
   - Severity: HIGH
 
 - [ ] **Command Injection - cmd.exe**
   - File: `src/Mouseion.Common/Processes/ProcessProvider.cs:355-373`
   - Fix: Properly escape arguments
+  - Status: DEFERRED (Windows-only feature, low priority for self-hosted)
   - Severity: HIGH
 
-- [ ] **Missing HTTP Security Headers**
-  - File: `src/Mouseion.Host/Program.cs:75-80`
-  - Fix: Add Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options, CSP
+- [x] **Missing HTTP Security Headers** ✅ FIXED (2025-12-31)
+  - Solution: Created SecurityHeadersMiddleware
+  - File: `src/Mouseion.Api/Security/SecurityHeadersMiddleware.cs`
+  - Headers: HSTS, X-Content-Type-Options, X-Frame-Options, CSP, Referrer-Policy, Permissions-Policy
   - Severity: HIGH
 
 ### 3. Performance (5 Critical)
