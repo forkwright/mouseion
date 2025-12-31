@@ -4,21 +4,17 @@
 // Copyright (C) 2010-2025 Radarr Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-using System;
-using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Mouseion.Common.Extensions;
-using Mouseion.Common.Instrumentation;
 using Mouseion.Core.MediaFiles;
 using Mouseion.Core.Qualities;
 
-namespace Mouseion.Core.Parser
+namespace Mouseion.Core.Parser;
+
+public static class MusicQualityParser
 {
-    public static class MusicQualityParser
-    {
-        private static readonly ILogger Logger = LoggerProvider.GetLogger(typeof(MusicQualityParser));
-        private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(5);
 
         private static readonly Regex BitDepthSampleRateRegex = new(
             @"\b(?:
@@ -97,9 +93,9 @@ namespace Mouseion.Core.Parser
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace,
             RegexTimeout);
 
-        public static QualityModel ParseQuality(string name)
+        public static QualityModel ParseQuality(string name, ILogger? logger = null)
         {
-            Logger.LogDebug("Trying to parse music quality for '{Name}'", name.SanitizeForLog());
+            logger?.LogDebug("Trying to parse music quality for '{Name}'", name.SanitizeForLog());
 
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -113,13 +109,13 @@ namespace Mouseion.Core.Parser
 
             if (result.Quality == Quality.MusicUnknown && !name.ContainsInvalidPathChars())
             {
-                result = ParseFromExtension(name, result);
+                result = ParseFromExtension(name, result, logger);
             }
 
             return result;
         }
 
-        private static QualityModel ParseFromExtension(string name, QualityModel result)
+        private static QualityModel ParseFromExtension(string name, QualityModel result, ILogger? logger = null)
         {
             try
             {
@@ -137,7 +133,7 @@ namespace Mouseion.Core.Parser
             }
             catch (ArgumentException ex)
             {
-                Logger.LogDebug(ex, "Unable to parse extension from '{Name}'", name.SanitizeForLog());
+                logger?.LogDebug(ex, "Unable to parse extension from '{Name}'", name.SanitizeForLog());
             }
 
             return result;
@@ -518,4 +514,3 @@ namespace Mouseion.Core.Parser
             }
         }
     }
-}
