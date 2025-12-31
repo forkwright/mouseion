@@ -2,6 +2,19 @@
 
 All notable changes to Mouseion will be documented in this file.
 
+## [2025-12-31] - CI Performance Optimization
+
+### Changed
+- **Docker Build Workflow** - Skip Docker builds on PRs for faster feedback loop
+  - Before: Docker multi-arch builds ran on every PR (4+ minutes total CI time)
+  - After: Docker builds only run on merge to develop/main (1.5 min PR CI time)
+  - Rationale: PRs don't need production Docker images; local Podman testing catches issues faster
+  - Requirement: MUST test Docker/Podman builds locally before pushing PR
+  - Alternative: Keep Docker in PR CI - rejected due to slow feedback (60-70% time savings)
+  - Benefit: Fast developer feedback loop without sacrificing quality gates
+
+---
+
 ## [2025-12-30] - Fresh-Start Migration
 
 ### Phase 0: Mouseion.Common Foundation
