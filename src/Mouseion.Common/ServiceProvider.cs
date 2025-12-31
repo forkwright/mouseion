@@ -6,7 +6,9 @@
 
 using System;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.ServiceProcess;
+using Mouseion.Common.EnvironmentInfo;
 using Mouseion.Common.Extensions;
 using Mouseion.Common.Processes;
 using Serilog;
@@ -44,15 +46,28 @@ namespace Mouseion.Common
         public virtual bool ServiceExist(string name)
         {
             _logger.Debug("Checking if service {Name} exists.", name);
-            return
-                ServiceController.GetServices().Any(
-                    s => string.Equals(s.ServiceName, name, StringComparison.InvariantCultureIgnoreCase));
+
+            if (!OsInfo.IsWindows)
+            {
+                return false;
+            }
+
+#pragma warning disable CA1416
+            return ServiceController.GetServices().Any(
+                s => string.Equals(s.ServiceName, name, StringComparison.InvariantCultureIgnoreCase));
+#pragma warning restore CA1416
         }
 
         public virtual bool IsServiceRunning(string name)
         {
             _logger.Debug("Checking if '{Name}' service is running", name);
 
+            if (!OsInfo.IsWindows)
+            {
+                return false;
+            }
+
+#pragma warning disable CA1416
             var service = ServiceController.GetServices()
                 .SingleOrDefault(s => string.Equals(s.ServiceName, name, StringComparison.InvariantCultureIgnoreCase));
 
@@ -61,6 +76,7 @@ namespace Mouseion.Common
                 service.Status == ServiceControllerStatus.StopPending ||
                 service.Status == ServiceControllerStatus.Paused ||
                 service.Status == ServiceControllerStatus.PausePending);
+#pragma warning restore CA1416
         }
 
         public virtual void Install(string serviceName)
@@ -112,16 +128,37 @@ namespace Mouseion.Common
 
         public virtual void Run(ServiceBase service)
         {
+            if (!OsInfo.IsWindows)
+            {
+                throw new PlatformNotSupportedException("Windows services are only supported on Windows");
+            }
+
+#pragma warning disable CA1416
             ServiceBase.Run(service);
+#pragma warning restore CA1416
         }
 
         public virtual ServiceController? GetService(string serviceName)
         {
+            if (!OsInfo.IsWindows)
+            {
+                return null;
+            }
+
+#pragma warning disable CA1416
             return ServiceController.GetServices().FirstOrDefault(c => string.Equals(c.ServiceName, serviceName, StringComparison.InvariantCultureIgnoreCase));
+#pragma warning restore CA1416
         }
 
         public virtual void Stop(string serviceName)
         {
+            if (!OsInfo.IsWindows)
+            {
+                _logger.Warning("Service operations are only supported on Windows");
+                return;
+            }
+
+#pragma warning disable CA1416
             _logger.Information("Stopping {ServiceName} Service...", serviceName);
             var service = GetService(serviceName);
             if (service == null)
@@ -151,15 +188,30 @@ namespace Mouseion.Common
             {
                 _logger.Warning("Service {ServiceName} is already in stopped state.", service.ServiceName);
             }
+#pragma warning restore CA1416
         }
 
         public ServiceControllerStatus GetStatus(string serviceName)
         {
+            if (!OsInfo.IsWindows)
+            {
+                return ServiceControllerStatus.Stopped;
+            }
+
+#pragma warning disable CA1416
             return GetService(serviceName)!.Status;
+#pragma warning restore CA1416
         }
 
         public void Start(string serviceName)
         {
+            if (!OsInfo.IsWindows)
+            {
+                _logger.Warning("Service operations are only supported on Windows");
+                return;
+            }
+
+#pragma warning disable CA1416
             _logger.Information("Starting {ServiceName} Service...", serviceName);
             var service = GetService(serviceName);
             if (service == null)
@@ -186,6 +238,7 @@ namespace Mouseion.Common
             {
                 _logger.Error("Service start request has timed out. {Status}", service.Status);
             }
+#pragma warning restore CA1416
         }
 
         public void Restart(string serviceName)
