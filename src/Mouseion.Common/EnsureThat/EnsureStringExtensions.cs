@@ -6,6 +6,8 @@
 
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Mouseion.Common.Disk;
+using Mouseion.Common.EnvironmentInfo;
 using Mouseion.Common.Extensions;
 
 namespace Mouseion.Common.EnsureThat
@@ -112,6 +114,27 @@ namespace Mouseion.Common.EnsureThat
             }
 
             return param;
+        }
+
+        [DebuggerStepThrough]
+        public static Param<string> IsValidPath(this Param<string> param, PathValidationType validationType)
+        {
+            if (string.IsNullOrWhiteSpace(param.Value))
+            {
+                throw ExceptionFactory.CreateForParamValidation(param.Name, ExceptionMessages.EnsureExtensions_IsNotNullOrWhiteSpace);
+            }
+
+            if (param.Value.IsPathValid(validationType))
+            {
+                return param;
+            }
+
+            if (OsInfo.IsWindows)
+            {
+                throw ExceptionFactory.CreateForParamValidation(param.Name, string.Format("value [{0}]  is not a valid Windows path. paths must be a full path e.g. C:\\Windows", param.Value));
+            }
+
+            throw ExceptionFactory.CreateForParamValidation(param.Name, string.Format("value [{0}]  is not a valid *nix path. paths must start with /", param.Value));
         }
     }
 }
