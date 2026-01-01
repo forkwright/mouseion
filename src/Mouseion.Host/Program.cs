@@ -73,6 +73,17 @@ try
     container.Register<Mouseion.Core.Music.IArtistStatisticsService, Mouseion.Core.Music.ArtistStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Music.IAlbumStatisticsService, Mouseion.Core.Music.AlbumStatisticsService>(Reuse.Singleton);
 
+    // Register movie repositories
+    container.Register<Mouseion.Core.Movies.IMovieRepository, Mouseion.Core.Movies.MovieRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Movies.IMovieFileRepository, Mouseion.Core.Movies.MovieFileRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Movies.ICollectionRepository, Mouseion.Core.Movies.CollectionRepository>(Reuse.Singleton);
+
+    // Register movie services
+    container.Register<Mouseion.Core.Movies.IAddMovieService, Mouseion.Core.Movies.AddMovieService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Movies.IAddCollectionService, Mouseion.Core.Movies.AddCollectionService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Movies.IMovieStatisticsService, Mouseion.Core.Movies.MovieStatisticsService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Movies.ICollectionStatisticsService, Mouseion.Core.Movies.CollectionStatisticsService>(Reuse.Singleton);
+
     // Register metadata providers
     container.Register<Mouseion.Common.Http.IHttpClient, Mouseion.Common.Http.HttpClient>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.ResilientMetadataClient>(Reuse.Singleton);

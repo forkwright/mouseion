@@ -24,10 +24,8 @@ public class Migration_006_AddMovieTables : FluentMigrator.Migration
             .WithColumn("QualityProfileId").AsInt32().NotNullable()
             .WithColumn("Added").AsDateTime().NotNullable();
 
-        // Add Movie columns to MediaItems table
+        // Add Movie columns to MediaItems table (Title and Year already exist from Migration 003)
         Alter.Table("MediaItems")
-            .AddColumn("Title").AsString().Nullable()
-            .AddColumn("Year").AsInt32().Nullable()
             .AddColumn("Overview").AsString().Nullable()
             .AddColumn("Runtime").AsInt32().Nullable()
             .AddColumn("TmdbId").AsString().Nullable()
@@ -66,9 +64,7 @@ public class Migration_006_AddMovieTables : FluentMigrator.Migration
         // Drop MovieFiles table
         Delete.Table("MovieFiles");
 
-        // Remove Movie columns from MediaItems
-        Delete.Column("Title").FromTable("MediaItems");
-        Delete.Column("Year").FromTable("MediaItems");
+        // Remove Movie columns from MediaItems (Title and Year are from Migration 003, don't delete)
         Delete.Column("Overview").FromTable("MediaItems");
         Delete.Column("Runtime").FromTable("MediaItems");
         Delete.Column("TmdbId").FromTable("MediaItems");
