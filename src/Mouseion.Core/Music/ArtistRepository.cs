@@ -13,11 +13,13 @@ public interface IArtistRepository : IBasicRepository<Artist>
 {
     Task<Artist?> FindByNameAsync(string name, CancellationToken ct = default);
     Task<Artist?> FindByForeignIdAsync(string foreignArtistId, CancellationToken ct = default);
+    Task<Artist?> FindByMusicBrainzIdAsync(string musicBrainzId, CancellationToken ct = default);
     Task<List<Artist>> GetMonitoredAsync(CancellationToken ct = default);
     Task<bool> ArtistExistsAsync(string name, CancellationToken ct = default);
 
     Artist? FindByName(string name);
     Artist? FindByForeignId(string foreignArtistId);
+    Artist? FindByMusicBrainzId(string musicBrainzId);
     List<Artist> GetMonitored();
     bool ArtistExists(string name);
 }
@@ -59,6 +61,22 @@ public class ArtistRepository : BasicRepository<Artist>, IArtistRepository
         return conn.QueryFirstOrDefault<Artist>(
             "SELECT * FROM \"Artists\" WHERE \"ForeignArtistId\" = @ForeignArtistId",
             new { ForeignArtistId = foreignArtistId });
+    }
+
+    public async Task<Artist?> FindByMusicBrainzIdAsync(string musicBrainzId, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+        return await conn.QueryFirstOrDefaultAsync<Artist>(
+            "SELECT * FROM \"Artists\" WHERE \"MusicBrainzId\" = @MusicBrainzId",
+            new { MusicBrainzId = musicBrainzId }).ConfigureAwait(false);
+    }
+
+    public Artist? FindByMusicBrainzId(string musicBrainzId)
+    {
+        using var conn = _database.OpenConnection();
+        return conn.QueryFirstOrDefault<Artist>(
+            "SELECT * FROM \"Artists\" WHERE \"MusicBrainzId\" = @MusicBrainzId",
+            new { MusicBrainzId = musicBrainzId });
     }
 
     public async Task<List<Artist>> GetMonitoredAsync(CancellationToken ct = default)
