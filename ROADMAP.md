@@ -1,7 +1,7 @@
 # Mouseion Roadmap
 
-**Last Updated:** 2025-12-31
-**Current Phase:** Phase 2 Complete (Week 6/6) → Phase 3 Next
+**Last Updated:** 2026-01-01
+**Current Phase:** Phase 2 Complete + Modernization Complete → Phase 3 Next
 **Timeline:** 16-20 weeks to full *arr replacement (Week 6/20 complete - 30%)
 
 ---
@@ -100,6 +100,22 @@ Plus audiobooks, podcasts, and comics in a single application.
 - `/api/v3/stream/{id}` - Already implemented ✅
 - `/api/v3/chapters/{id}` - Already implemented ✅
 - `/api/v3/progress/{id}` - New endpoint
+
+**Modernization (Post-Phase 2):**
+- [x] Full async/await conversion with CancellationToken support (Phase A)
+- [x] Pagination (50/page default, prevents memory exhaustion) (Phase B)
+- [x] FluentValidation with declarative rules (Phase B)
+- [x] Swagger/OpenAPI documentation at /swagger (Phase B)
+- [x] IMemoryCache with 15-minute TTL for metadata providers (Phase B)
+- [x] Code deduplication - Generic AddMediaItemService<T> (63% reduction) (Phase C)
+- [x] Type-safe MediaType enum constants (replaced magic numbers) (Phase C)
+- [ ] Modern C# features (records, required, init) - deferred
+
+**Post-Modernization Status:**
+- Build: Zero errors, zero warnings
+- Tests: 134/134 passing (115 unit + 19 integration)
+- Performance: Production-ready for 100+ concurrent users
+- Architecture: Clean base patterns for future media types (Music, TV, Podcasts, Comics)
 
 ---
 
