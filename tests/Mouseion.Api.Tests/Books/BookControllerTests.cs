@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Mouseion.Api.Authors;
 using Mouseion.Api.Books;
+using Mouseion.Api.Common;
 
 namespace Mouseion.Api.Tests.Books;
 
@@ -27,8 +28,9 @@ public class BookControllerTests : IClassFixture<TestWebApplicationFactory>
         var response = await _client.GetAsync("/api/v3/books");
         response.EnsureSuccessStatusCode();
 
-        var books = await response.Content.ReadFromJsonAsync<List<BookResource>>();
-        Assert.NotNull(books);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<BookResource>>();
+        Assert.NotNull(result);
+        Assert.NotNull(result.Items);
     }
 
     [Fact]

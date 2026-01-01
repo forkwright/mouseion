@@ -60,6 +60,15 @@ public class BasicRepository<TModel> : IBasicRepository<TModel>
         return conn.QuerySingle<int>($"SELECT COUNT(*) FROM \"{_table}\"");
     }
 
+    public virtual async Task<IEnumerable<TModel>> GetPageAsync(int page, int pageSize, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+        var offset = (page - 1) * pageSize;
+        return await conn.QueryAsync<TModel>(
+            $"SELECT * FROM \"{_table}\" ORDER BY \"Id\" DESC LIMIT @PageSize OFFSET @Offset",
+            new { PageSize = pageSize, Offset = offset }).ConfigureAwait(false);
+    }
+
     public async Task<TModel> GetAsync(int id, CancellationToken ct = default)
     {
         var model = await FindAsync(id, ct).ConfigureAwait(false);

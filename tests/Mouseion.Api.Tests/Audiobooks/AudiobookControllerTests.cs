@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Mouseion.Api.Audiobooks;
 using Mouseion.Api.Authors;
+using Mouseion.Api.Common;
 
 namespace Mouseion.Api.Tests.Audiobooks;
 
@@ -27,8 +28,9 @@ public class AudiobookControllerTests : IClassFixture<TestWebApplicationFactory>
         var response = await _client.GetAsync("/api/v3/audiobooks");
         response.EnsureSuccessStatusCode();
 
-        var audiobooks = await response.Content.ReadFromJsonAsync<List<AudiobookResource>>();
-        Assert.NotNull(audiobooks);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<AudiobookResource>>();
+        Assert.NotNull(result);
+        Assert.NotNull(result.Items);
     }
 
     [Fact]

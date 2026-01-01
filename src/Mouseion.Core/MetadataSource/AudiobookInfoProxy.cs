@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Mouseion.Common.Http;
 using Mouseion.Core.Audiobooks;
@@ -21,16 +22,26 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
     private const string UserAgent = "Mouseion/1.0 (https://github.com/forkwright/mouseion)";
 
     private readonly IHttpClient _httpClient;
+    private readonly IMemoryCache _cache;
     private readonly ILogger<AudiobookInfoProxy> _logger;
 
-    public AudiobookInfoProxy(IHttpClient httpClient, ILogger<AudiobookInfoProxy> logger)
+    public AudiobookInfoProxy(IHttpClient httpClient, IMemoryCache cache, ILogger<AudiobookInfoProxy> logger)
     {
         _httpClient = httpClient;
+        _cache = cache;
         _logger = logger;
     }
 
     public async Task<Audiobook?> GetByAsinAsync(string asin, CancellationToken ct = default)
     {
+        var cacheKey = $"audiobook_asin_{asin}";
+
+        if (_cache.TryGetValue(cacheKey, out Audiobook? cached))
+        {
+            _logger.LogDebug("Cache hit for audiobook ASIN: {Asin}", asin);
+            return cached;
+        }
+
         try
         {
             _logger.LogDebug("Fetching audiobook by ASIN: {Asin}", asin);
@@ -47,7 +58,13 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
                 return null;
             }
 
-            return ParseAudiobook(response.Content, asin);
+            var result = ParseAudiobook(response.Content, asin);
+            if (result != null)
+            {
+                _cache.Set(cacheKey, result, TimeSpan.FromMinutes(15));
+            }
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -97,6 +114,14 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
 
     public async Task<List<Audiobook>> SearchByTitleAsync(string title, CancellationToken ct = default)
     {
+        var cacheKey = $"audiobook_search_title_{title.ToLowerInvariant()}";
+
+        if (_cache.TryGetValue(cacheKey, out List<Audiobook>? cached))
+        {
+            _logger.LogDebug("Cache hit for audiobook title search: {Title}", title);
+            return cached ?? new List<Audiobook>();
+        }
+
         try
         {
             _logger.LogDebug("Searching audiobooks by title: {Title}", title);
@@ -113,7 +138,10 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
                 return new List<Audiobook>();
             }
 
-            return ParseSearchResults(response.Content);
+            var result = ParseSearchResults(response.Content);
+            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(15));
+
+            return result;
         }
         catch (Exception ex)
         {

@@ -7,6 +7,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Mouseion.Api.Authors;
+using Mouseion.Api.Common;
 
 namespace Mouseion.Api.Tests.Authors;
 
@@ -26,8 +27,9 @@ public class AuthorControllerTests : IClassFixture<TestWebApplicationFactory>
         var response = await _client.GetAsync("/api/v3/authors");
         response.EnsureSuccessStatusCode();
 
-        var authors = await response.Content.ReadFromJsonAsync<List<AuthorResource>>();
-        Assert.NotNull(authors);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<AuthorResource>>();
+        Assert.NotNull(result);
+        Assert.NotNull(result.Items);
     }
 
     [Fact]

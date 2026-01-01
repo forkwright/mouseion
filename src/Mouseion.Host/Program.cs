@@ -91,6 +91,17 @@ try
     builder.Services.AddControllers();
     builder.Services.AddSignalR();
     builder.Services.AddMouseionTelemetry();
+    builder.Services.AddMemoryCache();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v3", new Microsoft.OpenApi.Models.OpenApiInfo
+        {
+            Title = "Mouseion API",
+            Version = "v3",
+            Description = "Unified media manager for movies, books, audiobooks, music, TV, podcasts, and comics"
+        });
+    });
 
     // Configure CORS (restrictive by default)
     builder.Services.AddCors(options =>
@@ -125,6 +136,12 @@ try
     Log.Information("Database initialized");
 
     // Configure middleware pipeline
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v3/swagger.json", "Mouseion API v3");
+        c.RoutePrefix = "swagger";
+    });
     app.UseSecurityHeaders(); // Custom security headers middleware
     app.UseHttpsRedirection();
     app.UseCors();

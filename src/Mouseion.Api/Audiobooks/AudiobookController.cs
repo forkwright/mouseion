@@ -6,6 +6,7 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mouseion.Api.Common;
 using Mouseion.Core.Audiobooks;
 
 namespace Mouseion.Api.Audiobooks;
@@ -30,10 +31,25 @@ public class AudiobookController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AudiobookResource>>> GetAudiobooks(CancellationToken ct = default)
+    public async Task<ActionResult<PagedResult<AudiobookResource>>> GetAudiobooks(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken ct = default)
     {
-        var audiobooks = await _audiobookRepository.AllAsync(ct).ConfigureAwait(false);
-        return Ok(audiobooks.Select(ToResource).ToList());
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 50;
+        if (pageSize > 250) pageSize = 250;
+
+        var totalCount = await _audiobookRepository.CountAsync(ct).ConfigureAwait(false);
+        var audiobooks = await _audiobookRepository.GetPageAsync(page, pageSize, ct).ConfigureAwait(false);
+
+        return Ok(new PagedResult<AudiobookResource>
+        {
+            Items = audiobooks.Select(ToResource),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        });
     }
 
     [HttpGet("{id:int}")]

@@ -5,6 +5,7 @@ public interface IBasicRepository<TModel> where TModel : ModelBase, new()
     // Async methods (primary)
     Task<IEnumerable<TModel>> AllAsync(CancellationToken ct = default);
     Task<int> CountAsync(CancellationToken ct = default);
+    Task<IEnumerable<TModel>> GetPageAsync(int page, int pageSize, CancellationToken ct = default);
     Task<TModel> GetAsync(int id, CancellationToken ct = default);
     Task<TModel?> FindAsync(int id, CancellationToken ct = default);
     Task<TModel> InsertAsync(TModel model, CancellationToken ct = default);

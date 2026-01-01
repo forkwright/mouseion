@@ -6,6 +6,7 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mouseion.Api.Common;
 using Mouseion.Core.Authors;
 
 namespace Mouseion.Api.Authors;
@@ -27,10 +28,25 @@ public class AuthorController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AuthorResource>>> GetAuthors(CancellationToken ct = default)
+    public async Task<ActionResult<PagedResult<AuthorResource>>> GetAuthors(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken ct = default)
     {
-        var authors = await _authorRepository.AllAsync(ct).ConfigureAwait(false);
-        return Ok(authors.Select(ToResource).ToList());
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 50;
+        if (pageSize > 250) pageSize = 250;
+
+        var totalCount = await _authorRepository.CountAsync(ct).ConfigureAwait(false);
+        var authors = await _authorRepository.GetPageAsync(page, pageSize, ct).ConfigureAwait(false);
+
+        return Ok(new PagedResult<AuthorResource>
+        {
+            Items = authors.Select(ToResource),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        });
     }
 
     [HttpGet("{id:int}")]

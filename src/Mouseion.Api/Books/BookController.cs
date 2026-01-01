@@ -6,6 +6,7 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mouseion.Api.Common;
 using Mouseion.Core.Books;
 
 namespace Mouseion.Api.Books;
@@ -30,10 +31,25 @@ public class BookController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<BookResource>>> GetBooks(CancellationToken ct = default)
+    public async Task<ActionResult<PagedResult<BookResource>>> GetBooks(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken ct = default)
     {
-        var books = await _bookRepository.AllAsync(ct).ConfigureAwait(false);
-        return Ok(books.Select(ToResource).ToList());
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 50;
+        if (pageSize > 250) pageSize = 250;
+
+        var totalCount = await _bookRepository.CountAsync(ct).ConfigureAwait(false);
+        var books = await _bookRepository.GetPageAsync(page, pageSize, ct).ConfigureAwait(false);
+
+        return Ok(new PagedResult<BookResource>
+        {
+            Items = books.Select(ToResource),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        });
     }
 
     [HttpGet("{id:int}")]

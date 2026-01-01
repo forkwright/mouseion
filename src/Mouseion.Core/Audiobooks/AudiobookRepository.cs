@@ -6,6 +6,7 @@
 
 using Dapper;
 using Mouseion.Core.Datastore;
+using Mouseion.Core.MediaTypes;
 
 namespace Mouseion.Core.Audiobooks;
 
@@ -34,20 +35,29 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     public override async Task<IEnumerable<Audiobook>> AllAsync(CancellationToken ct = default)
     {
         using var conn = _database.OpenConnection();
-        return await conn.QueryAsync<Audiobook>("SELECT * FROM \"MediaItems\" WHERE \"MediaType\" = 5").ConfigureAwait(false);
+        return await conn.QueryAsync<Audiobook>($"SELECT * FROM \"MediaItems\" WHERE \"MediaType\" = {(int)MediaType.Audiobook}").ConfigureAwait(false);
     }
 
     public override IEnumerable<Audiobook> All()
     {
         using var conn = _database.OpenConnection();
-        return conn.Query<Audiobook>("SELECT * FROM \"MediaItems\" WHERE \"MediaType\" = 5");
+        return conn.Query<Audiobook>($"SELECT * FROM \"MediaItems\" WHERE \"MediaType\" = {(int)MediaType.Audiobook}");
+    }
+
+    public override async Task<IEnumerable<Audiobook>> GetPageAsync(int page, int pageSize, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+        var offset = (page - 1) * pageSize;
+        return await conn.QueryAsync<Audiobook>(
+            $"SELECT * FROM \"MediaItems\" WHERE \"MediaType\" = {(int)MediaType.Audiobook} ORDER BY \"Id\" DESC LIMIT @PageSize OFFSET @Offset",
+            new { PageSize = pageSize, Offset = offset }).ConfigureAwait(false);
     }
 
     public override async Task<Audiobook?> FindAsync(int id, CancellationToken ct = default)
     {
         using var conn = _database.OpenConnection();
         return await conn.QueryFirstOrDefaultAsync<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"Id\" = @Id AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"Id\" = @Id AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { Id = id }).ConfigureAwait(false);
     }
 
@@ -55,7 +65,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         return conn.QueryFirstOrDefault<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"Id\" = @Id AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"Id\" = @Id AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { Id = id });
     }
 
@@ -63,7 +73,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         return await conn.QueryFirstOrDefaultAsync<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"Title\" = @Title AND \"Year\" = @Year AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"Title\" = @Title AND \"Year\" = @Year AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { Title = title, Year = year }).ConfigureAwait(false);
     }
 
@@ -71,7 +81,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         return conn.QueryFirstOrDefault<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"Title\" = @Title AND \"Year\" = @Year AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"Title\" = @Title AND \"Year\" = @Year AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { Title = title, Year = year });
     }
 
@@ -79,7 +89,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         var result = await conn.QueryAsync<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"AuthorId\" = @AuthorId AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"AuthorId\" = @AuthorId AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { AuthorId = authorId }).ConfigureAwait(false);
         return result.ToList();
     }
@@ -88,7 +98,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         return conn.Query<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"AuthorId\" = @AuthorId AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"AuthorId\" = @AuthorId AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { AuthorId = authorId }).ToList();
     }
 
@@ -96,7 +106,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         var result = await conn.QueryAsync<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"BookSeriesId\" = @SeriesId AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"BookSeriesId\" = @SeriesId AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { SeriesId = seriesId }).ConfigureAwait(false);
         return result.ToList();
     }
@@ -105,7 +115,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         return conn.Query<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"BookSeriesId\" = @SeriesId AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"BookSeriesId\" = @SeriesId AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { SeriesId = seriesId }).ToList();
     }
 
@@ -113,7 +123,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         var result = await conn.QueryAsync<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"Monitored\" = @Monitored AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"Monitored\" = @Monitored AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { Monitored = true }).ConfigureAwait(false);
         return result.ToList();
     }
@@ -122,7 +132,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         return conn.Query<Audiobook>(
-            "SELECT * FROM \"MediaItems\" WHERE \"Monitored\" = @Monitored AND \"MediaType\" = 5",
+            $"SELECT * FROM \"MediaItems\" WHERE \"Monitored\" = @Monitored AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { Monitored = true }).ToList();
     }
 
@@ -130,7 +140,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         var count = await conn.QuerySingleAsync<int>(
-            "SELECT COUNT(*) FROM \"MediaItems\" WHERE \"AuthorId\" = @AuthorId AND \"Title\" = @Title AND \"Year\" = @Year AND \"MediaType\" = 5",
+            $"SELECT COUNT(*) FROM \"MediaItems\" WHERE \"AuthorId\" = @AuthorId AND \"Title\" = @Title AND \"Year\" = @Year AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { AuthorId = authorId, Title = title, Year = year }).ConfigureAwait(false);
         return count > 0;
     }
@@ -139,7 +149,7 @@ public class AudiobookRepository : BasicRepository<Audiobook>, IAudiobookReposit
     {
         using var conn = _database.OpenConnection();
         var count = conn.QuerySingle<int>(
-            "SELECT COUNT(*) FROM \"MediaItems\" WHERE \"AuthorId\" = @AuthorId AND \"Title\" = @Title AND \"Year\" = @Year AND \"MediaType\" = 5",
+            $"SELECT COUNT(*) FROM \"MediaItems\" WHERE \"AuthorId\" = @AuthorId AND \"Title\" = @Title AND \"Year\" = @Year AND \"MediaType\" = {(int)MediaType.Audiobook}",
             new { AuthorId = authorId, Title = title, Year = year });
         return count > 0;
     }

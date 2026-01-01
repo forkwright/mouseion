@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Mouseion.Common.Http;
 using Mouseion.Core.Books;
@@ -22,16 +23,26 @@ public class BookInfoProxy : IProvideBookInfo
     private const string UserAgent = "Mouseion/1.0 (https://github.com/forkwright/mouseion)";
 
     private readonly IHttpClient _httpClient;
+    private readonly IMemoryCache _cache;
     private readonly ILogger<BookInfoProxy> _logger;
 
-    public BookInfoProxy(IHttpClient httpClient, ILogger<BookInfoProxy> logger)
+    public BookInfoProxy(IHttpClient httpClient, IMemoryCache cache, ILogger<BookInfoProxy> logger)
     {
         _httpClient = httpClient;
+        _cache = cache;
         _logger = logger;
     }
 
     public async Task<Book?> GetByExternalIdAsync(string externalId, CancellationToken ct = default)
     {
+        var cacheKey = $"book_external_{externalId}";
+
+        if (_cache.TryGetValue(cacheKey, out Book? cached))
+        {
+            _logger.LogDebug("Cache hit for book external ID: {ExternalId}", externalId);
+            return cached;
+        }
+
         try
         {
             _logger.LogDebug("Fetching book by external ID: {ExternalId}", externalId);
@@ -50,7 +61,13 @@ public class BookInfoProxy : IProvideBookInfo
                 return null;
             }
 
-            return ParseWork(response.Content);
+            var result = ParseWork(response.Content);
+            if (result != null)
+            {
+                _cache.Set(cacheKey, result, TimeSpan.FromMinutes(15));
+            }
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -102,6 +119,14 @@ public class BookInfoProxy : IProvideBookInfo
 
     public async Task<List<Book>> SearchByTitleAsync(string title, CancellationToken ct = default)
     {
+        var cacheKey = $"book_search_title_{title.ToLowerInvariant()}";
+
+        if (_cache.TryGetValue(cacheKey, out List<Book>? cached))
+        {
+            _logger.LogDebug("Cache hit for book title search: {Title}", title);
+            return cached ?? new List<Book>();
+        }
+
         try
         {
             _logger.LogDebug("Searching books by title: {Title}", title);
@@ -118,7 +143,10 @@ public class BookInfoProxy : IProvideBookInfo
                 return new List<Book>();
             }
 
-            return ParseSearchResults(response.Content);
+            var result = ParseSearchResults(response.Content);
+            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(15));
+
+            return result;
         }
         catch (Exception ex)
         {

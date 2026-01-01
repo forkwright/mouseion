@@ -6,6 +6,7 @@
 
 using Microsoft.Extensions.Logging;
 using Mouseion.Core.Authors;
+using Mouseion.Core.MediaItems;
 
 namespace Mouseion.Core.Books;
 
@@ -18,144 +19,41 @@ public interface IAddBookService
     List<Book> AddBooks(List<Book> books);
 }
 
-public class AddBookService : IAddBookService
+public class AddBookService : AddMediaItemService<Book, IBookRepository>, IAddBookService
 {
     private readonly IBookRepository _bookRepository;
-    private readonly IAuthorRepository _authorRepository;
-    private readonly ILogger<AddBookService> _logger;
 
     public AddBookService(
         IBookRepository bookRepository,
         IAuthorRepository authorRepository,
         ILogger<AddBookService> logger)
+        : base(bookRepository, authorRepository, logger)
     {
         _bookRepository = bookRepository;
-        _authorRepository = authorRepository;
-        _logger = logger;
     }
 
-    public async Task<Book> AddBookAsync(Book book, CancellationToken ct = default)
-    {
-        ValidateBook(book);
-
-        // Verify author exists
-        if (book.AuthorId.HasValue)
-        {
-            var author = await _authorRepository.FindAsync(book.AuthorId.Value, ct).ConfigureAwait(false);
-            if (author == null)
-            {
-                throw new ArgumentException($"Author with ID {book.AuthorId.Value} not found", nameof(book));
-            }
-        }
-
-        // Check for existing book
-        if (book.AuthorId.HasValue)
-        {
-            var existing = await _bookRepository.FindByTitleAsync(book.Title, book.Year, ct).ConfigureAwait(false);
-            if (existing != null && existing.AuthorId == book.AuthorId)
-            {
-                _logger.LogInformation("Book already exists: {BookTitle} ({Year})", existing.Title, existing.Year);
-                return existing;
-            }
-        }
-
-        // Set defaults
-        book.Added = DateTime.UtcNow;
-        book.Monitored = true;
-
-        var added = await _bookRepository.InsertAsync(book, ct).ConfigureAwait(false);
-        _logger.LogInformation("Added book: {BookTitle} ({Year}) - Author ID: {AuthorId}",
-            added.Title, added.Year, added.AuthorId);
-
-        return added;
-    }
+    public Task<Book> AddBookAsync(Book book, CancellationToken ct = default)
+        => AddItemAsync(book, ct);
 
     public Book AddBook(Book book)
-    {
-        ValidateBook(book);
+        => AddItem(book);
 
-        // Verify author exists
-        if (book.AuthorId.HasValue)
-        {
-            var author = _authorRepository.Find(book.AuthorId.Value);
-            if (author == null)
-            {
-                throw new ArgumentException($"Author with ID {book.AuthorId.Value} not found", nameof(book));
-            }
-        }
-
-        // Check for existing book
-        if (book.AuthorId.HasValue)
-        {
-            var existing = _bookRepository.FindByTitle(book.Title, book.Year);
-            if (existing != null && existing.AuthorId == book.AuthorId)
-            {
-                _logger.LogInformation("Book already exists: {BookTitle} ({Year})", existing.Title, existing.Year);
-                return existing;
-            }
-        }
-
-        // Set defaults
-        book.Added = DateTime.UtcNow;
-        book.Monitored = true;
-
-        var added = _bookRepository.Insert(book);
-        _logger.LogInformation("Added book: {BookTitle} ({Year}) - Author ID: {AuthorId}",
-            added.Title, added.Year, added.AuthorId);
-
-        return added;
-    }
-
-    public async Task<List<Book>> AddBooksAsync(List<Book> books, CancellationToken ct = default)
-    {
-        var addedBooks = new List<Book>();
-
-        foreach (var book in books)
-        {
-            try
-            {
-                var added = await AddBookAsync(book, ct).ConfigureAwait(false);
-                addedBooks.Add(added);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding book: {BookTitle}", book.Title);
-            }
-        }
-
-        return addedBooks;
-    }
+    public Task<List<Book>> AddBooksAsync(List<Book> books, CancellationToken ct = default)
+        => AddItemsAsync(books, ct);
 
     public List<Book> AddBooks(List<Book> books)
-    {
-        var addedBooks = new List<Book>();
+        => AddItems(books);
 
-        foreach (var book in books)
-        {
-            try
-            {
-                var added = AddBook(book);
-                addedBooks.Add(added);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error adding book: {BookTitle}", book.Title);
-            }
-        }
+    protected override Task<Book?> FindByTitleAsync(string title, int year, CancellationToken ct = default)
+        => _bookRepository.FindByTitleAsync(title, year, ct);
 
-        return addedBooks;
-    }
+    protected override Book? FindByTitle(string title, int year)
+        => _bookRepository.FindByTitle(title, year);
 
-    private static void ValidateBook(Book book)
-    {
-        if (string.IsNullOrWhiteSpace(book.Title))
-        {
-            throw new ArgumentException("Book title is required", nameof(book));
-        }
+    protected override void LogItemAdded(Book book)
+        => Logger.LogInformation("Added book: {BookTitle} ({Year}) - Author ID: {AuthorId}",
+            book.Title, book.Year, book.AuthorId);
 
-        if (book.QualityProfileId <= 0)
-        {
-            throw new ArgumentException("Quality profile ID must be set", nameof(book));
-        }
-    }
+    protected override void LogItemExists(Book book)
+        => Logger.LogInformation("Book already exists: {BookTitle} ({Year})", book.Title, book.Year);
 }
