@@ -193,7 +193,6 @@ public class TrackController : ControllerBase
             DiscNumber = resource.DiscNumber,
             DurationSeconds = resource.DurationSeconds,
             Explicit = resource.Explicit,
-            MediaType = resource.MediaType,
             Monitored = resource.Monitored,
             QualityProfileId = resource.QualityProfileId,
             Added = resource.Added,

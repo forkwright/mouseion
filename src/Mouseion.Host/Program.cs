@@ -60,6 +60,19 @@ try
     container.Register<Mouseion.Core.Books.IBookStatisticsService, Mouseion.Core.Books.BookStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Audiobooks.IAudiobookStatisticsService, Mouseion.Core.Audiobooks.AudiobookStatisticsService>(Reuse.Singleton);
 
+    // Register music repositories
+    container.Register<Mouseion.Core.Music.IArtistRepository, Mouseion.Core.Music.ArtistRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IAlbumRepository, Mouseion.Core.Music.AlbumRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.ITrackRepository, Mouseion.Core.Music.TrackRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IMusicFileRepository, Mouseion.Core.Music.MusicFileRepository>(Reuse.Singleton);
+
+    // Register music services
+    container.Register<Mouseion.Core.Music.IAddArtistService, Mouseion.Core.Music.AddArtistService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IAddAlbumService, Mouseion.Core.Music.AddAlbumService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IAddTrackService, Mouseion.Core.Music.AddTrackService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IArtistStatisticsService, Mouseion.Core.Music.ArtistStatisticsService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IAlbumStatisticsService, Mouseion.Core.Music.AlbumStatisticsService>(Reuse.Singleton);
+
     // Register metadata providers
     container.Register<Mouseion.Common.Http.IHttpClient, Mouseion.Common.Http.HttpClient>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.ResilientMetadataClient>(Reuse.Singleton);
