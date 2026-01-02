@@ -1,8 +1,8 @@
 # Mouseion Roadmap
 
-**Last Updated:** 2026-01-01
-**Current Phase:** Phase 2 Complete + Modernization Complete → Phase 3 Next
-**Timeline:** 16-20 weeks to full *arr replacement (Week 6/20 complete - 30%)
+**Last Updated:** 2026-01-02
+**Current Phase:** Phase 3/4 Foundations Complete → Metadata Providers Next
+**Timeline:** 16-20 weeks to full *arr replacement (Week 8/20 complete - 40%)
 
 ---
 
@@ -119,19 +119,19 @@ Plus audiobooks, podcasts, and comics in a single application.
 
 ---
 
-## Phase 3: Music (Weeks 7-10) ⏳
+## Phase 3: Music (Weeks 7-10) 🔄
 
 **Goal:** Audiophile-grade music management
 
 **Features:**
-- [ ] Artist/Album/Track models and repositories
-- [ ] MusicBrainz metadata integration
+- [x] Artist/Album/Track models and repositories
+- [ ] MusicBrainz metadata integration ← **Next**
 - [ ] AcoustID fingerprinting (duplicate detection)
-- [ ] Music quality parser (60+ definitions: lossy, lossless, hi-res, DSD)
+- [x] Music quality parser (54 definitions: lossy, lossless, hi-res, DSD)
 - [ ] Spectral analysis (fake hi-res detection via FFmpeg)
 - [ ] TagLib integration for file analysis
 - [ ] Quality upgrades (MP3-320 → FLAC 16/44.1 → FLAC 24/96)
-- [ ] API endpoints: `/api/v3/artists`, `/api/v3/albums`, `/api/v3/tracks`
+- [x] API endpoints: `/api/v3/artists`, `/api/v3/albums`, `/api/v3/tracks`
 
 **Quality System:**
 - Lossy: MP3/AAC/OGG/Opus at 128-320kbps
@@ -146,17 +146,17 @@ Plus audiobooks, podcasts, and comics in a single application.
 
 ---
 
-## Phase 4: Movies (Weeks 11-12) ⏳
+## Phase 4: Movies (Weeks 11-12) 🔄
 
 **Goal:** Maintain Radarr feature parity
 
 **Features:**
-- [ ] Movie model (extends MediaItem)
-- [ ] TMDb metadata provider
-- [ ] Movie quality parser (reuse IDs 0-31)
+- [x] Movie model (extends MediaItem)
+- [ ] TMDb metadata provider ← **Next**
+- [x] Movie quality parser (reuse IDs 0-31)
 - [ ] File scanning and organization
 - [ ] Calendar view
-- [ ] API endpoints: `/api/v3/movies`, `/api/v3/moviefiles`
+- [x] API endpoints: `/api/v3/movies`, `/api/v3/moviefiles`
 
 **Success Criteria:**
 - Feature parity with Radarr

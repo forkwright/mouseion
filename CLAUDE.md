@@ -10,8 +10,8 @@ Inherits all rules from wrapper `/CLAUDE.md`.
 - Active work happens in fresh-start migration
 
 **Current Status:**
-- Phase: Phase 0 complete → Phase 1 in progress (quality system)
-- Test Suite: 134 tests (115 unit + 19 integration)
+- Phase: Phase 3/4 foundations complete → Metadata providers next (MusicBrainz, TMDb)
+- Test Suite: 134 tests (115 unit + 19 integration) - all passing
 - Stack: .NET 10.0, React 19, Serilog, OpenTelemetry
 
 ## Key Technical Details
@@ -73,14 +73,21 @@ Inherits all rules from wrapper `/CLAUDE.md`.
 
 4. **Test Isolation**: Integration tests share database per test class via IClassFixture - tests must use unique data or expect duplicates
 
-## Current Phase Work
+## Feature Planning
 
-**Phase A: Async/Await Modernization (Active)**
-- All repository methods have async equivalents
-- All service methods are async
-- All controller actions are async
-- All async methods accept CancellationToken
-- DryIoc downgraded to stable version
-- All 134 tests passing
+**ROADMAP.md is the authoritative source** for feature work:
+- Check ROADMAP.md first for current phase status and next priorities
+- Phase numbers (0, 1, 2, 3, 4, 5, 6) track major feature milestones
+- Checkboxes indicate actual implementation status
+- "← **Next**" markers show immediate priorities
 
-**Next: Phase B (Pagination, Validation, Caching)**
+**CLAUDE.md provides:**
+- Project-specific technical context
+- Key implementation details (MediaType values, async patterns, etc.)
+- Common gotchas and anti-patterns
+- Current test counts and stack versions
+
+**Workflow:**
+1. Check ROADMAP.md for what features to build
+2. Check CLAUDE.md for how to build them (patterns, conventions, gotchas)
+3. Update both files when completing work
