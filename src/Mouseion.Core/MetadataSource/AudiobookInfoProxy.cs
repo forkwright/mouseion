@@ -10,6 +10,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Mouseion.Common.Extensions;
 using Mouseion.Common.Http;
 using Mouseion.Core.Audiobooks;
 
@@ -121,13 +122,13 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
 
         if (_cache.TryGetValue(cacheKey, out List<Audiobook>? cached))
         {
-            _logger.LogDebug("Cache hit for audiobook title search: {Title}", title);
+            _logger.LogDebug("Cache hit for audiobook title search: {Title}", title.SanitizeForLog());
             return cached ?? new List<Audiobook>();
         }
 
         try
         {
-            _logger.LogDebug("Searching audiobooks by title: {Title}", title);
+            _logger.LogDebug("Searching audiobooks by title: {Title}", title.SanitizeForLog());
 
             var url = $"{BooksUrl}?title={Uri.EscapeDataString(title)}";
             var request = new HttpRequestBuilder(url)
@@ -148,7 +149,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching audiobooks by title: {Title}", title);
+            _logger.LogError(ex, "Error searching audiobooks by title: {Title}", title.SanitizeForLog());
             return new List<Audiobook>();
         }
     }
@@ -157,7 +158,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
     {
         try
         {
-            _logger.LogDebug("Searching audiobooks by title: {Title}", title);
+            _logger.LogDebug("Searching audiobooks by title: {Title}", title.SanitizeForLog());
 
             var url = $"{BooksUrl}?title={Uri.EscapeDataString(title)}";
             var request = new HttpRequestBuilder(url)
@@ -175,7 +176,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching audiobooks by title: {Title}", title);
+            _logger.LogError(ex, "Error searching audiobooks by title: {Title}", title.SanitizeForLog());
             return new List<Audiobook>();
         }
     }
@@ -184,7 +185,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
     {
         try
         {
-            _logger.LogDebug("Searching audiobooks by author: {Author}", author);
+            _logger.LogDebug("Searching audiobooks by author: {Author}", author.SanitizeForLog());
 
             var url = $"{BooksUrl}?author={Uri.EscapeDataString(author)}";
             var request = new HttpRequestBuilder(url)
@@ -202,7 +203,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching audiobooks by author: {Author}", author);
+            _logger.LogError(ex, "Error searching audiobooks by author: {Author}", author.SanitizeForLog());
             return new List<Audiobook>();
         }
     }
@@ -211,7 +212,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
     {
         try
         {
-            _logger.LogDebug("Searching audiobooks by author: {Author}", author);
+            _logger.LogDebug("Searching audiobooks by author: {Author}", author.SanitizeForLog());
 
             var url = $"{BooksUrl}?author={Uri.EscapeDataString(author)}";
             var request = new HttpRequestBuilder(url)
@@ -229,7 +230,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching audiobooks by author: {Author}", author);
+            _logger.LogError(ex, "Error searching audiobooks by author: {Author}", author.SanitizeForLog());
             return new List<Audiobook>();
         }
     }

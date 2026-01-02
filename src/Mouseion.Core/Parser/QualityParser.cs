@@ -664,7 +664,7 @@ public class QualityParser
         var match = ResolutionRegex.Match(name);
         var alternativeMatch = AlternativeResolutionRegex.Match(name);
 
-        if (!match.Success & !alternativeMatch.Success)
+        if (!match.Success && !alternativeMatch.Success)
         {
             return Resolution.Unknown;
         }

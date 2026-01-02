@@ -10,6 +10,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Mouseion.Common.Extensions;
 using Mouseion.Common.Http;
 using Mouseion.Core.Books;
 
@@ -42,13 +43,13 @@ public class BookInfoProxy : IProvideBookInfo
 
         if (_cache.TryGetValue(cacheKey, out Book? cached))
         {
-            _logger.LogDebug("Cache hit for book external ID: {ExternalId}", externalId);
+            _logger.LogDebug("Cache hit for book external ID: {ExternalId}", externalId.SanitizeForLog());
             return cached;
         }
 
         try
         {
-            _logger.LogDebug("Fetching book by external ID: {ExternalId}", externalId);
+            _logger.LogDebug("Fetching book by external ID: {ExternalId}", externalId.SanitizeForLog());
 
             var workId = externalId.StartsWith("/works/") ? externalId : $"/works/{externalId}";
             var url = $"{BaseUrl}{workId}.json";
@@ -60,7 +61,7 @@ public class BookInfoProxy : IProvideBookInfo
             var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                _logger.LogWarning("OpenLibrary returned {StatusCode} for work {WorkId}", response.StatusCode, workId);
+                _logger.LogWarning("OpenLibrary returned {StatusCode} for work {WorkId}", response.StatusCode, workId.SanitizeForLog());
                 return null;
             }
 
@@ -74,7 +75,7 @@ public class BookInfoProxy : IProvideBookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching book by external ID: {ExternalId}", externalId);
+            _logger.LogError(ex, "Error fetching book by external ID: {ExternalId}", externalId.SanitizeForLog());
             return null;
         }
     }
@@ -83,7 +84,7 @@ public class BookInfoProxy : IProvideBookInfo
     {
         try
         {
-            _logger.LogDebug("Fetching book by external ID: {ExternalId}", externalId);
+            _logger.LogDebug("Fetching book by external ID: {ExternalId}", externalId.SanitizeForLog());
 
             var workId = externalId.StartsWith("/works/") ? externalId : $"/works/{externalId}";
             var url = $"{BaseUrl}{workId}.json";
@@ -95,7 +96,7 @@ public class BookInfoProxy : IProvideBookInfo
             var response = _httpClient.Get(request);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                _logger.LogWarning("OpenLibrary returned {StatusCode} for work {WorkId}", response.StatusCode, workId);
+                _logger.LogWarning("OpenLibrary returned {StatusCode} for work {WorkId}", response.StatusCode, workId.SanitizeForLog());
                 return null;
             }
 
@@ -103,7 +104,7 @@ public class BookInfoProxy : IProvideBookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching book by external ID: {ExternalId}", externalId);
+            _logger.LogError(ex, "Error fetching book by external ID: {ExternalId}", externalId.SanitizeForLog());
             return null;
         }
     }
@@ -126,13 +127,13 @@ public class BookInfoProxy : IProvideBookInfo
 
         if (_cache.TryGetValue(cacheKey, out List<Book>? cached))
         {
-            _logger.LogDebug("Cache hit for book title search: {Title}", title);
+            _logger.LogDebug("Cache hit for book title search: {Title}", title.SanitizeForLog());
             return cached ?? new List<Book>();
         }
 
         try
         {
-            _logger.LogDebug("Searching books by title: {Title}", title);
+            _logger.LogDebug("Searching books by title: {Title}", title.SanitizeForLog());
 
             var url = $"{SearchUrl}?title={Uri.EscapeDataString(title)}&limit=20";
             var request = new HttpRequestBuilder(url)
@@ -153,7 +154,7 @@ public class BookInfoProxy : IProvideBookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching books by title: {Title}", title);
+            _logger.LogError(ex, "Error searching books by title: {Title}", title.SanitizeForLog());
             return new List<Book>();
         }
     }
@@ -162,7 +163,7 @@ public class BookInfoProxy : IProvideBookInfo
     {
         try
         {
-            _logger.LogDebug("Searching books by title: {Title}", title);
+            _logger.LogDebug("Searching books by title: {Title}", title.SanitizeForLog());
 
             var url = $"{SearchUrl}?title={Uri.EscapeDataString(title)}&limit=20";
             var request = new HttpRequestBuilder(url)
@@ -180,7 +181,7 @@ public class BookInfoProxy : IProvideBookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching books by title: {Title}", title);
+            _logger.LogError(ex, "Error searching books by title: {Title}", title.SanitizeForLog());
             return new List<Book>();
         }
     }
@@ -189,7 +190,7 @@ public class BookInfoProxy : IProvideBookInfo
     {
         try
         {
-            _logger.LogDebug("Searching books by author: {Author}", author);
+            _logger.LogDebug("Searching books by author: {Author}", author.SanitizeForLog());
 
             var url = $"{SearchUrl}?author={Uri.EscapeDataString(author)}&limit=20";
             var request = new HttpRequestBuilder(url)
@@ -207,7 +208,7 @@ public class BookInfoProxy : IProvideBookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching books by author: {Author}", author);
+            _logger.LogError(ex, "Error searching books by author: {Author}", author.SanitizeForLog());
             return new List<Book>();
         }
     }
@@ -216,7 +217,7 @@ public class BookInfoProxy : IProvideBookInfo
     {
         try
         {
-            _logger.LogDebug("Searching books by author: {Author}", author);
+            _logger.LogDebug("Searching books by author: {Author}", author.SanitizeForLog());
 
             var url = $"{SearchUrl}?author={Uri.EscapeDataString(author)}&limit=20";
             var request = new HttpRequestBuilder(url)
@@ -234,7 +235,7 @@ public class BookInfoProxy : IProvideBookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching books by author: {Author}", author);
+            _logger.LogError(ex, "Error searching books by author: {Author}", author.SanitizeForLog());
             return new List<Book>();
         }
     }
@@ -243,7 +244,7 @@ public class BookInfoProxy : IProvideBookInfo
     {
         try
         {
-            _logger.LogDebug("Searching books by ISBN: {Isbn}", isbn);
+            _logger.LogDebug("Searching books by ISBN: {Isbn}", isbn.SanitizeForLog());
 
             var url = $"{SearchUrl}?isbn={Uri.EscapeDataString(isbn)}&limit=5";
             var request = new HttpRequestBuilder(url)
@@ -261,7 +262,7 @@ public class BookInfoProxy : IProvideBookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching books by ISBN: {Isbn}", isbn);
+            _logger.LogError(ex, "Error searching books by ISBN: {Isbn}", isbn.SanitizeForLog());
             return new List<Book>();
         }
     }
@@ -270,7 +271,7 @@ public class BookInfoProxy : IProvideBookInfo
     {
         try
         {
-            _logger.LogDebug("Searching books by ISBN: {Isbn}", isbn);
+            _logger.LogDebug("Searching books by ISBN: {Isbn}", isbn.SanitizeForLog());
 
             var url = $"{SearchUrl}?isbn={Uri.EscapeDataString(isbn)}&limit=5";
             var request = new HttpRequestBuilder(url)
@@ -288,7 +289,7 @@ public class BookInfoProxy : IProvideBookInfo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching books by ISBN: {Isbn}", isbn);
+            _logger.LogError(ex, "Error searching books by ISBN: {Isbn}", isbn.SanitizeForLog());
             return new List<Book>();
         }
     }
