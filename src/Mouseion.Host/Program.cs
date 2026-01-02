@@ -84,6 +84,8 @@ try
     container.Register<Mouseion.Core.MediaFiles.IDiskScanService, Mouseion.Core.MediaFiles.DiskScanService>(Reuse.Singleton);
     container.Register<Mouseion.Core.MediaFiles.IMusicFileAnalyzer, Mouseion.Core.MediaFiles.MusicFileAnalyzer>(Reuse.Singleton);
     container.Register<Mouseion.Core.MediaFiles.IMusicFileScanner, Mouseion.Core.MediaFiles.MusicFileScanner>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.Fingerprinting.IFingerprintService, Mouseion.Core.MediaFiles.Fingerprinting.FingerprintService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.Spectral.ISpectralAnalyzer, Mouseion.Core.MediaFiles.Spectral.SpectralAnalyzer>(Reuse.Singleton);
 
     // Register import services
     container.Register<Mouseion.Core.MediaFiles.Import.Aggregation.IAggregationService, Mouseion.Core.MediaFiles.Import.Aggregation.AggregationService>(Reuse.Singleton);

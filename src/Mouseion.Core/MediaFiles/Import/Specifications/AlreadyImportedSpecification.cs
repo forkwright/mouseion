@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using Microsoft.Extensions.Logging;
+using Mouseion.Core.MediaFiles.Fingerprinting;
 using Mouseion.Core.Music;
 
 namespace Mouseion.Core.MediaFiles.Import.Specifications;
@@ -9,14 +10,18 @@ namespace Mouseion.Core.MediaFiles.Import.Specifications;
 public class AlreadyImportedSpecification : IImportSpecification
 {
     private readonly IMusicFileRepository _musicFileRepository;
+    private readonly IFingerprintService _fingerprintService;
     private readonly ILogger<AlreadyImportedSpecification> _logger;
+    private const double FingerprintSimilarityThreshold = 0.95;
 
     public AlreadyImportedSpecification(
         IMusicFileRepository musicFileRepository,
-        ILogger<AlreadyImportedSpecification> logger)
+        IFingerprintService fingerprintService,
+        ILogger<AlreadyImportedSpecification> _logger)
     {
         _musicFileRepository = musicFileRepository;
-        _logger = logger;
+        _fingerprintService = fingerprintService;
+        this._logger = _logger;
     }
 
     public async Task<ImportRejection?> IsSatisfiedByAsync(MusicFileInfo musicFileInfo, CancellationToken ct = default)
@@ -31,6 +36,24 @@ public class AlreadyImportedSpecification : IImportSpecification
             return new ImportRejection(
                 ImportRejectionReason.AlreadyImported,
                 $"File already imported: {relativePath}");
+        }
+
+        if (!string.IsNullOrEmpty(musicFileInfo.Fingerprint))
+        {
+            var duplicates = await _fingerprintService.FindDuplicatesAsync(
+                musicFileInfo.Fingerprint,
+                FingerprintSimilarityThreshold,
+                ct).ConfigureAwait(false);
+
+            if (duplicates.Any())
+            {
+                var (trackId, similarity) = duplicates.First();
+                _logger.LogDebug("Duplicate found via fingerprint: {Path} matches Track {TrackId} ({Similarity:P1})",
+                    musicFileInfo.Path, trackId, similarity);
+                return new ImportRejection(
+                    ImportRejectionReason.AlreadyImported,
+                    $"Duplicate file detected (fingerprint match: {similarity:P1})");
+            }
         }
 
         return null;
@@ -48,6 +71,23 @@ public class AlreadyImportedSpecification : IImportSpecification
             return new ImportRejection(
                 ImportRejectionReason.AlreadyImported,
                 $"File already imported: {relativePath}");
+        }
+
+        if (!string.IsNullOrEmpty(musicFileInfo.Fingerprint))
+        {
+            var duplicates = _fingerprintService.FindDuplicates(
+                musicFileInfo.Fingerprint,
+                FingerprintSimilarityThreshold);
+
+            if (duplicates.Any())
+            {
+                var (trackId, similarity) = duplicates.First();
+                _logger.LogDebug("Duplicate found via fingerprint: {Path} matches Track {TrackId} ({Similarity:P1})",
+                    musicFileInfo.Path, trackId, similarity);
+                return new ImportRejection(
+                    ImportRejectionReason.AlreadyImported,
+                    $"Duplicate file detected (fingerprint match: {similarity:P1})");
+            }
         }
 
         return null;

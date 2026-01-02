@@ -26,6 +26,8 @@ public class MusicFile : ModelBase
     public int? Bitrate { get; set; }
     public int? SampleRate { get; set; }
     public int? Channels { get; set; }
+    public string? Fingerprint { get; set; }
+    public int? FingerprintDuration { get; set; }
 
     public override string ToString() => RelativePath ?? $"MusicFile {Id}";
 }

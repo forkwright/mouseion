@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using Microsoft.Extensions.Logging;
+using Mouseion.Core.MediaFiles.Fingerprinting;
 using Mouseion.Core.Parser;
 using Mouseion.Core.Qualities;
 using TagLib;
@@ -17,10 +18,14 @@ public interface IMusicFileAnalyzer
 public class MusicFileAnalyzer : IMusicFileAnalyzer
 {
     private readonly ILogger<MusicFileAnalyzer> _logger;
+    private readonly IFingerprintService _fingerprintService;
 
-    public MusicFileAnalyzer(ILogger<MusicFileAnalyzer> logger)
+    public MusicFileAnalyzer(
+        ILogger<MusicFileAnalyzer> logger,
+        IFingerprintService fingerprintService)
     {
         _logger = logger;
+        _fingerprintService = fingerprintService;
     }
 
     public Task<MusicFileInfo?> AnalyzeAsync(string filePath, CancellationToken ct = default)
@@ -60,6 +65,13 @@ public class MusicFileAnalyzer : IMusicFileAnalyzer
 
             var qualityFromFilename = MusicQualityParser.ParseQuality(filePath, _logger);
             musicInfo.Quality = RefineQuality(qualityFromFilename.Quality, musicInfo);
+
+            var fingerprint = _fingerprintService.Fingerprint(filePath);
+            if (fingerprint != null)
+            {
+                musicInfo.Fingerprint = fingerprint.Hash;
+                musicInfo.FingerprintDuration = fingerprint.Duration;
+            }
 
             return musicInfo;
         }
@@ -295,4 +307,7 @@ public class MusicFileInfo
     public string? MusicBrainzArtistId { get; set; }
     public string? MusicBrainzTrackId { get; set; }
     public string? MusicBrainzAlbumArtistId { get; set; }
+
+    public string? Fingerprint { get; set; }
+    public int? FingerprintDuration { get; set; }
 }

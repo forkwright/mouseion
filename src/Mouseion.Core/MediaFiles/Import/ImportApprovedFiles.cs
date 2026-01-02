@@ -82,7 +82,9 @@ public class ImportApprovedFiles : IImportApprovedFiles
                 AudioFormat = musicFileInfo.Codec,
                 Bitrate = musicFileInfo.Bitrate,
                 SampleRate = musicFileInfo.SampleRate,
-                Channels = musicFileInfo.Channels
+                Channels = musicFileInfo.Channels,
+                Fingerprint = musicFileInfo.Fingerprint,
+                FingerprintDuration = musicFileInfo.FingerprintDuration
             };
 
             var inserted = await _musicFileRepository.InsertAsync(musicFile, ct).ConfigureAwait(false);
@@ -115,7 +117,9 @@ public class ImportApprovedFiles : IImportApprovedFiles
                 AudioFormat = musicFileInfo.Codec,
                 Bitrate = musicFileInfo.Bitrate,
                 SampleRate = musicFileInfo.SampleRate,
-                Channels = musicFileInfo.Channels
+                Channels = musicFileInfo.Channels,
+                Fingerprint = musicFileInfo.Fingerprint,
+                FingerprintDuration = musicFileInfo.FingerprintDuration
             };
 
             var inserted = _musicFileRepository.Insert(musicFile);
