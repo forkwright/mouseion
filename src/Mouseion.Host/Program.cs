@@ -96,7 +96,6 @@ try
 
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
-
     // Create ASP.NET Core builder
     var builder = WebApplication.CreateBuilder(args);
 
@@ -124,6 +123,18 @@ try
             Title = "Mouseion API",
             Version = "v3",
             Description = "Unified media manager for movies, books, audiobooks, music, TV, podcasts, and comics"
+        });
+    });
+
+    // Configure CORS (restrictive by default)
+    builder.Services.AddCors(options =>
+    {
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         });
     });
 
