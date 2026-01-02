@@ -92,6 +92,8 @@ try
     container.Register<Mouseion.Core.MetadataSource.ResilientMetadataClient>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.IProvideBookInfo, Mouseion.Core.MetadataSource.BookInfoProxy>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.IProvideAudiobookInfo, Mouseion.Core.MetadataSource.AudiobookInfoProxy>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MetadataSource.IProvideMusicInfo, Mouseion.Core.MetadataSource.MusicBrainzInfoProxy>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MetadataSource.IProvideMovieInfo, Mouseion.Core.MetadataSource.TmdbInfoProxy>(Reuse.Singleton);
 
     // Register indexers
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseSettings>(Reuse.Singleton);
