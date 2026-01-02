@@ -126,13 +126,16 @@ Plus audiobooks, podcasts, and comics in a single application.
 **Features:**
 - [x] Artist/Album/Track models and repositories
 - [x] MusicBrainz metadata integration
-- [ ] Music file scanning and import ← **Next**
-- [ ] TagLib integration for file analysis ← **Next**
-- [ ] AcoustID fingerprinting (duplicate detection)
+- [x] Music file scanning and import (PR #18)
+- [x] TagLib integration for file analysis (PR #18)
+- [x] Root folder management (PR #18)
+- [x] Import decision engine with specification pattern (PR #18)
+- [x] Multi-mode scanning: artist, album, root folder, library (PR #18)
+- [ ] AcoustID fingerprinting (duplicate detection) ← **Next**
 - [x] Music quality parser (54 definitions: lossy, lossless, hi-res, DSD)
 - [ ] Spectral analysis (fake hi-res detection via FFmpeg)
 - [ ] Quality upgrades (MP3-320 → FLAC 16/44.1 → FLAC 24/96)
-- [x] API endpoints: `/api/v3/artists`, `/api/v3/albums`, `/api/v3/tracks`
+- [x] API endpoints: `/api/v3/artists`, `/api/v3/albums`, `/api/v3/tracks`, `/api/v3/scan/music/*`, `/api/v3/rootfolders`
 
 **Quality System:**
 - Lossy: MP3/AAC/OGG/Opus at 128-320kbps
