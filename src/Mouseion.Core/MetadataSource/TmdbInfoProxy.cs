@@ -334,15 +334,15 @@ public class TmdbInfoProxy : IProvideMovieInfo
             {
                 Title = root.GetProperty("title").GetString() ?? "Unknown",
                 Year = ExtractYear(root),
-                Overview = GetStringProperty(root, "overview"),
-                Runtime = GetIntProperty(root, "runtime"),
-                TmdbId = GetIntProperty(root, "id")?.ToString(),
-                ImdbId = GetStringProperty(root, "imdb_id"),
+                Overview = JsonHelpers.GetStringProperty(root, "overview"),
+                Runtime = JsonHelpers.GetIntProperty(root, "runtime"),
+                TmdbId = JsonHelpers.GetIntProperty(root, "id")?.ToString(),
+                ImdbId = JsonHelpers.GetStringProperty(root, "imdb_id"),
                 Genres = GetGenres(root),
                 Certification = ExtractCertification(root),
-                Studio = GetStringProperty(root, "production_companies"),
-                Website = GetStringProperty(root, "homepage"),
-                Popularity = GetFloatProperty(root, "popularity"),
+                Studio = JsonHelpers.GetStringProperty(root, "production_companies"),
+                Website = JsonHelpers.GetStringProperty(root, "homepage"),
+                Popularity = JsonHelpers.GetFloatProperty(root, "popularity"),
                 Images = GetImages(root)
             };
 
@@ -417,7 +417,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
     {
         try
         {
-            var tmdbId = GetIntProperty(item, "id");
+            var tmdbId = JsonHelpers.GetIntProperty(item, "id");
             if (!tmdbId.HasValue)
             {
                 return null;
@@ -427,10 +427,10 @@ public class TmdbInfoProxy : IProvideMovieInfo
             {
                 Title = item.GetProperty("title").GetString() ?? "Unknown",
                 Year = ExtractYear(item),
-                Overview = GetStringProperty(item, "overview"),
+                Overview = JsonHelpers.GetStringProperty(item, "overview"),
                 TmdbId = tmdbId.Value.ToString(),
                 Genres = GetGenres(item),
-                Popularity = GetFloatProperty(item, "popularity"),
+                Popularity = JsonHelpers.GetFloatProperty(item, "popularity"),
                 Images = GetImages(item)
             };
 
@@ -449,39 +449,10 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
     }
 
-    private static string? GetStringProperty(JsonElement element, string propertyName)
-    {
-        if (element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.String)
-        {
-            return property.GetString();
-        }
-
-        return null;
-    }
-
-    private static int? GetIntProperty(JsonElement element, string propertyName)
-    {
-        if (element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.Number)
-        {
-            return property.GetInt32();
-        }
-
-        return null;
-    }
-
-    private static float? GetFloatProperty(JsonElement element, string propertyName)
-    {
-        if (element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.Number)
-        {
-            return property.GetSingle();
-        }
-
-        return null;
-    }
 
     private static int ExtractYear(JsonElement element)
     {
-        var releaseDate = GetStringProperty(element, "release_date");
+        var releaseDate = JsonHelpers.GetStringProperty(element, "release_date");
         if (string.IsNullOrWhiteSpace(releaseDate))
         {
             return 0;
@@ -531,13 +502,13 @@ public class TmdbInfoProxy : IProvideMovieInfo
     {
         var images = new List<string>();
 
-        var posterPath = GetStringProperty(element, "poster_path");
+        var posterPath = JsonHelpers.GetStringProperty(element, "poster_path");
         if (!string.IsNullOrWhiteSpace(posterPath))
         {
             images.Add($"https://image.tmdb.org/t/p/original{posterPath}");
         }
 
-        var backdropPath = GetStringProperty(element, "backdrop_path");
+        var backdropPath = JsonHelpers.GetStringProperty(element, "backdrop_path");
         if (!string.IsNullOrWhiteSpace(backdropPath))
         {
             images.Add($"https://image.tmdb.org/t/p/original{backdropPath}");
@@ -559,7 +530,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
                 {
                     foreach (var date in dates.EnumerateArray())
                     {
-                        var cert = GetStringProperty(date, "certification");
+                        var cert = JsonHelpers.GetStringProperty(date, "certification");
                         if (!string.IsNullOrWhiteSpace(cert))
                         {
                             return cert;

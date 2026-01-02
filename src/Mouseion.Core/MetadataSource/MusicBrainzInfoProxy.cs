@@ -276,12 +276,12 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
             var artist = new Artist
             {
                 Name = root.GetProperty("name").GetString() ?? "Unknown",
-                SortName = GetStringProperty(root, "sort-name"),
+                SortName = JsonHelpers.GetStringProperty(root, "sort-name"),
                 MusicBrainzId = mbid,
                 ForeignArtistId = mbid,
-                Description = GetStringProperty(root, "disambiguation"),
-                ArtistType = GetStringProperty(root, "type"),
-                Country = GetStringProperty(root, "country"),
+                Description = JsonHelpers.GetStringProperty(root, "disambiguation"),
+                ArtistType = JsonHelpers.GetStringProperty(root, "type"),
+                Country = JsonHelpers.GetStringProperty(root, "country"),
                 Genres = GetStringArrayProperty(root, "genres"),
                 BeginDate = ParseDate(lifeSpanJson, "begin"),
                 EndDate = ParseDate(lifeSpanJson, "end")
@@ -308,10 +308,10 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
                 Title = root.GetProperty("title").GetString() ?? "Unknown",
                 MusicBrainzId = mbid,
                 ForeignAlbumId = mbid,
-                ReleaseDate = ParseReleaseDate(GetStringProperty(root, "date")),
-                AlbumType = GetStringProperty(root, "packaging"),
+                ReleaseDate = JsonHelpers.ParseReleaseDate(JsonHelpers.GetStringProperty(root, "date")),
+                AlbumType = JsonHelpers.GetStringProperty(root, "packaging"),
                 Genres = GetStringArrayProperty(root, "genres"),
-                TrackCount = GetIntProperty(root, "track-count")
+                TrackCount = JsonHelpers.GetIntProperty(root, "track-count")
             };
 
             return album;
@@ -336,7 +336,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
             {
                 foreach (var item in artistsArray.EnumerateArray())
                 {
-                    var mbid = GetStringProperty(item, "id");
+                    var mbid = JsonHelpers.GetStringProperty(item, "id");
                     if (string.IsNullOrWhiteSpace(mbid))
                     {
                         continue;
@@ -345,11 +345,11 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
                     var artist = new Artist
                     {
                         Name = item.GetProperty("name").GetString() ?? "Unknown",
-                        SortName = GetStringProperty(item, "sort-name"),
+                        SortName = JsonHelpers.GetStringProperty(item, "sort-name"),
                         MusicBrainzId = mbid,
                         ForeignArtistId = mbid,
-                        ArtistType = GetStringProperty(item, "type"),
-                        Country = GetStringProperty(item, "country")
+                        ArtistType = JsonHelpers.GetStringProperty(item, "type"),
+                        Country = JsonHelpers.GetStringProperty(item, "country")
                     };
 
                     artists.Add(artist);
@@ -377,7 +377,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
             {
                 foreach (var item in releasesArray.EnumerateArray())
                 {
-                    var mbid = GetStringProperty(item, "id");
+                    var mbid = JsonHelpers.GetStringProperty(item, "id");
                     if (string.IsNullOrWhiteSpace(mbid))
                     {
                         continue;
@@ -388,8 +388,8 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
                         Title = item.GetProperty("title").GetString() ?? "Unknown",
                         MusicBrainzId = mbid,
                         ForeignAlbumId = mbid,
-                        ReleaseDate = ParseReleaseDate(GetStringProperty(item, "date")),
-                        TrackCount = GetIntProperty(item, "track-count")
+                        ReleaseDate = JsonHelpers.ParseReleaseDate(JsonHelpers.GetStringProperty(item, "date")),
+                        TrackCount = JsonHelpers.GetIntProperty(item, "track-count")
                     };
 
                     albums.Add(album);
@@ -402,26 +402,6 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
         }
 
         return albums;
-    }
-
-    private static string? GetStringProperty(JsonElement element, string propertyName)
-    {
-        if (element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.String)
-        {
-            return property.GetString();
-        }
-
-        return null;
-    }
-
-    private static int? GetIntProperty(JsonElement element, string propertyName)
-    {
-        if (element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.Number)
-        {
-            return property.GetInt32();
-        }
-
-        return null;
     }
 
     private static List<string> GetStringArrayProperty(JsonElement element, string propertyName)
@@ -446,21 +426,6 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
         return result;
     }
 
-    private static DateTime? ParseReleaseDate(string? dateStr)
-    {
-        if (string.IsNullOrWhiteSpace(dateStr))
-        {
-            return null;
-        }
-
-        if (DateTime.TryParse(dateStr, out var date))
-        {
-            return date;
-        }
-
-        return null;
-    }
-
     private static DateTime? ParseDate(string? lifeSpan, string key)
     {
         if (string.IsNullOrWhiteSpace(lifeSpan))
@@ -471,8 +436,8 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
         try
         {
             using var doc = JsonDocument.Parse(lifeSpan);
-            var dateStr = GetStringProperty(doc.RootElement, key);
-            return ParseReleaseDate(dateStr);
+            var dateStr = JsonHelpers.GetStringProperty(doc.RootElement, key);
+            return JsonHelpers.ParseReleaseDate(dateStr);
         }
         catch
         {
