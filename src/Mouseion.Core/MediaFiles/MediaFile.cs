@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mouseion Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // Mouseion - Unified media manager
 // Copyright (C) 2024-2025 Mouseion Contributors
 // Based on Radarr (https://github.com/Radarr/Radarr)
@@ -29,18 +32,21 @@ public class MediaFile : ModelBase
         return $"[{Id}] {RelativePath}";
     }
 
-    public string GetFileName()
+    public string FileName
     {
-        if (!string.IsNullOrWhiteSpace(RelativePath))
+        get
         {
-            return System.IO.Path.GetFileNameWithoutExtension(RelativePath);
-        }
+            if (!string.IsNullOrWhiteSpace(RelativePath))
+            {
+                return System.IO.Path.GetFileNameWithoutExtension(RelativePath);
+            }
 
-        if (!string.IsNullOrWhiteSpace(Path))
-        {
-            return System.IO.Path.GetFileNameWithoutExtension(Path);
-        }
+            if (!string.IsNullOrWhiteSpace(Path))
+            {
+                return System.IO.Path.GetFileNameWithoutExtension(Path);
+            }
 
-        return string.Empty;
+            return string.Empty;
+        }
     }
 }

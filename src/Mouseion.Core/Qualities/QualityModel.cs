@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mouseion Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 using System.Text.Json.Serialization;
 using Mouseion.Core.Datastore;
 

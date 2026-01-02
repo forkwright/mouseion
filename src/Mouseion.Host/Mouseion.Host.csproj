@@ -17,6 +17,16 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.CLSCompliantAttribute">
+      <_Parameter1>false</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.InteropServices.ComVisibleAttribute">
+      <_Parameter1>false</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
 </Project>

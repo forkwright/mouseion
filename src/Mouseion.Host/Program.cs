@@ -1,3 +1,6 @@
+// Copyright (c) 2025 Mouseion Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
 using Mouseion.Api.Security;
@@ -165,9 +168,9 @@ try
 
     // Initialize database (run migrations)
     Log.Information("Initializing database...");
-    var mainDb = app.Services.GetRequiredService<IDatabase>(); // Triggers creation via delegate
+    _ = app.Services.GetRequiredService<IDatabase>(); // Triggers creation and migrations via delegate
     var dbFactory = app.Services.GetRequiredService<IDbFactory>();
-    var logDb = dbFactory.Create(MigrationType.Log);
+    _ = dbFactory.Create(MigrationType.Log); // Triggers creation and migrations
     Log.Information("Database initialized");
 
     // Configure middleware pipeline

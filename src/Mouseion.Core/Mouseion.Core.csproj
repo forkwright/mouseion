@@ -20,6 +20,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS8714;CS8765;CS8767</WarningsAsErrors>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.CLSCompliantAttribute">
+      <_Parameter1>false</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.InteropServices.ComVisibleAttribute">
+      <_Parameter1>false</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
 </Project>
