@@ -14,7 +14,10 @@ public class QualityParser
     private static readonly Regex SourceRegex = new(
         @"\b(?:
             (?<bluray>M?Blu[-_. ]?Ray|HD[-_. ]?DVD|BD(?!$)|UHD2?BD|BDISO|BDMux|BD25|BD50|BR[-_. ]?DISK)|
-            (?<webdl>WEB[-_. ]?DL(?:mux)?|AmazonHD|AmazonSD|iTunesHD|MaxdomeHD|NetflixU?HD|WebHD|HBOMaxHD|DisneyHD|[. ]WEB[. ](?:[xh][ .]?26[45]|AVC|HEVC|DDP?5[. ]1)|[. ](?-i:WEB)$|(?:\d{3,4}0p)[-. ](?:Hybrid[-_. ]?)?WEB[-. ]|[-. ]WEB[-. ]\d{3,4}0p|\b\s\/\sWEB\s\/\s\b|(?:AMZN|NF|DP)[. -]WEB[. -](?!Rip))|
+            (?<webdl>WEB[-_. ]?DL(?:mux)?|AmazonHD|AmazonSD|iTunesHD|MaxdomeHD|NetflixU?HD|WebHD|
+                     HBOMaxHD|DisneyHD|[. ]WEB[. ](?:[xh][ .]?26[45]|AVC|HEVC|DDP?5[. ]1)|[. ](?-i:WEB)$|
+                     (?:\d{3,4}0p)[-. ](?:Hybrid[-_. ]?)?WEB[-. ]|[-. ]WEB[-. ]\d{3,4}0p|\b\s\/\sWEB\s\/\s\b|
+                     (?:AMZN|NF|DP)[. -]WEB[. -](?!Rip))|
             (?<webrip>WebRip|Web-Rip|WEBMux)|
             (?<hdtv>HDTV)|
             (?<bdrip>BDRip|BDLight|HD[-_. ]?DVDRip|UHDBDRip)|
@@ -41,7 +44,22 @@ public class QualityParser
     private static readonly Regex MPEG2Regex = new(@"\b(?<mpeg2>MPEG[-_. ]?2)\b");
 
     private static readonly Regex BRDISKRegex = new(
-        @"^(?!.*\b((?<!HD[._ -]|HD)DVD|BDRip|720p|MKV|XviD|WMV|d3g|(BD)?REMUX|^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*[DM]L|((?<=\d{4}).*German.*([DM]L)?)(?=.*\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\b))\b)(((?=.*\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\b)(?=.*\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\b))|^((?=.*\b(((?=.*\b((.*_)?COMPLETE.*|Dis[ck])\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD)))|3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO)))))))).*",
+        @"^(?!.*\b(" +
+            @"(?<!HD[._ -]|HD)DVD|BDRip|720p|MKV|XviD|WMV|d3g|(BD)?REMUX|" +
+            @"^(?=.*1080p)(?=.*HEVC)|[xh][-_. ]?26[45]|German.*[DM]L|" +
+            @"((?<=\d{4}).*German.*([DM]L)?)(?=.*\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2)\b)" +
+        @")\b)" +
+        @"((" +
+            @"(?=.*\b(Blu[-_. ]?ray|BD|HD[-_. ]?DVD)\b)" +
+            @"(?=.*\b(AVC|HEVC|VC[-_. ]?1|MVC|MPEG[-_. ]?2|BDMV|ISO)\b)" +
+        @")|^(" +
+            @"(?=.*\b((" +
+                @"(?=.*\b((.*_)?COMPLETE.*|Dis[ck])\b)(?=.*(Blu[-_. ]?ray|HD[-_. ]?DVD))" +
+            @")|" +
+                @"3D[-_. ]?BD|BR[-_. ]?DISK|Full[-_. ]?Blu[-_. ]?ray|" +
+                @"^((?=.*((BD|UHD)[-_. ]?(25|50|66|100|ISO))))" +
+            @"))" +
+        @")).*",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly Regex ProperRegex = new(
@@ -61,7 +79,15 @@ public class QualityParser
         RegexOptions.Compiled);
 
     private static readonly Regex ResolutionRegex = new(
-        @"\b(?:(?<R360p>360p)|(?<R480p>480p|480i|640x480|848x480)|(?<R540p>540p)|(?<R576p>576p)|(?<R720p>720p|1280x720|960p)|(?<R1080p>1080p|1920x1080|1440p|FHD|1080i|4kto1080p)|(?<R2160p>2160p|3840x2160|4k[-_. ](?:UHD|HEVC|BD|H\.?265)|(?:UHD|HEVC|BD|H\.?265)[-_. ]4k))\b",
+        @"\b(?:" +
+            @"(?<R360p>360p)|" +
+            @"(?<R480p>480p|480i|640x480|848x480)|" +
+            @"(?<R540p>540p)|" +
+            @"(?<R576p>576p)|" +
+            @"(?<R720p>720p|1280x720|960p)|" +
+            @"(?<R1080p>1080p|1920x1080|1440p|FHD|1080i|4kto1080p)|" +
+            @"(?<R2160p>2160p|3840x2160|4k[-_. ](?:UHD|HEVC|BD|H\.?265)|(?:UHD|HEVC|BD|H\.?265)[-_. ]4k)" +
+        @")\b",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly Regex AlternativeResolutionRegex = new(

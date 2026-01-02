@@ -112,7 +112,10 @@ public static class MediaFileExtensions
     public static HashSet<string> DiskExtensions => new(new[] { ".img", ".iso", ".vob" }, StringComparer.OrdinalIgnoreCase);
     public static HashSet<string> EbookExtensions => new(new[] { ".epub", ".mobi", ".azw", ".azw3", ".pdf", ".txt", ".djvu", ".cbr", ".cbz" }, StringComparer.OrdinalIgnoreCase);
     public static HashSet<string> AudiobookExtensions => new(new[] { ".m4b", ".aa", ".aax" }, StringComparer.OrdinalIgnoreCase);
-    public static HashSet<string> MusicExtensions => new(new[] { ".mp3", ".aac", ".ogg", ".oga", ".opus", ".wma", ".m4a", ".flac", ".wav", ".aiff", ".aif", ".alac", ".ape", ".wv", ".dsf", ".dff" }, StringComparer.OrdinalIgnoreCase);
+    public static HashSet<string> MusicExtensions => new(
+        new[] { ".mp3", ".aac", ".ogg", ".oga", ".opus", ".wma", ".m4a", ".flac",
+                ".wav", ".aiff", ".aif", ".alac", ".ape", ".wv", ".dsf", ".dff" },
+        StringComparer.OrdinalIgnoreCase);
 
     public static Quality GetQualityForExtension(string extension)
     {
