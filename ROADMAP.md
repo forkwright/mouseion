@@ -1,8 +1,8 @@
 # Mouseion Roadmap
 
 **Last Updated:** 2026-01-02
-**Current Phase:** Phase 3/4 Foundations Complete → Metadata Providers Next
-**Timeline:** 16-20 weeks to full *arr replacement (Week 8/20 complete - 40%)
+**Current Phase:** Phase 3/4 Metadata Providers Complete → File Scanning Next
+**Timeline:** 16-20 weeks to full *arr replacement (Week 9/20 complete - 45%)
 
 ---
 
@@ -125,11 +125,12 @@ Plus audiobooks, podcasts, and comics in a single application.
 
 **Features:**
 - [x] Artist/Album/Track models and repositories
-- [ ] MusicBrainz metadata integration ← **Next**
+- [x] MusicBrainz metadata integration
+- [ ] Music file scanning and import ← **Next**
+- [ ] TagLib integration for file analysis ← **Next**
 - [ ] AcoustID fingerprinting (duplicate detection)
 - [x] Music quality parser (54 definitions: lossy, lossless, hi-res, DSD)
 - [ ] Spectral analysis (fake hi-res detection via FFmpeg)
-- [ ] TagLib integration for file analysis
 - [ ] Quality upgrades (MP3-320 → FLAC 16/44.1 → FLAC 24/96)
 - [x] API endpoints: `/api/v3/artists`, `/api/v3/albums`, `/api/v3/tracks`
 
@@ -152,9 +153,9 @@ Plus audiobooks, podcasts, and comics in a single application.
 
 **Features:**
 - [x] Movie model (extends MediaItem)
-- [ ] TMDb metadata provider ← **Next**
+- [x] TMDb metadata provider
 - [x] Movie quality parser (reuse IDs 0-31)
-- [ ] File scanning and organization
+- [ ] Movie file scanning and organization ← **Next**
 - [ ] Calendar view
 - [x] API endpoints: `/api/v3/movies`, `/api/v3/moviefiles`
 
