@@ -76,6 +76,33 @@ try
     container.Register<Mouseion.Core.Music.IArtistStatisticsService, Mouseion.Core.Music.ArtistStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Music.IAlbumStatisticsService, Mouseion.Core.Music.AlbumStatisticsService>(Reuse.Singleton);
 
+    // Register root folder services
+    container.Register<Mouseion.Core.RootFolders.IRootFolderRepository, Mouseion.Core.RootFolders.RootFolderRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.RootFolders.IRootFolderService, Mouseion.Core.RootFolders.RootFolderService>(Reuse.Singleton);
+
+    // Register file scanning services
+    container.Register<Mouseion.Core.MediaFiles.IDiskScanService, Mouseion.Core.MediaFiles.DiskScanService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.IMusicFileAnalyzer, Mouseion.Core.MediaFiles.MusicFileAnalyzer>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.IMusicFileScanner, Mouseion.Core.MediaFiles.MusicFileScanner>(Reuse.Singleton);
+
+    // Register import services
+    container.Register<Mouseion.Core.MediaFiles.Import.Aggregation.IAggregationService, Mouseion.Core.MediaFiles.Import.Aggregation.AggregationService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.Import.IImportDecisionMaker, Mouseion.Core.MediaFiles.Import.ImportDecisionMaker>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.Import.IImportApprovedFiles, Mouseion.Core.MediaFiles.Import.ImportApprovedFiles>(Reuse.Singleton);
+
+    // Register import specifications
+    container.Register<Mouseion.Core.MediaFiles.Import.IImportSpecification, Mouseion.Core.MediaFiles.Import.Specifications.HasAudioTrackSpecification>(Reuse.Singleton, serviceKey: "HasAudioTrack");
+    container.Register<Mouseion.Core.MediaFiles.Import.IImportSpecification, Mouseion.Core.MediaFiles.Import.Specifications.AlreadyImportedSpecification>(Reuse.Singleton, serviceKey: "AlreadyImported");
+    container.Register<Mouseion.Core.MediaFiles.Import.IImportSpecification, Mouseion.Core.MediaFiles.Import.Specifications.MinimumQualitySpecification>(Reuse.Singleton, serviceKey: "MinimumQuality");
+    container.Register<Mouseion.Core.MediaFiles.Import.IImportSpecification, Mouseion.Core.MediaFiles.Import.Specifications.UpgradeSpecification>(Reuse.Singleton, serviceKey: "Upgrade");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.MediaFiles.Import.IImportSpecification>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.MediaFiles.Import.IImportSpecification>(serviceKey: "HasAudioTrack"),
+        r.Resolve<Mouseion.Core.MediaFiles.Import.IImportSpecification>(serviceKey: "AlreadyImported"),
+        r.Resolve<Mouseion.Core.MediaFiles.Import.IImportSpecification>(serviceKey: "MinimumQuality"),
+        r.Resolve<Mouseion.Core.MediaFiles.Import.IImportSpecification>(serviceKey: "Upgrade")
+    }, Reuse.Singleton);
+
     // Register movie repositories
     container.Register<Mouseion.Core.Movies.IMovieRepository, Mouseion.Core.Movies.MovieRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.Movies.IMovieFileRepository, Mouseion.Core.Movies.MovieFileRepository>(Reuse.Singleton);
