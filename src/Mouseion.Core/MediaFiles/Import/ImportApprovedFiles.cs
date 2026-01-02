@@ -38,16 +38,9 @@ public class ImportApprovedFiles : IImportApprovedFiles
 
         _logger.LogInformation("Importing {Count} approved files", approvedDecisions.Count);
 
-        var importedFiles = new List<MusicFile>();
-
-        foreach (var decision in approvedDecisions)
-        {
-            var musicFile = await ImportFileAsync(decision.MusicFileInfo, ct).ConfigureAwait(false);
-            if (musicFile != null)
-            {
-                importedFiles.Add(musicFile);
-            }
-        }
+        var importTasks = approvedDecisions.Select(d => ImportFileAsync(d.MusicFileInfo, ct));
+        var musicFiles = await Task.WhenAll(importTasks).ConfigureAwait(false);
+        var importedFiles = musicFiles.OfType<MusicFile>().ToList();
 
         _logger.LogInformation("Successfully imported {Count} files", importedFiles.Count);
 
@@ -66,16 +59,10 @@ public class ImportApprovedFiles : IImportApprovedFiles
 
         _logger.LogInformation("Importing {Count} approved files", approvedDecisions.Count);
 
-        var importedFiles = new List<MusicFile>();
-
-        foreach (var decision in approvedDecisions)
-        {
-            var musicFile = ImportFile(decision.MusicFileInfo);
-            if (musicFile != null)
-            {
-                importedFiles.Add(musicFile);
-            }
-        }
+        var importedFiles = approvedDecisions
+            .Select(d => ImportFile(d.MusicFileInfo))
+            .OfType<MusicFile>()
+            .ToList();
 
         _logger.LogInformation("Successfully imported {Count} files", importedFiles.Count);
 
@@ -103,7 +90,12 @@ public class ImportApprovedFiles : IImportApprovedFiles
 
             return inserted;
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Failed to import file: {Path}", musicFileInfo.Path);
+            return null;
+        }
+        catch (IOException ex)
         {
             _logger.LogError(ex, "Failed to import file: {Path}", musicFileInfo.Path);
             return null;
@@ -131,7 +123,12 @@ public class ImportApprovedFiles : IImportApprovedFiles
 
             return inserted;
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Failed to import file: {Path}", musicFileInfo.Path);
+            return null;
+        }
+        catch (IOException ex)
         {
             _logger.LogError(ex, "Failed to import file: {Path}", musicFileInfo.Path);
             return null;

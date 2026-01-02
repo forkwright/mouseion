@@ -112,7 +112,8 @@ public class MusicFileScanner : IMusicFileScanner
             return new ScanResult { Success = false, Error = $"Album {albumId}'s artist has no path" };
         }
 
-        var albumPath = Path.Combine(artist.Path, album.Title);
+        var sanitizedAlbumTitle = album.Title.Replace(Path.DirectorySeparatorChar, '_').Replace(Path.AltDirectorySeparatorChar, '_');
+        var albumPath = Path.Combine(artist.Path, sanitizedAlbumTitle);
         _logger.LogInformation("Scanning album: {Album} at {Path}", album.Title, albumPath);
         return await ScanPathAsync(albumPath, ct).ConfigureAwait(false);
     }
@@ -139,7 +140,8 @@ public class MusicFileScanner : IMusicFileScanner
             return new ScanResult { Success = false, Error = $"Album {albumId}'s artist has no path" };
         }
 
-        var albumPath = Path.Combine(artist.Path, album.Title);
+        var sanitizedAlbumTitle = album.Title.Replace(Path.DirectorySeparatorChar, '_').Replace(Path.AltDirectorySeparatorChar, '_');
+        var albumPath = Path.Combine(artist.Path, sanitizedAlbumTitle);
         _logger.LogInformation("Scanning album: {Album} at {Path}", album.Title, albumPath);
         return ScanPath(albumPath);
     }

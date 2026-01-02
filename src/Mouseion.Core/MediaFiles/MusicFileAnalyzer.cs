@@ -63,9 +63,19 @@ public class MusicFileAnalyzer : IMusicFileAnalyzer
 
             return musicInfo;
         }
-        catch (Exception ex)
+        catch (TagLib.CorruptFileException ex)
         {
-            _logger.LogWarning(ex, "Failed to analyze music file: {Path}", filePath);
+            _logger.LogWarning(ex, "Failed to analyze music file (corrupt): {Path}", filePath);
+            return null;
+        }
+        catch (TagLib.UnsupportedFormatException ex)
+        {
+            _logger.LogWarning(ex, "Failed to analyze music file (unsupported format): {Path}", filePath);
+            return null;
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(ex, "Failed to analyze music file (I/O error): {Path}", filePath);
             return null;
         }
     }
@@ -137,7 +147,11 @@ public class MusicFileAnalyzer : IMusicFileAnalyzer
                 musicInfo.MusicBrainzAlbumArtistId = GetAppleTagField(mp4Tag, "----:com.apple.iTunes:MusicBrainz Album Artist Id");
             }
         }
-        catch (Exception ex)
+        catch (InvalidCastException ex)
+        {
+            _logger.LogDebug(ex, "Failed to extract MusicBrainz IDs from {Path}", musicInfo.Path);
+        }
+        catch (NullReferenceException ex)
         {
             _logger.LogDebug(ex, "Failed to extract MusicBrainz IDs from {Path}", musicInfo.Path);
         }
@@ -221,8 +235,6 @@ public class MusicFileAnalyzer : IMusicFileAnalyzer
     {
         var codec = musicInfo.Codec;
         var bitrate = musicInfo.Bitrate;
-        var bitDepth = musicInfo.BitsPerSample;
-        var sampleRate = musicInfo.SampleRate / 1000;
 
         return codec switch
         {

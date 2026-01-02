@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using Microsoft.Extensions.Logging;
+using Mouseion.Common.Extensions;
 using Mouseion.Core.MediaTypes;
 
 namespace Mouseion.Core.RootFolders;
@@ -177,7 +178,7 @@ public class RootFolderService : IRootFolderService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to get disk space for {Path}", rootFolder.Path);
+            _logger.LogWarning(ex, "Failed to get disk space for {Path}", rootFolder.Path.SanitizeForLog());
             rootFolder.Accessible = false;
             rootFolder.FreeSpace = null;
             rootFolder.TotalSpace = null;
