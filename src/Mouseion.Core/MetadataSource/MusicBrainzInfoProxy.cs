@@ -75,29 +75,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
 
     public Artist? GetArtistByMusicBrainzId(string mbid)
     {
-        try
-        {
-            _logger.LogDebug("Fetching artist by MBID: {Mbid}", mbid);
-
-            var url = $"{BaseUrl}/artist/{mbid}?fmt=json&inc=genres+url-rels+tags";
-            var request = new HttpRequestBuilder(url)
-                .SetHeader("User-Agent", UserAgent)
-                .Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogWarning("MusicBrainz returned {StatusCode} for artist {Mbid}", response.StatusCode, mbid);
-                return null;
-            }
-
-            return ParseArtist(response.Content, mbid);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching artist by MBID: {Mbid}", mbid);
-            return null;
-        }
+        return GetArtistByMusicBrainzIdAsync(mbid).GetAwaiter().GetResult();
     }
 
     public async Task<Album?> GetAlbumByMusicBrainzIdAsync(string mbid, CancellationToken ct = default)
@@ -143,29 +121,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
 
     public Album? GetAlbumByMusicBrainzId(string mbid)
     {
-        try
-        {
-            _logger.LogDebug("Fetching album by MBID: {Mbid}", mbid);
-
-            var url = $"{BaseUrl}/release/{mbid}?fmt=json&inc=artists+genres+labels+recordings+tags";
-            var request = new HttpRequestBuilder(url)
-                .SetHeader("User-Agent", UserAgent)
-                .Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogWarning("MusicBrainz returned {StatusCode} for album {Mbid}", response.StatusCode, mbid);
-                return null;
-            }
-
-            return ParseAlbum(response.Content, mbid);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching album by MBID: {Mbid}", mbid);
-            return null;
-        }
+        return GetAlbumByMusicBrainzIdAsync(mbid).GetAwaiter().GetResult();
     }
 
     public async Task<List<Artist>> SearchArtistsByNameAsync(string name, CancellationToken ct = default)
@@ -208,29 +164,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
 
     public List<Artist> SearchArtistsByName(string name)
     {
-        try
-        {
-            _logger.LogDebug("Searching artists by name: {Name}", name.SanitizeForLog());
-
-            var url = $"{BaseUrl}/artist?query={Uri.EscapeDataString(name)}&fmt=json&limit=25";
-            var request = new HttpRequestBuilder(url)
-                .SetHeader("User-Agent", UserAgent)
-                .Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogWarning("MusicBrainz search returned {StatusCode}", response.StatusCode);
-                return new List<Artist>();
-            }
-
-            return ParseArtistSearchResults(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching artists by name: {Name}", name.SanitizeForLog());
-            return new List<Artist>();
-        }
+        return SearchArtistsByNameAsync(name).GetAwaiter().GetResult();
     }
 
     public async Task<List<Album>> SearchAlbumsByTitleAsync(string title, CancellationToken ct = default)
@@ -273,29 +207,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
 
     public List<Album> SearchAlbumsByTitle(string title)
     {
-        try
-        {
-            _logger.LogDebug("Searching albums by title: {Title}", title.SanitizeForLog());
-
-            var url = $"{BaseUrl}/release?query={Uri.EscapeDataString(title)}&fmt=json&limit=25";
-            var request = new HttpRequestBuilder(url)
-                .SetHeader("User-Agent", UserAgent)
-                .Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogWarning("MusicBrainz search returned {StatusCode}", response.StatusCode);
-                return new List<Album>();
-            }
-
-            return ParseAlbumSearchResults(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching albums by title: {Title}", title.SanitizeForLog());
-            return new List<Album>();
-        }
+        return SearchAlbumsByTitleAsync(title).GetAwaiter().GetResult();
     }
 
     public async Task<List<Album>> GetAlbumsByArtistAsync(string artistMbid, CancellationToken ct = default)
@@ -327,29 +239,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
 
     public List<Album> GetAlbumsByArtist(string artistMbid)
     {
-        try
-        {
-            _logger.LogDebug("Fetching albums for artist: {ArtistMbid}", artistMbid);
-
-            var url = $"{BaseUrl}/release?artist={artistMbid}&fmt=json&limit=100";
-            var request = new HttpRequestBuilder(url)
-                .SetHeader("User-Agent", UserAgent)
-                .Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogWarning("MusicBrainz returned {StatusCode}", response.StatusCode);
-                return new List<Album>();
-            }
-
-            return ParseAlbumSearchResults(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching albums for artist: {ArtistMbid}", artistMbid);
-            return new List<Album>();
-        }
+        return GetAlbumsByArtistAsync(artistMbid).GetAwaiter().GetResult();
     }
 
     public async Task<List<Album>> GetTrendingAlbumsAsync(CancellationToken ct = default)
@@ -360,8 +250,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
 
     public List<Album> GetTrendingAlbums()
     {
-        _logger.LogDebug("GetTrendingAlbums not supported by MusicBrainz");
-        return new List<Album>();
+        return GetTrendingAlbumsAsync().GetAwaiter().GetResult();
     }
 
     public async Task<List<Album>> GetPopularAlbumsAsync(CancellationToken ct = default)
@@ -372,8 +261,7 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
 
     public List<Album> GetPopularAlbums()
     {
-        _logger.LogDebug("GetPopularAlbums not supported by MusicBrainz");
-        return new List<Album>();
+        return GetPopularAlbumsAsync().GetAwaiter().GetResult();
     }
 
     private Artist? ParseArtist(string json, string mbid)

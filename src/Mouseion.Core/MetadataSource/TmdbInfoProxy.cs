@@ -90,33 +90,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
     public Movie? GetByTmdbId(int tmdbId)
     {
-        if (string.IsNullOrWhiteSpace(_apiKey))
-        {
-            _logger.LogWarning("TMDb API key not configured");
-            return null;
-        }
-
-        try
-        {
-            _logger.LogDebug("Fetching movie by TMDb ID: {TmdbId}", tmdbId);
-
-            var url = $"{BaseUrl}/movie/{tmdbId}?api_key={_apiKey}&append_to_response=credits,release_dates";
-            var request = new HttpRequestBuilder(url).Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogWarning("TMDb returned {StatusCode} for TMDb ID {TmdbId}", response.StatusCode, tmdbId);
-                return null;
-            }
-
-            return ParseMovie(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching movie by TMDb ID: {TmdbId}", tmdbId);
-            return null;
-        }
+        return GetByTmdbIdAsync(tmdbId).GetAwaiter().GetResult();
     }
 
     public async Task<Movie?> GetByImdbIdAsync(string imdbId, CancellationToken ct = default)
@@ -166,33 +140,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
     public Movie? GetByImdbId(string imdbId)
     {
-        if (string.IsNullOrWhiteSpace(_apiKey))
-        {
-            _logger.LogWarning("TMDb API key not configured");
-            return null;
-        }
-
-        try
-        {
-            _logger.LogDebug("Fetching movie by IMDB ID: {ImdbId}", imdbId);
-
-            var url = $"{BaseUrl}/find/{imdbId}?api_key={_apiKey}&external_source=imdb_id";
-            var request = new HttpRequestBuilder(url).Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogWarning("TMDb returned {StatusCode} for IMDB ID {ImdbId}", response.StatusCode, imdbId);
-                return null;
-            }
-
-            return ParseFindResult(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching movie by IMDB ID: {ImdbId}", imdbId);
-            return null;
-        }
+        return GetByImdbIdAsync(imdbId).GetAwaiter().GetResult();
     }
 
     public async Task<List<Movie>> SearchByTitleAsync(string title, int? year = null, CancellationToken ct = default)
@@ -244,38 +192,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
     public List<Movie> SearchByTitle(string title, int? year = null)
     {
-        if (string.IsNullOrWhiteSpace(_apiKey))
-        {
-            _logger.LogWarning("TMDb API key not configured");
-            return new List<Movie>();
-        }
-
-        try
-        {
-            _logger.LogDebug("Searching movies by title: {Title}", title.SanitizeForLog());
-
-            var url = $"{BaseUrl}/search/movie?api_key={_apiKey}&query={Uri.EscapeDataString(title)}";
-            if (year.HasValue)
-            {
-                url += $"&year={year.Value}";
-            }
-
-            var request = new HttpRequestBuilder(url).Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                _logger.LogWarning("TMDb search returned {StatusCode}", response.StatusCode);
-                return new List<Movie>();
-            }
-
-            return ParseSearchResults(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching movies by title: {Title}", title.SanitizeForLog());
-            return new List<Movie>();
-        }
+        return SearchByTitleAsync(title, year).GetAwaiter().GetResult();
     }
 
     public async Task<List<Movie>> GetTrendingAsync(CancellationToken ct = default)
@@ -307,29 +224,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
     public List<Movie> GetTrending()
     {
-        if (string.IsNullOrWhiteSpace(_apiKey))
-        {
-            return new List<Movie>();
-        }
-
-        try
-        {
-            var url = $"{BaseUrl}/trending/movie/week?api_key={_apiKey}";
-            var request = new HttpRequestBuilder(url).Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                return new List<Movie>();
-            }
-
-            return ParseSearchResults(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching trending movies");
-            return new List<Movie>();
-        }
+        return GetTrendingAsync().GetAwaiter().GetResult();
     }
 
     public async Task<List<Movie>> GetPopularAsync(CancellationToken ct = default)
@@ -361,29 +256,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
     public List<Movie> GetPopular()
     {
-        if (string.IsNullOrWhiteSpace(_apiKey))
-        {
-            return new List<Movie>();
-        }
-
-        try
-        {
-            var url = $"{BaseUrl}/movie/popular?api_key={_apiKey}";
-            var request = new HttpRequestBuilder(url).Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                return new List<Movie>();
-            }
-
-            return ParseSearchResults(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching popular movies");
-            return new List<Movie>();
-        }
+        return GetPopularAsync().GetAwaiter().GetResult();
     }
 
     public async Task<List<Movie>> GetUpcomingAsync(CancellationToken ct = default)
@@ -415,29 +288,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
     public List<Movie> GetUpcoming()
     {
-        if (string.IsNullOrWhiteSpace(_apiKey))
-        {
-            return new List<Movie>();
-        }
-
-        try
-        {
-            var url = $"{BaseUrl}/movie/upcoming?api_key={_apiKey}";
-            var request = new HttpRequestBuilder(url).Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                return new List<Movie>();
-            }
-
-            return ParseSearchResults(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching upcoming movies");
-            return new List<Movie>();
-        }
+        return GetUpcomingAsync().GetAwaiter().GetResult();
     }
 
     public async Task<List<Movie>> GetNowPlayingAsync(CancellationToken ct = default)
@@ -469,29 +320,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
     public List<Movie> GetNowPlaying()
     {
-        if (string.IsNullOrWhiteSpace(_apiKey))
-        {
-            return new List<Movie>();
-        }
-
-        try
-        {
-            var url = $"{BaseUrl}/movie/now_playing?api_key={_apiKey}";
-            var request = new HttpRequestBuilder(url).Build();
-
-            var response = _httpClient.Get(request);
-            if (response.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                return new List<Movie>();
-            }
-
-            return ParseSearchResults(response.Content);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching now playing movies");
-            return new List<Movie>();
-        }
+        return GetNowPlayingAsync().GetAwaiter().GetResult();
     }
 
     private Movie? ParseMovie(string json)
