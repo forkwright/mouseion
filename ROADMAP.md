@@ -27,8 +27,8 @@ Plus audiobooks, podcasts, and comics in a single application.
 | 0: Foundation | Complete | MediaItems table, quality system foundation | ✅ Done |
 | 1: Quality System | Weeks 1-2 | Parsers, polymorphic types, 103 definitions | ✅ Done |
 | 2: Books/Audiobooks | Weeks 3-6 | Full CRUD, metadata, async/await | ✅ Done |
-| 3: Music | Weeks 7-10 | Audiophile features, fingerprinting | 🔄 Next |
-| 4: Movies | Weeks 11-12 | Radarr parity | ⏳ Planned |
+| 3: Music | Weeks 7-10 | Audiophile features, fingerprinting | ✅ Done |
+| 4: Movies | Weeks 11-12 | Radarr parity | 🔄 Next |
 | 5: TV/Podcasts | Weeks 13-14 | Episode tracking, RSS | ⏳ Planned |
 | 6: Infrastructure | Weeks 15-20 | Subtitles, import lists, production polish | ⏳ Planned |
 
@@ -119,7 +119,7 @@ Plus audiobooks, podcasts, and comics in a single application.
 
 ---
 
-## Phase 3: Music (Weeks 7-10) 🔄
+## Phase 3: Music (Weeks 7-10) ✅
 
 **Goal:** Audiophile-grade music management
 
@@ -131,10 +131,10 @@ Plus audiobooks, podcasts, and comics in a single application.
 - [x] Root folder management (PR #18)
 - [x] Import decision engine with specification pattern (PR #18)
 - [x] Multi-mode scanning: artist, album, root folder, library (PR #18)
-- [ ] AcoustID fingerprinting (duplicate detection) ← **Next**
+- [x] Audio fingerprinting for duplicate detection (PR #19)
 - [x] Music quality parser (54 definitions: lossy, lossless, hi-res, DSD)
-- [ ] Spectral analysis (fake hi-res detection via FFmpeg)
-- [ ] Quality upgrades (MP3-320 → FLAC 16/44.1 → FLAC 24/96)
+- [x] Spectral analysis for fake hi-res detection (PR #19)
+- [x] Quality upgrade logic (MP3-320 → FLAC 16/44.1 → FLAC 24/96) (PR #19)
 - [x] API endpoints: `/api/v3/artists`, `/api/v3/albums`, `/api/v3/tracks`, `/api/v3/scan/music/*`, `/api/v3/rootfolders`
 
 **Quality System:**
