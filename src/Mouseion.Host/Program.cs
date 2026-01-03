@@ -81,6 +81,10 @@ try
     // Register audio analysis services
     container.Register<Mouseion.Core.MediaFiles.Audio.IDynamicRangeAnalyzer, Mouseion.Core.MediaFiles.Audio.DynamicRangeAnalyzer>(Reuse.Singleton);
 
+    // Register library filtering services
+    container.Register<Mouseion.Core.Filtering.IFilterQueryBuilder, Mouseion.Core.Filtering.FilterQueryBuilder>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Library.ILibraryFilterService, Mouseion.Core.Library.LibraryFilterService>(Reuse.Singleton);
+
     // Register root folder services
     container.Register<Mouseion.Core.RootFolders.IRootFolderRepository, Mouseion.Core.RootFolders.RootFolderRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.RootFolders.IRootFolderService, Mouseion.Core.RootFolders.RootFolderService>(Reuse.Singleton);

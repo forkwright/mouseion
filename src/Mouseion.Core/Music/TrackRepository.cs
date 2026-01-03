@@ -9,6 +9,7 @@
 
 using Dapper;
 using Mouseion.Core.Datastore;
+using Mouseion.Core.Filtering;
 using Mouseion.Core.MediaTypes;
 
 namespace Mouseion.Core.Music;
@@ -19,18 +20,23 @@ public interface ITrackRepository : IBasicRepository<Track>
     Task<List<Track>> GetByAlbumIdAsync(int albumId, CancellationToken ct = default);
     Task<List<Track>> GetByArtistIdAsync(int artistId, CancellationToken ct = default);
     Task<List<Track>> GetMonitoredAsync(CancellationToken ct = default);
+    Task<List<Track>> FilterAsync(FilterRequest request, CancellationToken ct = default);
 
     Track? FindByForeignId(string foreignTrackId);
     List<Track> GetByAlbumId(int albumId);
     List<Track> GetByArtistId(int artistId);
     List<Track> GetMonitored();
+    List<Track> Filter(FilterRequest request);
 }
 
 public class TrackRepository : BasicRepository<Track>, ITrackRepository
 {
-    public TrackRepository(IDatabase database)
+    private readonly IFilterQueryBuilder _queryBuilder;
+
+    public TrackRepository(IDatabase database, IFilterQueryBuilder queryBuilder)
         : base(database, "MediaItems")
     {
+        _queryBuilder = queryBuilder;
     }
 
     public override async Task<IEnumerable<Track>> AllAsync(CancellationToken ct = default)
@@ -135,5 +141,34 @@ public class TrackRepository : BasicRepository<Track>, ITrackRepository
         return conn.Query<Track>(
             $"SELECT * FROM \"MediaItems\" WHERE \"Monitored\" = @Monitored AND \"MediaType\" = {(int)MediaType.Music}",
             new { Monitored = true }).ToList();
+    }
+
+    public async Task<List<Track>> FilterAsync(FilterRequest request, CancellationToken ct = default)
+    {
+        var (sql, parameters) = _queryBuilder.BuildQuery(request, "MusicFiles");
+
+        var joinSql = sql.Replace(
+            "SELECT * FROM \"MusicFiles\"",
+            $@"SELECT m.* FROM ""MediaItems"" m
+               INNER JOIN ""MusicFiles"" mf ON m.""Id"" = mf.""TrackId""
+               WHERE m.""MediaType"" = {(int)MediaType.Music} AND");
+
+        using var conn = _database.OpenConnection();
+        var result = await conn.QueryAsync<Track>(joinSql, parameters).ConfigureAwait(false);
+        return result.ToList();
+    }
+
+    public List<Track> Filter(FilterRequest request)
+    {
+        var (sql, parameters) = _queryBuilder.BuildQuery(request, "MusicFiles");
+
+        var joinSql = sql.Replace(
+            "SELECT * FROM \"MusicFiles\"",
+            $@"SELECT m.* FROM ""MediaItems"" m
+               INNER JOIN ""MusicFiles"" mf ON m.""Id"" = mf.""TrackId""
+               WHERE m.""MediaType"" = {(int)MediaType.Music} AND");
+
+        using var conn = _database.OpenConnection();
+        return conn.Query<Track>(joinSql, parameters).ToList();
     }
 }
