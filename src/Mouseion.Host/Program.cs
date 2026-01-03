@@ -179,6 +179,28 @@ try
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseSettings>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseIndexer>(Reuse.Singleton);
 
+    // Register health checks
+    container.Register<Mouseion.Core.HealthCheck.IHealthCheckService, Mouseion.Core.HealthCheck.HealthCheckService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.RootFolderCheck>(Reuse.Singleton, serviceKey: "RootFolder");
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>(Reuse.Singleton, serviceKey: "DiskSpace");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.HealthCheck.IProvideHealthCheck>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "RootFolder"),
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "DiskSpace")
+    }, Reuse.Singleton);
+
+    // Register scheduled tasks
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.HealthCheckTask>(Reuse.Singleton, serviceKey: "HealthCheck");
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.DiskScanTask>(Reuse.Singleton, serviceKey: "DiskScan");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.Jobs.IScheduledTask>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "HealthCheck"),
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "DiskScan")
+    }, Reuse.Singleton);
+
+    // Register system info
+    container.Register<Mouseion.Core.SystemInfo.ISystemService, Mouseion.Core.SystemInfo.SystemService>(Reuse.Singleton);
+
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
     // Create ASP.NET Core builder
@@ -200,6 +222,8 @@ try
     builder.Services.AddSignalR();
     builder.Services.AddMouseionTelemetry();
     builder.Services.AddMemoryCache();
+    builder.Services.AddHostedService<Mouseion.Core.Jobs.TaskScheduler>();
+    builder.Services.AddHttpClient();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
     {

@@ -63,7 +63,7 @@ public static class ImportListResourceMapper
             RootFolderPath = definition.RootFolderPath,
             SearchOnAdd = definition.SearchOnAdd,
             Settings = definition.Settings,
-            Tags = definition.Tags
+            Tags = definition.Tags.Select(t => t.ToString()).ToList()
         };
     }
 
@@ -84,7 +84,7 @@ public static class ImportListResourceMapper
             RootFolderPath = resource.RootFolderPath,
             SearchOnAdd = resource.SearchOnAdd,
             Settings = resource.Settings,
-            Tags = resource.Tags
+            Tags = resource.Tags.Select(t => int.TryParse(t, out var id) ? id : 0).Where(id => id > 0).ToHashSet()
         };
     }
 
