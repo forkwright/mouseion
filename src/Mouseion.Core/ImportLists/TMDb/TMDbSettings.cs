@@ -3,4 +3,4 @@
 
 namespace Mouseion.Core.ImportLists.TMDb;
 
-public class TMDbSettings : ImportListSettingsBase {}
+public class TMDbSettings : ImportListSettingsBase { }

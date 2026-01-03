@@ -7,7 +7,7 @@ namespace Mouseion.Core.ImportLists.Custom;
 
 public class CustomList : ImportListBase<CustomListSettings>
 {
-    public CustomList(ILogger<CustomList> logger) : base(logger) {}
+    public CustomList(ILogger<CustomList> logger) : base(logger) { }
 
     public override string Name => "Custom List";
     public override ImportListType ListType => ImportListType.Custom;
