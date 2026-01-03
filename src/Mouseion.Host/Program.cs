@@ -135,8 +135,35 @@ try
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseSettings>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseIndexer>(Reuse.Singleton);
 
+    // Register download clients
+    container.Register<Mouseion.Core.Download.Clients.QBittorrent.QBittorrentSettings>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Download.Clients.QBittorrent.QBittorrentProxy>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Download.Clients.QBittorrent.QBittorrentClient>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Download.IDownloadClient, Mouseion.Core.Download.Clients.QBittorrent.QBittorrentClient>(Reuse.Singleton);
+
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
+
+    // Register infrastructure services
+    container.Register<Mouseion.Core.SystemInfo.ISystemService, Mouseion.Core.SystemInfo.SystemService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.HealthCheck.IHealthCheckService, Mouseion.Core.HealthCheck.HealthCheckService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.RootFolderCheck>(Reuse.Singleton, serviceKey: "RootFolderCheck");
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>(Reuse.Singleton, serviceKey: "DiskSpaceCheck");
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.UpdateCheck>(Reuse.Singleton, serviceKey: "UpdateCheck");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.HealthCheck.IProvideHealthCheck>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "RootFolderCheck"),
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "DiskSpaceCheck"),
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "UpdateCheck")
+    }, Reuse.Singleton);
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.HealthCheckTask>(Reuse.Singleton, serviceKey: "HealthCheckTask");
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.DiskScanTask>(Reuse.Singleton, serviceKey: "DiskScanTask");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.Jobs.IScheduledTask>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "HealthCheckTask"),
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "DiskScanTask")
+    }, Reuse.Singleton);
+
     // Create ASP.NET Core builder
     var builder = WebApplication.CreateBuilder(args);
 
@@ -157,6 +184,8 @@ try
     builder.Services.AddMouseionTelemetry();
     builder.Services.AddMemoryCache();
     builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddHttpClient("QBittorrent");
+    builder.Services.AddHostedService<Mouseion.Core.Jobs.TaskScheduler>();
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v3", new Microsoft.OpenApi.Models.OpenApiInfo
