@@ -77,9 +77,13 @@ try
     container.Register<Mouseion.Core.Music.IAlbumStatisticsService, Mouseion.Core.Music.AlbumStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Music.IAlbumVersionsService, Mouseion.Core.Music.AlbumVersionsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Music.IAudioAnalysisService, Mouseion.Core.Music.AudioAnalysisService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IMusicQualityParser, Mouseion.Core.Music.MusicQualityParser>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IAcoustIDService, Mouseion.Core.Music.AcoustIDService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IMusicReleaseMonitoringService, Mouseion.Core.Music.MusicReleaseMonitoringService>(Reuse.Singleton);
 
     // Register audio analysis services
     container.Register<Mouseion.Core.MediaFiles.Audio.IDynamicRangeAnalyzer, Mouseion.Core.MediaFiles.Audio.DynamicRangeAnalyzer>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.Audio.IAudioFileAnalyzer, Mouseion.Core.MediaFiles.Audio.AudioFileAnalyzer>(Reuse.Singleton);
 
     // Register library filtering services
     container.Register<Mouseion.Core.Filtering.IFilterQueryBuilder, Mouseion.Core.Filtering.FilterQueryBuilder>(Reuse.Singleton);
@@ -134,6 +138,11 @@ try
     // Register indexers
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseSettings>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseIndexer>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Indexers.Gazelle.GazelleSettings>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Indexers.Gazelle.GazelleParser>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Indexers.Gazelle.GazelleIndexer>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Indexers.Torznab.TorznabSettings>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Indexers.Torznab.TorznabMusicIndexer>(Reuse.Singleton);
 
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
