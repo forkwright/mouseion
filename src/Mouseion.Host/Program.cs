@@ -123,6 +123,28 @@ try
     container.Register<Mouseion.Core.Movies.IMovieStatisticsService, Mouseion.Core.Movies.MovieStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Movies.ICollectionStatisticsService, Mouseion.Core.Movies.CollectionStatisticsService>(Reuse.Singleton);
 
+    // Register movie calendar and monitoring services
+    container.Register<Mouseion.Core.Movies.Calendar.IMovieCalendarService, Mouseion.Core.Movies.Calendar.MovieCalendarService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Movies.Monitoring.IReleaseMonitoringService, Mouseion.Core.Movies.Monitoring.ReleaseMonitoringService>(Reuse.Singleton);
+
+    // Register movie import services
+    container.Register<Mouseion.Core.Movies.Import.IMovieImportDecisionMaker, Mouseion.Core.Movies.Import.MovieImportDecisionMaker>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Movies.Import.IImportApprovedMovies, Mouseion.Core.Movies.Import.ImportApprovedMovies>(Reuse.Singleton);
+
+    // Register movie import specifications
+    container.Register<Mouseion.Core.Movies.Import.Specifications.IMovieImportSpecification, Mouseion.Core.Movies.Import.Specifications.HasVideoTrackSpecification>(Reuse.Singleton, serviceKey: "MovieHasVideoTrack");
+    container.Register<Mouseion.Core.Movies.Import.Specifications.IMovieImportSpecification, Mouseion.Core.Movies.Import.Specifications.UpgradeSpecification>(Reuse.Singleton, serviceKey: "MovieUpgrade");
+    container.Register<Mouseion.Core.Movies.Import.Specifications.IMovieImportSpecification, Mouseion.Core.Movies.Import.Specifications.MinimumQualitySpecification>(Reuse.Singleton, serviceKey: "MovieMinimumQuality");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.Movies.Import.Specifications.IMovieImportSpecification>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.Movies.Import.Specifications.IMovieImportSpecification>(serviceKey: "MovieHasVideoTrack"),
+        r.Resolve<Mouseion.Core.Movies.Import.Specifications.IMovieImportSpecification>(serviceKey: "MovieUpgrade"),
+        r.Resolve<Mouseion.Core.Movies.Import.Specifications.IMovieImportSpecification>(serviceKey: "MovieMinimumQuality")
+    }, Reuse.Singleton);
+
+    // Register movie indexers
+    container.Register<Mouseion.Core.Indexers.Torznab.TorznabMovieIndexer>(Reuse.Singleton);
+
     // Register metadata providers
     container.Register<Mouseion.Common.Http.IHttpClient, Mouseion.Common.Http.HttpClient>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.ResilientMetadataClient>(Reuse.Singleton);
@@ -135,8 +157,43 @@ try
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseSettings>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseIndexer>(Reuse.Singleton);
 
+    // Register podcast repositories
+    container.Register<Mouseion.Core.Podcasts.IPodcastShowRepository, Mouseion.Core.Podcasts.PodcastShowRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Podcasts.IPodcastEpisodeRepository, Mouseion.Core.Podcasts.PodcastEpisodeRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Podcasts.IPodcastFileRepository, Mouseion.Core.Podcasts.PodcastFileRepository>(Reuse.Singleton);
+
+    // Register podcast services
+    container.Register<Mouseion.Core.Podcasts.IAddPodcastService, Mouseion.Core.Podcasts.AddPodcastService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Podcasts.RSS.IRSSFeedParser, Mouseion.Core.Podcasts.RSS.RSSFeedParser>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MetadataSource.IProvidePodcastInfo, Mouseion.Core.MetadataSource.PodcastIndexProxy>(Reuse.Singleton);
+
+    // Register TV repositories
+    container.Register<Mouseion.Core.TV.ISeriesRepository, Mouseion.Core.TV.SeriesRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.TV.ISeasonRepository, Mouseion.Core.TV.SeasonRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.TV.IEpisodeRepository, Mouseion.Core.TV.EpisodeRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.TV.IEpisodeFileRepository, Mouseion.Core.TV.EpisodeFileRepository>(Reuse.Singleton);
+
+    // Register TV services
+    container.Register<Mouseion.Core.TV.IAddSeriesService, Mouseion.Core.TV.AddSeriesService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.TV.ISeriesStatisticsService, Mouseion.Core.TV.SeriesStatisticsService>(Reuse.Singleton);
+
+    // Register TV scene numbering
+    container.Register<Mouseion.Core.TV.SceneNumbering.ISceneMappingRepository, Mouseion.Core.TV.SceneNumbering.SceneMappingRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.TV.SceneNumbering.ISceneMappingService, Mouseion.Core.TV.SceneNumbering.SceneMappingService>(Reuse.Singleton);
+
+    // Register TVDB metadata provider
+    container.Register<Mouseion.Core.MetadataSource.TVDB.TVDBSettings>(Reuse.Singleton);
+    container.RegisterDelegate<Mouseion.Core.MetadataSource.TVDB.ITVDBProxy>(r =>
+    {
+        var settings = r.Resolve<Mouseion.Core.MetadataSource.TVDB.TVDBSettings>();
+        var logger = r.Resolve<Microsoft.Extensions.Logging.ILogger<Mouseion.Core.MetadataSource.TVDB.TVDBProxy>>();
+        var httpClient = new HttpClient();
+        return new Mouseion.Core.MetadataSource.TVDB.TVDBProxy(settings, logger, httpClient);
+    }, Reuse.Singleton);
+
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
+
     // Create ASP.NET Core builder
     var builder = WebApplication.CreateBuilder(args);
 
