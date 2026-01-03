@@ -76,6 +76,10 @@ try
     container.Register<Mouseion.Core.Music.IArtistStatisticsService, Mouseion.Core.Music.ArtistStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Music.IAlbumStatisticsService, Mouseion.Core.Music.AlbumStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Music.IAlbumVersionsService, Mouseion.Core.Music.AlbumVersionsService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.IAudioAnalysisService, Mouseion.Core.Music.AudioAnalysisService>(Reuse.Singleton);
+
+    // Register audio analysis services
+    container.Register<Mouseion.Core.MediaFiles.Audio.IDynamicRangeAnalyzer, Mouseion.Core.MediaFiles.Audio.DynamicRangeAnalyzer>(Reuse.Singleton);
 
     // Register root folder services
     container.Register<Mouseion.Core.RootFolders.IRootFolderRepository, Mouseion.Core.RootFolders.RootFolderRepository>(Reuse.Singleton);
