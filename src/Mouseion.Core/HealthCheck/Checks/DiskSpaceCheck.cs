@@ -17,7 +17,7 @@ public class DiskSpaceCheck : HealthCheckBase
 
     public override HealthCheck Check()
     {
-        var rootFolders = _rootFolderService.All();
+        var rootFolders = _rootFolderService.GetAll();
 
         var lowSpace = rootFolders
             .Where(r => r.Accessible && r.FreeSpace.HasValue && r.FreeSpace.Value < MinimumFreeSpace)

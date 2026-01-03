@@ -18,6 +18,6 @@ public class ImportListRepository : BasicRepository<ImportListDefinition>, IImpo
 
     public List<ImportListDefinition> GetEnabled()
     {
-        return Query(x => x.Enabled);
+        return All().Where(x => x.Enabled).ToList();
     }
 }

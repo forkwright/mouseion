@@ -16,7 +16,7 @@ public class RootFolderCheck : HealthCheckBase
 
     public override HealthCheck Check()
     {
-        var rootFolders = _rootFolderService.All();
+        var rootFolders = _rootFolderService.GetAll();
 
         if (rootFolders.Count == 0)
         {

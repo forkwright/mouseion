@@ -27,7 +27,7 @@ public class SystemService : ISystemService
         return new SystemInfo
         {
             Version = BuildInfo.Version.ToString(),
-            BuildTime = BuildInfo.BuildTime.ToString("o"),
+            BuildTime = BuildInfo.BuildDateTime.ToString("o"),
             IsDebug = BuildInfo.IsDebug,
             IsProduction = !BuildInfo.IsDebug,
             IsLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
