@@ -96,7 +96,7 @@ public class SpectralAnalyzer : ISpectralAnalyzer
     {
         try
         {
-            var statsFile = Path.GetTempFileName();
+            var statsFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             FFMpegArguments
                 .FromFileInput(filePath)
@@ -120,7 +120,7 @@ public class SpectralAnalyzer : ISpectralAnalyzer
         }
     }
 
-    private int EstimateCutoffFromDuration(string filePath, int nyquistFrequency)
+    private static int EstimateCutoffFromDuration(string filePath, int nyquistFrequency)
     {
         try
         {

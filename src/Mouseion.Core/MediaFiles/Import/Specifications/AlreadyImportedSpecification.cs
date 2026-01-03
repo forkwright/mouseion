@@ -47,7 +47,7 @@ public class AlreadyImportedSpecification : IImportSpecification
 
             if (duplicates.Any())
             {
-                var (trackId, similarity) = duplicates.First();
+                var (trackId, similarity) = duplicates[0];
                 _logger.LogDebug("Duplicate found via fingerprint: {Path} matches Track {TrackId} ({Similarity:P1})",
                     musicFileInfo.Path, trackId, similarity);
                 return new ImportRejection(
@@ -81,7 +81,7 @@ public class AlreadyImportedSpecification : IImportSpecification
 
             if (duplicates.Any())
             {
-                var (trackId, similarity) = duplicates.First();
+                var (trackId, similarity) = duplicates[0];
                 _logger.LogDebug("Duplicate found via fingerprint: {Path} matches Track {TrackId} ({Similarity:P1})",
                     musicFileInfo.Path, trackId, similarity);
                 return new ImportRejection(

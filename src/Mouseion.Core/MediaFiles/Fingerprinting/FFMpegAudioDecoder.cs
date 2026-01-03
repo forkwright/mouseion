@@ -42,7 +42,7 @@ public class FFMpegAudioDecoder
             var sampleRate = audioStream.SampleRateHz;
             var channels = audioStream.Channels;
 
-            var pcmFile = Path.GetTempFileName();
+            var pcmFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             FFMpegArguments
                 .FromFileInput(filePath)

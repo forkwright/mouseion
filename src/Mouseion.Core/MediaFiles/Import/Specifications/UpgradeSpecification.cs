@@ -38,7 +38,7 @@ public class UpgradeSpecification : IImportSpecification
             var duplicates = _fingerprintService.FindDuplicates(musicFileInfo.Fingerprint, 0.95);
             if (duplicates.Any())
             {
-                var (trackId, _) = duplicates.First();
+                var (trackId, _) = duplicates[0];
                 existingFile = _musicFileRepository.Find(trackId);
             }
         }
