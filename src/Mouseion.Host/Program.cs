@@ -35,6 +35,8 @@ try
 
     // Register core services
     container.Register<IAppFolderInfo, AppFolderInfo>(Reuse.Singleton);
+    container.Register<Mouseion.Common.Disk.IDiskProvider, Mouseion.Common.Disk.DiskProvider>(Reuse.Singleton);
+    container.Register<Mouseion.Common.Cache.ICacheManager, Mouseion.Common.Cache.CacheManager>(Reuse.Singleton);
     container.Register<IMigrationController, MigrationController>(Reuse.Singleton);
     container.Register<IConnectionStringFactory, ConnectionStringFactory>(Reuse.Singleton);
     container.Register<IDbFactory, DbFactory>(Reuse.Singleton);
@@ -49,6 +51,8 @@ try
     // Register MediaFile services
     container.Register<Mouseion.Core.MediaFiles.IMediaFileRepository, Mouseion.Core.MediaFiles.MediaFileRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.MediaFiles.IMediaAnalyzer, Mouseion.Core.MediaFiles.MediaAnalyzer>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.MediaInfo.IMediaInfoService, Mouseion.Core.MediaFiles.MediaInfo.MediaInfoService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaFiles.MediaInfo.IUpdateMediaInfoService, Mouseion.Core.MediaFiles.MediaInfo.UpdateMediaInfoService>(Reuse.Singleton);
 
     // Register book/audiobook repositories
     container.Register<Mouseion.Core.Authors.IAuthorRepository, Mouseion.Core.Authors.AuthorRepository>(Reuse.Singleton);
@@ -90,6 +94,10 @@ try
     container.Register<Mouseion.Core.Filtering.IFilterQueryBuilder, Mouseion.Core.Filtering.FilterQueryBuilder>(Reuse.Singleton);
     container.Register<Mouseion.Core.Library.ILibraryFilterService, Mouseion.Core.Library.LibraryFilterService>(Reuse.Singleton);
 
+    // Register tag services
+    container.Register<Mouseion.Core.Tags.ITagRepository, Mouseion.Core.Tags.TagRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Tags.ITagService, Mouseion.Core.Tags.TagService>(Reuse.Singleton);
+
     // Register root folder services
     container.Register<Mouseion.Core.RootFolders.IRootFolderRepository, Mouseion.Core.RootFolders.RootFolderRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.RootFolders.IRootFolderService, Mouseion.Core.RootFolders.RootFolderService>(Reuse.Singleton);
@@ -128,6 +136,14 @@ try
     container.Register<Mouseion.Core.Movies.IMovieStatisticsService, Mouseion.Core.Movies.MovieStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Movies.ICollectionStatisticsService, Mouseion.Core.Movies.CollectionStatisticsService>(Reuse.Singleton);
 
+    // Register blocklist services
+    container.Register<Mouseion.Core.Blocklisting.IBlocklistRepository, Mouseion.Core.Blocklisting.BlocklistRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Blocklisting.IBlocklistService, Mouseion.Core.Blocklisting.BlocklistService>(Reuse.Singleton);
+
+    // Register history services
+    container.Register<Mouseion.Core.History.IMediaItemHistoryRepository, Mouseion.Core.History.MediaItemHistoryRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.History.IMediaItemHistoryService, Mouseion.Core.History.MediaItemHistoryService>(Reuse.Singleton);
+
     // Register metadata providers
     container.Register<Mouseion.Common.Http.IHttpClient, Mouseion.Common.Http.HttpClient>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.ResilientMetadataClient>(Reuse.Singleton);
@@ -135,6 +151,12 @@ try
     container.Register<Mouseion.Core.MetadataSource.IProvideAudiobookInfo, Mouseion.Core.MetadataSource.AudiobookInfoProxy>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.IProvideMusicInfo, Mouseion.Core.MetadataSource.MusicBrainzInfoProxy>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.IProvideMovieInfo, Mouseion.Core.MetadataSource.TmdbInfoProxy>(Reuse.Singleton);
+
+    // Register media cover services
+    container.Register<Mouseion.Core.MediaCovers.IImageResizer, Mouseion.Core.MediaCovers.ImageResizer>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaCovers.ICoverExistsSpecification, Mouseion.Core.MediaCovers.CoverExistsSpecification>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaCovers.IMediaCoverProxy, Mouseion.Core.MediaCovers.MediaCoverProxy>(Reuse.Singleton);
+    container.Register<Mouseion.Core.MediaCovers.IMediaCoverService, Mouseion.Core.MediaCovers.MediaCoverService>(Reuse.Singleton);
 
     // Register import lists
     container.Register<Mouseion.Core.ImportLists.IImportListRepository, Mouseion.Core.ImportLists.ImportListRepository>(Reuse.Singleton);
@@ -199,13 +221,40 @@ try
         r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "DiskSpace")
     }, Reuse.Singleton);
 
+    // Register housekeeping tasks
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.CleanupUnusedTags>(Reuse.Singleton, serviceKey: "CleanupUnusedTags");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.CleanupOrphanedBlocklist>(Reuse.Singleton, serviceKey: "CleanupOrphanedBlocklist");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.CleanupOrphanedMediaFiles>(Reuse.Singleton, serviceKey: "CleanupOrphanedMediaFiles");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.CleanupOrphanedImportListItems>(Reuse.Singleton, serviceKey: "CleanupOrphanedImportListItems");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.CleanupOrphanedMovieCollections>(Reuse.Singleton, serviceKey: "CleanupOrphanedMovieCollections");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.CleanupOrphanedBookSeries>(Reuse.Singleton, serviceKey: "CleanupOrphanedBookSeries");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.CleanupOrphanedAuthors>(Reuse.Singleton, serviceKey: "CleanupOrphanedAuthors");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.CleanupOrphanedArtists>(Reuse.Singleton, serviceKey: "CleanupOrphanedArtists");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.TrimLogEntries>(Reuse.Singleton, serviceKey: "TrimLogEntries");
+    container.Register<Mouseion.Core.Housekeeping.IHousekeepingTask, Mouseion.Core.Housekeeping.Tasks.VacuumLogDatabase>(Reuse.Singleton, serviceKey: "VacuumLogDatabase");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.Housekeeping.IHousekeepingTask>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "CleanupUnusedTags"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "CleanupOrphanedBlocklist"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "CleanupOrphanedMediaFiles"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "CleanupOrphanedImportListItems"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "CleanupOrphanedMovieCollections"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "CleanupOrphanedBookSeries"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "CleanupOrphanedAuthors"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "CleanupOrphanedArtists"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "TrimLogEntries"),
+        r.Resolve<Mouseion.Core.Housekeeping.IHousekeepingTask>(serviceKey: "VacuumLogDatabase")
+    }, Reuse.Singleton);
+
     // Register scheduled tasks
     container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.HealthCheckTask>(Reuse.Singleton, serviceKey: "HealthCheck");
     container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.DiskScanTask>(Reuse.Singleton, serviceKey: "DiskScan");
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Housekeeping.HousekeepingScheduler>(Reuse.Singleton, serviceKey: "Housekeeping");
     container.RegisterDelegate<IEnumerable<Mouseion.Core.Jobs.IScheduledTask>>(r => new[]
     {
         r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "HealthCheck"),
-        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "DiskScan")
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "DiskScan"),
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "Housekeeping")
     }, Reuse.Singleton);
 
     // Register system info
@@ -213,26 +262,6 @@ try
 
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
-
-    // Register infrastructure services
-    container.Register<Mouseion.Core.SystemInfo.ISystemService, Mouseion.Core.SystemInfo.SystemService>(Reuse.Singleton);
-    container.Register<Mouseion.Core.HealthCheck.IHealthCheckService, Mouseion.Core.HealthCheck.HealthCheckService>(Reuse.Singleton);
-    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.RootFolderCheck>(Reuse.Singleton, serviceKey: "RootFolderCheck");
-    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>(Reuse.Singleton, serviceKey: "DiskSpaceCheck");
-    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.UpdateCheck>(Reuse.Singleton, serviceKey: "UpdateCheck");
-    container.RegisterDelegate<IEnumerable<Mouseion.Core.HealthCheck.IProvideHealthCheck>>(r => new[]
-    {
-        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "RootFolderCheck"),
-        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "DiskSpaceCheck"),
-        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "UpdateCheck")
-    }, Reuse.Singleton);
-    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.HealthCheckTask>(Reuse.Singleton, serviceKey: "HealthCheckTask");
-    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.DiskScanTask>(Reuse.Singleton, serviceKey: "DiskScanTask");
-    container.RegisterDelegate<IEnumerable<Mouseion.Core.Jobs.IScheduledTask>>(r => new[]
-    {
-        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "HealthCheckTask"),
-        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "DiskScanTask")
-    }, Reuse.Singleton);
 
     // Create ASP.NET Core builder
     var builder = WebApplication.CreateBuilder(args);
