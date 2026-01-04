@@ -6,6 +6,6 @@ namespace Mouseion.Core.Jobs;
 public interface IScheduledTask
 {
     string Name { get; }
-    int Interval { get; }
+    TimeSpan Interval { get; }
     Task ExecuteAsync(CancellationToken cancellationToken);
 }

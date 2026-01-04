@@ -5,31 +5,77 @@ using Mouseion.Core.RootFolders;
 
 namespace Mouseion.Core.HealthCheck.Checks;
 
-public class DiskSpaceCheck : HealthCheckBase
+public class DiskSpaceCheck : IProvideHealthCheck
 {
     private readonly IRootFolderService _rootFolderService;
-    private const long MinimumFreeSpace = 100 * 1024 * 1024; // 100 MB
+    private const long MinimumDiskSpaceBytes = 100 * 1024 * 1024; // 100 MB
 
     public DiskSpaceCheck(IRootFolderService rootFolderService)
     {
         _rootFolderService = rootFolderService;
     }
 
-    public override HealthCheck Check()
+    public HealthCheck Check()
     {
         var rootFolders = _rootFolderService.GetAll();
 
-        var lowSpace = rootFolders
-            .Where(r => r.Accessible && r.FreeSpace.HasValue && r.FreeSpace.Value < MinimumFreeSpace)
-            .ToList();
-
-        if (lowSpace.Any())
+        if (rootFolders.Count == 0)
         {
-            return new HealthCheck(GetType(), HealthCheckResult.Error,
-                $"Low disk space on: {string.Join(", ", lowSpace.Select(r => r.Path))}",
-                "#low-disk-space");
+            return new HealthCheck(
+                HealthCheckResult.Ok,
+                "No root folders to check for disk space"
+            );
         }
 
-        return new HealthCheck(GetType());
+        var lowSpaceFolders = new List<string>();
+
+        foreach (var rootFolder in rootFolders)
+        {
+            if (!Directory.Exists(rootFolder.Path))
+            {
+                continue;
+            }
+
+            try
+            {
+                var driveInfo = new DriveInfo(Path.GetPathRoot(rootFolder.Path)!);
+                if (driveInfo.AvailableFreeSpace < MinimumDiskSpaceBytes)
+                {
+                    lowSpaceFolders.Add($"{rootFolder.Path} ({FormatBytes(driveInfo.AvailableFreeSpace)} free)");
+                }
+            }
+            catch
+            {
+                // Skip if unable to get drive info
+                continue;
+            }
+        }
+
+        if (lowSpaceFolders.Count > 0)
+        {
+            return new HealthCheck(
+                HealthCheckResult.Warning,
+                $"Low disk space on: {string.Join(", ", lowSpaceFolders)}",
+                "disk-space-low"
+            );
+        }
+
+        return new HealthCheck(
+            HealthCheckResult.Ok,
+            "Sufficient disk space available"
+        );
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len /= 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
     }
 }

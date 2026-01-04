@@ -12,12 +12,7 @@ public interface IImportListRepository : IBasicRepository<ImportListDefinition>
 
 public class ImportListRepository : BasicRepository<ImportListDefinition>, IImportListRepository
 {
-    public ImportListRepository(IDatabase database) : base(database)
-    {
-    }
+    public ImportListRepository(IDatabase database) : base(database) { }
 
-    public List<ImportListDefinition> GetEnabled()
-    {
-        return All().Where(x => x.Enabled).ToList();
-    }
+    public List<ImportListDefinition> GetEnabled() => All().Where(x => x.Enabled).ToList();
 }

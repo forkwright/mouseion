@@ -3,9 +3,6 @@
 
 namespace Mouseion.Core.ImportLists;
 
-/// <summary>
-/// Base interface for all import list implementations
-/// </summary>
 public interface IImportList
 {
     string Name { get; }
@@ -13,9 +10,7 @@ public interface IImportList
     TimeSpan MinRefreshInterval { get; }
     bool Enabled { get; }
     bool EnableAuto { get; }
-
     ImportListDefinition Definition { get; set; }
-
     Task<ImportListFetchResult> FetchAsync(CancellationToken cancellationToken = default);
     Task<bool> TestAsync(CancellationToken cancellationToken = default);
 }

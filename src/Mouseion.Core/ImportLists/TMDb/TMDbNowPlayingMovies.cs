@@ -11,10 +11,7 @@ public class TMDbNowPlayingMovies : ImportListBase<TMDbSettings>
 {
     private readonly TmdbInfoProxy _tmdbProxy;
 
-    public TMDbNowPlayingMovies(
-        TmdbInfoProxy tmdbProxy,
-        ILogger<TMDbNowPlayingMovies> logger)
-        : base(logger)
+    public TMDbNowPlayingMovies(TmdbInfoProxy tmdbProxy, ILogger<TMDbNowPlayingMovies> logger) : base(logger)
     {
         _tmdbProxy = tmdbProxy;
     }
@@ -31,7 +28,6 @@ public class TMDbNowPlayingMovies : ImportListBase<TMDbSettings>
         {
             Logger.LogInformation("Fetching now playing movies from TMDb");
             var movies = await _tmdbProxy.GetNowPlayingAsync(cancellationToken);
-
             var items = movies.Select(movie => new ImportListItem
             {
                 MediaType = MediaType.Movie,
@@ -40,20 +36,12 @@ public class TMDbNowPlayingMovies : ImportListBase<TMDbSettings>
                 TmdbId = int.TryParse(movie.TmdbId, out var id) ? id : 0,
                 ImdbId = movie.ImdbId
             }).ToList();
-
-            return new ImportListFetchResult
-            {
-                Items = CleanupListItems(items),
-                SyncedLists = 1
-            };
+            return new ImportListFetchResult { Items = CleanupListItems(items), SyncedLists = 1 };
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error fetching TMDb now playing movies");
-            return new ImportListFetchResult
-            {
-                AnyFailure = true
-            };
+            return new ImportListFetchResult { AnyFailure = true };
         }
     }
 }

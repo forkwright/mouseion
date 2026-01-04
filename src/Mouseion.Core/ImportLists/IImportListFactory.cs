@@ -15,9 +15,7 @@ public class ImportListFactory : IImportListFactory
     private readonly IImportListRepository _repository;
     private readonly IEnumerable<IImportList> _importLists;
 
-    public ImportListFactory(
-        IImportListRepository repository,
-        IEnumerable<IImportList> importLists)
+    public ImportListFactory(IImportListRepository repository, IEnumerable<IImportList> importLists)
     {
         _repository = repository;
         _importLists = importLists;
@@ -28,7 +26,6 @@ public class ImportListFactory : IImportListFactory
         var definition = _repository.Get(id);
         var implementation = _importLists.FirstOrDefault(x => x.GetType().Name == definition.Implementation)
             ?? throw new InvalidOperationException($"Import list implementation {definition.Implementation} not found");
-
         implementation.Definition = definition;
         return implementation;
     }
@@ -39,12 +36,9 @@ public class ImportListFactory : IImportListFactory
         return definitions.Select(def =>
         {
             var impl = _importLists.FirstOrDefault(x => x.GetType().Name == def.Implementation);
-            if (impl != null)
-            {
-                impl.Definition = def;
-            }
+            if (impl != null) impl.Definition = def;
             return impl;
-        }).OfType<IImportList>().ToList();
+        }).Where(x => x != null).Cast<IImportList>().ToList();
     }
 
     public List<IImportList> GetAll()
@@ -53,11 +47,8 @@ public class ImportListFactory : IImportListFactory
         return definitions.Select(def =>
         {
             var impl = _importLists.FirstOrDefault(x => x.GetType().Name == def.Implementation);
-            if (impl != null)
-            {
-                impl.Definition = def;
-            }
+            if (impl != null) impl.Definition = def;
             return impl;
-        }).OfType<IImportList>().ToList();
+        }).Where(x => x != null).Cast<IImportList>().ToList();
     }
 }

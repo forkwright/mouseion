@@ -7,10 +7,7 @@ namespace Mouseion.Core.ImportLists.Custom;
 
 public class CustomList : ImportListBase<CustomListSettings>
 {
-    public CustomList(ILogger<CustomList> logger)
-        : base(logger)
-    {
-    }
+    public CustomList(ILogger<CustomList> logger) : base(logger) { }
 
     public override string Name => "Custom List";
     public override ImportListType ListType => ImportListType.Custom;
@@ -21,7 +18,6 @@ public class CustomList : ImportListBase<CustomListSettings>
     public override Task<ImportListFetchResult> FetchAsync(CancellationToken cancellationToken = default)
     {
         Logger.LogInformation("Fetching custom list entries");
-
         var items = Settings.Entries.Select(entry => new ImportListItem
         {
             MediaType = Settings.MediaType,
@@ -31,10 +27,6 @@ public class CustomList : ImportListBase<CustomListSettings>
             ImdbId = entry.ImdbId
         }).ToList();
 
-        return Task.FromResult(new ImportListFetchResult
-        {
-            Items = CleanupListItems(items),
-            SyncedLists = 1
-        });
+        return Task.FromResult(new ImportListFetchResult { Items = CleanupListItems(items), SyncedLists = 1 });
     }
 }

@@ -3,9 +3,6 @@
 
 namespace Mouseion.Core.ImportLists;
 
-/// <summary>
-/// Base class for import list settings
-/// </summary>
 public abstract class ImportListSettingsBase
 {
     public string BaseUrl { get; set; } = string.Empty;

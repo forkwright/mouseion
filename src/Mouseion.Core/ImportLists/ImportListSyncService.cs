@@ -18,10 +18,7 @@ public class ImportListSyncService : IImportListSyncService
     private readonly IImportListExclusionService _exclusionService;
     private readonly ILogger<ImportListSyncService> _logger;
 
-    public ImportListSyncService(
-        IImportListFactory factory,
-        IImportListExclusionService exclusionService,
-        ILogger<ImportListSyncService> logger)
+    public ImportListSyncService(IImportListFactory factory, IImportListExclusionService exclusionService, ILogger<ImportListSyncService> logger)
     {
         _factory = factory;
         _exclusionService = exclusionService;
@@ -46,11 +43,8 @@ public class ImportListSyncService : IImportListSyncService
             {
                 _logger.LogInformation("Syncing import list: {Name}", list.Name);
                 var fetchResult = await list.FetchAsync(cancellationToken);
-
                 result.SyncedLists++;
                 result.AnyFailure |= fetchResult.AnyFailure;
-
-                // Filter out excluded items
                 var filteredItems = FilterExcludedItems(fetchResult.Items, exclusions);
                 result.Items.AddRange(filteredItems);
             }
@@ -61,9 +55,7 @@ public class ImportListSyncService : IImportListSyncService
             }
         }
 
-        _logger.LogInformation("Import list sync complete. Fetched {Count} items from {Lists} lists",
-            result.Items.Count, result.SyncedLists);
-
+        _logger.LogInformation("Import list sync complete. Fetched {Count} items from {Lists} lists", result.Items.Count, result.SyncedLists);
         return result;
     }
 
@@ -71,12 +63,10 @@ public class ImportListSyncService : IImportListSyncService
     {
         var list = _factory.Get(listId);
         _logger.LogInformation("Syncing single import list: {Name}", list.Name);
-
         var result = await list.FetchAsync(cancellationToken);
         var exclusions = _exclusionService.GetAll();
         result.Items = FilterExcludedItems(result.Items, exclusions);
         result.SyncedLists = 1;
-
         return result;
     }
 
@@ -86,22 +76,15 @@ public class ImportListSyncService : IImportListSyncService
         {
             var isExcluded = exclusions.Any(ex =>
                 (ex.MediaType == item.MediaType) &&
-                (
-                    (ex.TmdbId > 0 && ex.TmdbId == item.TmdbId) ||
-                    (ex.ImdbId != null && ex.ImdbId == item.ImdbId) ||
-                    (ex.TvdbId > 0 && ex.TvdbId == item.TvdbId) ||
-                    (ex.GoodreadsId > 0 && ex.GoodreadsId == item.GoodreadsId) ||
-                    (ex.Isbn != null && ex.Isbn == item.Isbn) ||
-                    (ex.MusicBrainzId != Guid.Empty && ex.MusicBrainzId == item.MusicBrainzId) ||
-                    (ex.Asin != null && ex.Asin == item.Asin)
-                )
+                ((ex.TmdbId > 0 && ex.TmdbId == item.TmdbId) ||
+                 (ex.ImdbId != null && ex.ImdbId == item.ImdbId) ||
+                 (ex.TvdbId > 0 && ex.TvdbId == item.TvdbId) ||
+                 (ex.GoodreadsId > 0 && ex.GoodreadsId == item.GoodreadsId) ||
+                 (ex.Isbn != null && ex.Isbn == item.Isbn) ||
+                 (ex.MusicBrainzId != Guid.Empty && ex.MusicBrainzId == item.MusicBrainzId) ||
+                 (ex.Asin != null && ex.Asin == item.Asin))
             );
-
-            if (isExcluded)
-            {
-                _logger.LogDebug("Item excluded: {Title} ({Year})", item.Title, item.Year);
-            }
-
+            if (isExcluded) _logger.LogDebug("Item excluded: {Title} ({Year})", item.Title, item.Year);
             return !isExcluded;
         }).ToList();
     }

@@ -8,59 +8,56 @@ namespace Mouseion.Core.HealthCheck;
 
 public interface IHealthCheckService
 {
-    List<HealthCheck> Results();
-    void RunChecks(bool scheduledOnly = true);
+    List<HealthCheck> PerformHealthChecks();
+    HealthCheck? GetHealthCheck(string source);
 }
 
 public class HealthCheckService : IHealthCheckService
 {
-    private readonly IEnumerable<IProvideHealthCheck> _healthChecks;
+    private readonly IEnumerable<IProvideHealthCheck> _healthCheckProviders;
     private readonly ILogger<HealthCheckService> _logger;
-    private readonly ConcurrentDictionary<string, HealthCheck> _healthCheckResults;
+    private readonly ConcurrentDictionary<string, HealthCheck> _healthCheckResults = new();
 
     public HealthCheckService(
-        IEnumerable<IProvideHealthCheck> healthChecks,
+        IEnumerable<IProvideHealthCheck> healthCheckProviders,
         ILogger<HealthCheckService> logger)
     {
-        _healthChecks = healthChecks;
+        _healthCheckProviders = healthCheckProviders;
         _logger = logger;
-        _healthCheckResults = new ConcurrentDictionary<string, HealthCheck>();
     }
 
-    public List<HealthCheck> Results()
+    public List<HealthCheck> PerformHealthChecks()
     {
-        return _healthCheckResults.Values.ToList();
-    }
+        _logger.LogDebug("Performing health checks");
+        var results = new List<HealthCheck>();
 
-    public void RunChecks(bool scheduledOnly = true)
-    {
-        var checksToRun = scheduledOnly
-            ? _healthChecks.Where(h => h.CheckOnSchedule)
-            : _healthChecks;
-
-        foreach (var check in checksToRun)
+        foreach (var provider in _healthCheckProviders)
         {
             try
             {
-                _logger.LogTrace("Running health check: {CheckType}", check.GetType().Name);
-                var result = check.Check();
-
-                if (result.Type == HealthCheckResult.Ok)
-                {
-                    _healthCheckResults.TryRemove(result.Source.Name, out _);
-                }
-                else
-                {
-                    _healthCheckResults[result.Source.Name] = result;
-                }
-
-                _logger.LogTrace("Health check completed: {CheckType} - {Result}",
-                    check.GetType().Name, result.Type);
+                var result = provider.Check();
+                var key = provider.GetType().Name;
+                _healthCheckResults[key] = result;
+                results.Add(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Health check failed: {CheckType}", check.GetType().Name);
+                _logger.LogError(ex, "Health check failed for {Provider}", provider.GetType().Name);
+                var errorCheck = new HealthCheck(
+                    HealthCheckResult.Error,
+                    $"Health check failed: {ex.Message}"
+                );
+                results.Add(errorCheck);
             }
         }
+
+        _logger.LogDebug("Completed {Count} health checks", results.Count);
+        return results;
+    }
+
+    public HealthCheck? GetHealthCheck(string source)
+    {
+        _healthCheckResults.TryGetValue(source, out var result);
+        return result;
     }
 }

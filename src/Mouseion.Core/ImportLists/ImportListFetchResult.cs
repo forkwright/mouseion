@@ -3,9 +3,6 @@
 
 namespace Mouseion.Core.ImportLists;
 
-/// <summary>
-/// Result of fetching items from import lists
-/// </summary>
 public class ImportListFetchResult
 {
     public List<ImportListItem> Items { get; set; } = new();

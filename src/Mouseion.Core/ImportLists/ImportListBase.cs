@@ -5,9 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Mouseion.Core.ImportLists;
 
-/// <summary>
-/// Base class for import list implementations
-/// </summary>
 public abstract class ImportListBase<TSettings> : IImportList
     where TSettings : ImportListSettingsBase, new()
 {
@@ -23,7 +20,6 @@ public abstract class ImportListBase<TSettings> : IImportList
     public abstract TimeSpan MinRefreshInterval { get; }
     public abstract bool Enabled { get; }
     public abstract bool EnableAuto { get; }
-
     public ImportListDefinition Definition { get; set; } = new();
 
     protected TSettings Settings
@@ -34,7 +30,6 @@ public abstract class ImportListBase<TSettings> : IImportList
             {
                 return new TSettings();
             }
-
             return System.Text.Json.JsonSerializer.Deserialize<TSettings>(Definition.Settings) ?? new TSettings();
         }
     }

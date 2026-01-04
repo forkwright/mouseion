@@ -5,7 +5,7 @@ using Mouseion.Core.RootFolders;
 
 namespace Mouseion.Core.HealthCheck.Checks;
 
-public class RootFolderCheck : HealthCheckBase
+public class RootFolderCheck : IProvideHealthCheck
 {
     private readonly IRootFolderService _rootFolderService;
 
@@ -14,26 +14,36 @@ public class RootFolderCheck : HealthCheckBase
         _rootFolderService = rootFolderService;
     }
 
-    public override HealthCheck Check()
+    public HealthCheck Check()
     {
         var rootFolders = _rootFolderService.GetAll();
 
         if (rootFolders.Count == 0)
         {
-            return new HealthCheck(GetType(), HealthCheckResult.Warning,
+            return new HealthCheck(
+                HealthCheckResult.Warning,
                 "No root folders configured",
-                "#no-root-folders");
+                "root-folder-missing"
+            );
         }
 
-        var inaccessible = rootFolders.Where(r => !r.Accessible).ToList();
+        var inaccessibleFolders = rootFolders
+            .Where(rf => !Directory.Exists(rf.Path))
+            .Select(rf => rf.Path)
+            .ToList();
 
-        if (inaccessible.Any())
+        if (inaccessibleFolders.Count > 0)
         {
-            return new HealthCheck(GetType(), HealthCheckResult.Error,
-                $"Root folders are inaccessible: {string.Join(", ", inaccessible.Select(r => r.Path))}",
-                "#root-folders-inaccessible");
+            return new HealthCheck(
+                HealthCheckResult.Error,
+                $"Root folders are inaccessible: {string.Join(", ", inaccessibleFolders)}",
+                "root-folder-inaccessible"
+            );
         }
 
-        return new HealthCheck(GetType());
+        return new HealthCheck(
+            HealthCheckResult.Ok,
+            "All root folders are accessible"
+        );
     }
 }

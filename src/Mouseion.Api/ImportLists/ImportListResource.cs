@@ -63,7 +63,28 @@ public static class ImportListResourceMapper
             RootFolderPath = definition.RootFolderPath,
             SearchOnAdd = definition.SearchOnAdd,
             Settings = definition.Settings,
-            Tags = definition.Tags
+            Tags = definition.Tags.Select(t => t.ToString()).ToList()
+        };
+    }
+
+    public static ImportListDefinition ToDefinition(this ImportListResource resource)
+    {
+        return new ImportListDefinition
+        {
+            Id = resource.Id,
+            Name = resource.Name,
+            Implementation = resource.Implementation,
+            Enabled = resource.Enabled,
+            EnableAuto = resource.EnableAuto,
+            ListType = resource.ListType,
+            MediaType = resource.MediaType,
+            MinRefreshInterval = resource.MinRefreshInterval,
+            Monitor = resource.Monitor,
+            QualityProfileId = resource.QualityProfileId,
+            RootFolderPath = resource.RootFolderPath,
+            SearchOnAdd = resource.SearchOnAdd,
+            Settings = resource.Settings,
+            Tags = resource.Tags.Select(t => int.TryParse(t, out var id) ? id : 0).Where(id => id > 0).ToHashSet()
         };
     }
 
@@ -87,27 +108,6 @@ public static class ImportListResourceMapper
             Asin = item.Asin,
             PodcastGuid = item.PodcastGuid,
             FeedUrl = item.FeedUrl
-        };
-    }
-
-    public static ImportListDefinition ToDefinition(this ImportListResource resource)
-    {
-        return new ImportListDefinition
-        {
-            Id = resource.Id,
-            Name = resource.Name,
-            Implementation = resource.Implementation,
-            Enabled = resource.Enabled,
-            EnableAuto = resource.EnableAuto,
-            ListType = resource.ListType,
-            MediaType = resource.MediaType,
-            MinRefreshInterval = resource.MinRefreshInterval,
-            Monitor = resource.Monitor,
-            QualityProfileId = resource.QualityProfileId,
-            RootFolderPath = resource.RootFolderPath,
-            SearchOnAdd = resource.SearchOnAdd,
-            Settings = resource.Settings,
-            Tags = resource.Tags
         };
     }
 }

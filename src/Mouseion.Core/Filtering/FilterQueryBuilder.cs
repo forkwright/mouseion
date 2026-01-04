@@ -33,7 +33,13 @@ public class FilterQueryBuilder : IFilterQueryBuilder
         "Explicit",
         "TrackNumber",
         "DiscNumber",
-        "DurationSeconds"
+        "DurationSeconds",
+        "BitDepth",
+        "DynamicRange",
+        "Lossless",
+        "ArtistName",
+        "AlbumName",
+        "Genre"
     };
 
     private static readonly Dictionary<string, string> FieldToColumn = new(StringComparer.OrdinalIgnoreCase)
@@ -50,7 +56,13 @@ public class FilterQueryBuilder : IFilterQueryBuilder
         { "Explicit", "Explicit" },
         { "TrackNumber", "TrackNumber" },
         { "DiscNumber", "DiscNumber" },
-        { "DurationSeconds", "DurationSeconds" }
+        { "DurationSeconds", "DurationSeconds" },
+        { "BitDepth", "BitDepth" },
+        { "DynamicRange", "DynamicRange" },
+        { "Lossless", "Lossless" },
+        { "ArtistName", "ar.Name" },
+        { "AlbumName", "al.Title" },
+        { "Genre", "al.Genres" }
     };
 
     public bool IsValidField(string field)

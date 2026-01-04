@@ -11,10 +11,7 @@ public class TMDbUpcomingMovies : ImportListBase<TMDbSettings>
 {
     private readonly TmdbInfoProxy _tmdbProxy;
 
-    public TMDbUpcomingMovies(
-        TmdbInfoProxy tmdbProxy,
-        ILogger<TMDbUpcomingMovies> logger)
-        : base(logger)
+    public TMDbUpcomingMovies(TmdbInfoProxy tmdbProxy, ILogger<TMDbUpcomingMovies> logger) : base(logger)
     {
         _tmdbProxy = tmdbProxy;
     }
@@ -31,7 +28,6 @@ public class TMDbUpcomingMovies : ImportListBase<TMDbSettings>
         {
             Logger.LogInformation("Fetching upcoming movies from TMDb");
             var movies = await _tmdbProxy.GetUpcomingAsync(cancellationToken);
-
             var items = movies.Select(movie => new ImportListItem
             {
                 MediaType = MediaType.Movie,
@@ -40,20 +36,12 @@ public class TMDbUpcomingMovies : ImportListBase<TMDbSettings>
                 TmdbId = int.TryParse(movie.TmdbId, out var id) ? id : 0,
                 ImdbId = movie.ImdbId
             }).ToList();
-
-            return new ImportListFetchResult
-            {
-                Items = CleanupListItems(items),
-                SyncedLists = 1
-            };
+            return new ImportListFetchResult { Items = CleanupListItems(items), SyncedLists = 1 };
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error fetching TMDb upcoming movies");
-            return new ImportListFetchResult
-            {
-                AnyFailure = true
-            };
+            return new ImportListFetchResult { AnyFailure = true };
         }
     }
 }

@@ -5,13 +5,9 @@ using Mouseion.Core.Datastore;
 
 namespace Mouseion.Core.ImportLists.ImportExclusions;
 
-public interface IImportListExclusionRepository : IBasicRepository<ImportListExclusion>
-{
-}
+public interface IImportListExclusionRepository : IBasicRepository<ImportListExclusion> { }
 
 public class ImportListExclusionRepository : BasicRepository<ImportListExclusion>, IImportListExclusionRepository
 {
-    public ImportListExclusionRepository(IDatabase database) : base(database)
-    {
-    }
+    public ImportListExclusionRepository(IDatabase database) : base(database) { }
 }

@@ -17,18 +17,13 @@ public class ImportListExclusionService : IImportListExclusionService
     private readonly IImportListExclusionRepository _repository;
     private readonly ILogger<ImportListExclusionService> _logger;
 
-    public ImportListExclusionService(
-        IImportListExclusionRepository repository,
-        ILogger<ImportListExclusionService> logger)
+    public ImportListExclusionService(IImportListExclusionRepository repository, ILogger<ImportListExclusionService> logger)
     {
         _repository = repository;
         _logger = logger;
     }
 
-    public List<ImportListExclusion> GetAll()
-    {
-        return _repository.All().ToList();
-    }
+    public List<ImportListExclusion> GetAll() => _repository.All().ToList();
 
     public ImportListExclusion Add(ImportListExclusion exclusion)
     {

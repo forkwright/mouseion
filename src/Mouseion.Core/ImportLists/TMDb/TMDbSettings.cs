@@ -3,7 +3,4 @@
 
 namespace Mouseion.Core.ImportLists.TMDb;
 
-public class TMDbSettings : ImportListSettingsBase
-{
-    // No additional settings needed - uses global TMDb API key from configuration
-}
+public class TMDbSettings : ImportListSettingsBase { }

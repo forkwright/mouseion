@@ -7,9 +7,9 @@ using Mouseion.Core.HealthCheck;
 
 namespace Mouseion.Api.Health;
 
-[Authorize]
 [ApiController]
 [Route("api/v3/[controller]")]
+[Authorize]
 public class HealthController : ControllerBase
 {
     private readonly IHealthCheckService _healthCheckService;
@@ -20,17 +20,20 @@ public class HealthController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetHealth()
+    public ActionResult<List<HealthResource>> GetHealth()
     {
-        var results = _healthCheckService.Results();
-        return Ok(results);
+        var healthChecks = _healthCheckService.PerformHealthChecks();
+        var resources = healthChecks.Select(MapToResource).ToList();
+        return Ok(resources);
     }
 
-    [HttpPost("check")]
-    public IActionResult RunHealthChecks()
+    private static HealthResource MapToResource(Core.HealthCheck.HealthCheck check)
     {
-        _healthCheckService.RunChecks(scheduledOnly: false);
-        var results = _healthCheckService.Results();
-        return Ok(results);
+        return new HealthResource
+        {
+            Type = check.Type.ToString(),
+            Message = check.Message,
+            WikiUrl = check.WikiUrl
+        };
     }
 }

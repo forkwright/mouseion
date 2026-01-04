@@ -14,10 +14,7 @@ public class ImportListController : ControllerBase
     private readonly IImportListFactory _factory;
     private readonly IImportListSyncService _syncService;
 
-    public ImportListController(
-        IImportListRepository repository,
-        IImportListFactory factory,
-        IImportListSyncService syncService)
+    public ImportListController(IImportListRepository repository, IImportListFactory factory, IImportListSyncService syncService)
     {
         _repository = repository;
         _factory = factory;

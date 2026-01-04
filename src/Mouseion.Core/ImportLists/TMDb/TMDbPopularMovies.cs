@@ -11,10 +11,7 @@ public class TMDbPopularMovies : ImportListBase<TMDbSettings>
 {
     private readonly TmdbInfoProxy _tmdbProxy;
 
-    public TMDbPopularMovies(
-        TmdbInfoProxy tmdbProxy,
-        ILogger<TMDbPopularMovies> logger)
-        : base(logger)
+    public TMDbPopularMovies(TmdbInfoProxy tmdbProxy, ILogger<TMDbPopularMovies> logger) : base(logger)
     {
         _tmdbProxy = tmdbProxy;
     }
@@ -31,7 +28,6 @@ public class TMDbPopularMovies : ImportListBase<TMDbSettings>
         {
             Logger.LogInformation("Fetching popular movies from TMDb");
             var movies = await _tmdbProxy.GetPopularAsync(cancellationToken);
-
             var items = movies.Select(movie => new ImportListItem
             {
                 MediaType = MediaType.Movie,
@@ -40,20 +36,12 @@ public class TMDbPopularMovies : ImportListBase<TMDbSettings>
                 TmdbId = int.TryParse(movie.TmdbId, out var id) ? id : 0,
                 ImdbId = movie.ImdbId
             }).ToList();
-
-            return new ImportListFetchResult
-            {
-                Items = CleanupListItems(items),
-                SyncedLists = 1
-            };
+            return new ImportListFetchResult { Items = CleanupListItems(items), SyncedLists = 1 };
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error fetching TMDb popular movies");
-            return new ImportListFetchResult
-            {
-                AnyFailure = true
-            };
+            return new ImportListFetchResult { AnyFailure = true };
         }
     }
 }

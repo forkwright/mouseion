@@ -8,66 +8,56 @@ namespace Mouseion.Core.Jobs;
 
 public class TaskScheduler : BackgroundService
 {
-    private readonly IEnumerable<IScheduledTask> _tasks;
+    private readonly IEnumerable<IScheduledTask> _scheduledTasks;
     private readonly ILogger<TaskScheduler> _logger;
     private readonly Dictionary<string, DateTime> _lastExecution = new();
 
     public TaskScheduler(
-        IEnumerable<IScheduledTask> tasks,
+        IEnumerable<IScheduledTask> scheduledTasks,
         ILogger<TaskScheduler> logger)
     {
-        _tasks = tasks;
+        _scheduledTasks = scheduledTasks;
         _logger = logger;
-
-        foreach (var task in _tasks)
-        {
-            _lastExecution[task.Name] = DateTime.UtcNow;
-        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Task scheduler started with {Count} tasks", _tasks.Count());
+        _logger.LogInformation("Task scheduler started with {Count} tasks", _scheduledTasks.Count());
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            try
+            foreach (var task in _scheduledTasks)
             {
-                foreach (var task in _tasks)
+                try
                 {
-                    var nextExecution = _lastExecution[task.Name].AddMinutes(task.Interval);
-
-                    if (DateTime.UtcNow >= nextExecution)
+                    if (ShouldExecute(task))
                     {
                         _logger.LogDebug("Executing scheduled task: {TaskName}", task.Name);
-
-                        try
-                        {
-                            await task.ExecuteAsync(stoppingToken);
-                            _lastExecution[task.Name] = DateTime.UtcNow;
-                            _logger.LogDebug("Completed scheduled task: {TaskName}", task.Name);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Error executing scheduled task: {TaskName}", task.Name);
-                        }
+                        await task.ExecuteAsync(stoppingToken);
+                        _lastExecution[task.Name] = DateTime.UtcNow;
+                        _logger.LogDebug("Completed scheduled task: {TaskName}", task.Name);
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error executing scheduled task: {TaskName}", task.Name);
+                }
+            }
 
-                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogInformation("Task scheduler stopping...");
-                break;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in task scheduler main loop");
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-            }
+            // Check every minute
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
 
         _logger.LogInformation("Task scheduler stopped");
+    }
+
+    private bool ShouldExecute(IScheduledTask task)
+    {
+        if (!_lastExecution.TryGetValue(task.Name, out var lastRun))
+        {
+            return true; // First run
+        }
+
+        return DateTime.UtcNow - lastRun >= task.Interval;
     }
 }

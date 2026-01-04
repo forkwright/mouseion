@@ -30,7 +30,7 @@ public class LibraryController : ControllerBase
     }
 
     [HttpPost("filter")]
-    public async Task<ActionResult<PagedResult<TrackResource>>> FilterLibrary(
+    public async Task<ActionResult<FilterPagedResult<TrackResource>>> FilterLibrary(
         [FromBody] FilterRequest request,
         CancellationToken ct = default)
     {
@@ -38,12 +38,13 @@ public class LibraryController : ControllerBase
         {
             var result = await _filterService.FilterTracksAsync(request, ct).ConfigureAwait(false);
 
-            return Ok(new PagedResult<TrackResource>
+            return Ok(new FilterPagedResult<TrackResource>
             {
                 Items = result.Tracks.Select(ToResource).ToList(),
                 Page = result.Page,
                 PageSize = result.PageSize,
-                TotalCount = result.TotalCount
+                TotalCount = result.TotalCount,
+                Summary = result.Summary
             });
         }
         catch (ArgumentException ex)
