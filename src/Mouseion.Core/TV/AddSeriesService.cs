@@ -117,7 +117,11 @@ public class AddSeriesService : IAddSeriesService
                 var added = await AddSeriesAsync(series, ct).ConfigureAwait(false);
                 addedSeries.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for series: {SeriesTitle} ({Year})", series.Title.SanitizeForLog(), series.Year);
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding series: {SeriesTitle} ({Year})", series.Title.SanitizeForLog(), series.Year);
             }
@@ -137,7 +141,11 @@ public class AddSeriesService : IAddSeriesService
                 var added = AddSeries(series);
                 addedSeries.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for series: {SeriesTitle} ({Year})", series.Title.SanitizeForLog(), series.Year);
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding series: {SeriesTitle} ({Year})", series.Title.SanitizeForLog(), series.Year);
             }

@@ -87,7 +87,11 @@ public class AddArtistService : IAddArtistService
                 var added = await AddArtistAsync(artist, ct).ConfigureAwait(false);
                 addedArtists.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for artist: {ArtistName}", artist.Name.SanitizeForLog());
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding artist: {ArtistName}", artist.Name.SanitizeForLog());
             }
@@ -107,7 +111,11 @@ public class AddArtistService : IAddArtistService
                 var added = AddArtist(artist);
                 addedArtists.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for artist: {ArtistName}", artist.Name.SanitizeForLog());
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding artist: {ArtistName}", artist.Name.SanitizeForLog());
             }

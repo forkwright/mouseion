@@ -138,7 +138,11 @@ public class AddMovieService : IAddMovieService
                 var added = await AddMovieAsync(movie, ct).ConfigureAwait(false);
                 addedMovies.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for movie: {MovieTitle} ({Year})", movie.Title.SanitizeForLog(), movie.Year);
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding movie: {MovieTitle} ({Year})", movie.Title.SanitizeForLog(), movie.Year);
             }
@@ -158,7 +162,11 @@ public class AddMovieService : IAddMovieService
                 var added = AddMovie(movie);
                 addedMovies.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for movie: {MovieTitle} ({Year})", movie.Title.SanitizeForLog(), movie.Year);
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding movie: {MovieTitle} ({Year})", movie.Title.SanitizeForLog(), movie.Year);
             }

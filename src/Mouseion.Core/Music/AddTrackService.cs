@@ -137,7 +137,11 @@ public class AddTrackService : IAddTrackService
                 var added = await AddTrackAsync(track, ct).ConfigureAwait(false);
                 addedTracks.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for track: {TrackTitle}", track.Title.SanitizeForLog());
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding track: {TrackTitle}", track.Title.SanitizeForLog());
             }
@@ -157,7 +161,11 @@ public class AddTrackService : IAddTrackService
                 var added = AddTrack(track);
                 addedTracks.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for track: {TrackTitle}", track.Title.SanitizeForLog());
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding track: {TrackTitle}", track.Title.SanitizeForLog());
             }
