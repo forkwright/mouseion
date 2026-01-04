@@ -468,6 +468,8 @@ namespace Mouseion.Common.Disk
             }
         }
 
+        // TODO: Convert to async when IDiskProvider interface supports async operations
+        // Waiting for filesystem operations to complete before proceeding with rollback
         private static void WaitForIO()
         {
             Thread.Sleep(3000);
