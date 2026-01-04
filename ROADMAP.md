@@ -1,8 +1,8 @@
 # Mouseion Roadmap
 
 **Last Updated:** 2026-01-04
-**Current Phase:** Phase 7 - File Scanning & Advanced Features
-**Timeline:** 16-20 weeks to full *arr replacement (Week 17/20 complete - ~85%)
+**Current Phase:** Phase 7 Complete - All Core Features Implemented
+**Timeline:** 17-20 weeks to full *arr replacement (Week 20/20 complete - 100%)
 
 ---
 
@@ -31,7 +31,7 @@ Plus audiobooks, podcasts, and comics in a single application.
 | 4: Movies | Weeks 11-12 | Radarr parity | ✅ Done |
 | 5: TV/Podcasts | Weeks 13-14 | Episode tracking, RSS | ✅ Done |
 | 6: Infrastructure | Weeks 15-16 | Download clients, notifications, health checks | ✅ Done |
-| 7: File Scanning | Weeks 17-20 | Music scanning, movie org, history, covers | 🔄 In Progress |
+| 7: File Scanning | Weeks 17-20 | Music scanning, movie org, history, covers | ✅ Done |
 
 ---
 
@@ -223,27 +223,31 @@ Plus audiobooks, podcasts, and comics in a single application.
 
 ---
 
-## Phase 7: File Scanning & Advanced Features (Weeks 17-20) 🔄
+## Phase 7: File Scanning & Advanced Features (Weeks 17-20) ✅
 
 **Goal:** Complete file scanning and advanced features for all media types
 
-**Current Focus:**
-- [ ] Music file scanning and import ← **Next Priority**
-- [ ] TagLib integration for file analysis
-- [ ] Spectral analysis (fake hi-res detection via FFmpeg)
-- [ ] Quality upgrades (MP3-320 → FLAC 16/44.1 → FLAC 24/96)
+**Completed (PR #18, #20, #29):**
+- [x] Music file scanning and import (AudioFileAnalyzer, AudioAnalysisService)
+- [x] TagLib integration for file analysis (via TagLibSharp)
+- [x] Spectral analysis (fake hi-res detection via FFmpeg)
+- [x] Quality upgrades (via MusicQualityParser, upgrade decision engine)
+- [x] History tracking for all media types (MediaItemHistory)
+- [x] Media covers management (MediaCoverService with SixLabors.ImageSharp)
+- [x] AcoustID fingerprinting for duplicate detection
+- [x] Gazelle indexer support (RED, OPS)
 
-**Planned:**
+**Remaining (Phase 8 priorities):**
 - [ ] Movie file organization and renaming
-- [ ] History tracking for all media types
-- [ ] Media covers management (download, cache, fallback)
 - [ ] Subtitles foundation (OpenSubtitles, hash-based matching)
+- [ ] Auto-tagging improvements (genre, language detection)
+- [ ] Advanced file import pipeline (hardlink/copy strategies)
 
 **Success Criteria:**
-- Music files scanned with quality detection
-- Movie files organized per naming convention
-- History tracking functional for imports/upgrades
-- Cover art management integrated
+- ✅ Music files scanned with quality detection
+- ✅ History tracking functional for imports/upgrades
+- ✅ Cover art management integrated
+- ⏳ Movie files organized per naming convention (deferred to Phase 8)
 
 ---
 
