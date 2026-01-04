@@ -54,7 +54,7 @@ public class AddAlbumService : IAddAlbumService
         if (existing != null)
         {
             _logger.LogInformation("Album already exists: {AlbumTitle} by Artist {ArtistId}",
-                album.Title, album.ArtistId);
+                album.Title.SanitizeForLog(), album.ArtistId);
             return existing;
         }
 
@@ -63,7 +63,7 @@ public class AddAlbumService : IAddAlbumService
 
         var added = await _albumRepository.InsertAsync(album, ct).ConfigureAwait(false);
         _logger.LogInformation("Added album: {AlbumTitle} ({ReleaseDate}) - MusicBrainz: {MusicBrainzId}, Artist ID: {ArtistId}",
-            added.Title, added.ReleaseDate?.Year, added.MusicBrainzId, added.ArtistId);
+            added.Title.SanitizeForLog(), added.ReleaseDate?.Year, added.MusicBrainzId.SanitizeForLog(), added.ArtistId);
 
         return added;
     }
@@ -85,7 +85,7 @@ public class AddAlbumService : IAddAlbumService
         if (existing != null)
         {
             _logger.LogInformation("Album already exists: {AlbumTitle} by Artist {ArtistId}",
-                album.Title, album.ArtistId);
+                album.Title.SanitizeForLog(), album.ArtistId);
             return existing;
         }
 
@@ -94,7 +94,7 @@ public class AddAlbumService : IAddAlbumService
 
         var added = _albumRepository.Insert(album);
         _logger.LogInformation("Added album: {AlbumTitle} ({ReleaseDate}) - MusicBrainz: {MusicBrainzId}, Artist ID: {ArtistId}",
-            added.Title, added.ReleaseDate?.Year, added.MusicBrainzId, added.ArtistId);
+            added.Title.SanitizeForLog(), added.ReleaseDate?.Year, added.MusicBrainzId.SanitizeForLog(), added.ArtistId);
 
         return added;
     }
@@ -112,7 +112,7 @@ public class AddAlbumService : IAddAlbumService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding album: {AlbumTitle}", album.Title);
+                _logger.LogError(ex, "Error adding album: {AlbumTitle}", album.Title.SanitizeForLog());
             }
         }
 
@@ -132,7 +132,7 @@ public class AddAlbumService : IAddAlbumService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding album: {AlbumTitle}", album.Title);
+                _logger.LogError(ex, "Error adding album: {AlbumTitle}", album.Title.SanitizeForLog());
             }
         }
 

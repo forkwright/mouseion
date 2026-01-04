@@ -41,7 +41,7 @@ public class AddArtistService : IAddArtistService
         var existing = await _artistRepository.FindByNameAsync(artist.Name, ct).ConfigureAwait(false);
         if (existing != null)
         {
-            _logger.LogInformation("Artist already exists: {ArtistName}", artist.Name);
+            _logger.LogInformation("Artist already exists: {ArtistName}", artist.Name.SanitizeForLog());
             return existing;
         }
 
@@ -50,7 +50,7 @@ public class AddArtistService : IAddArtistService
 
         var added = await _artistRepository.InsertAsync(artist, ct).ConfigureAwait(false);
         _logger.LogInformation("Added artist: {ArtistName} - MusicBrainz: {MusicBrainzId}",
-            added.Name, added.MusicBrainzId);
+            added.Name.SanitizeForLog(), added.MusicBrainzId.SanitizeForLog());
 
         return added;
     }
@@ -62,7 +62,7 @@ public class AddArtistService : IAddArtistService
         var existing = _artistRepository.FindByName(artist.Name);
         if (existing != null)
         {
-            _logger.LogInformation("Artist already exists: {ArtistName}", artist.Name);
+            _logger.LogInformation("Artist already exists: {ArtistName}", artist.Name.SanitizeForLog());
             return existing;
         }
 
@@ -71,7 +71,7 @@ public class AddArtistService : IAddArtistService
 
         var added = _artistRepository.Insert(artist);
         _logger.LogInformation("Added artist: {ArtistName} - MusicBrainz: {MusicBrainzId}",
-            added.Name, added.MusicBrainzId);
+            added.Name.SanitizeForLog(), added.MusicBrainzId.SanitizeForLog());
 
         return added;
     }
@@ -89,7 +89,7 @@ public class AddArtistService : IAddArtistService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding artist: {ArtistName}", artist.Name);
+                _logger.LogError(ex, "Error adding artist: {ArtistName}", artist.Name.SanitizeForLog());
             }
         }
 
@@ -109,7 +109,7 @@ public class AddArtistService : IAddArtistService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding artist: {ArtistName}", artist.Name);
+                _logger.LogError(ex, "Error adding artist: {ArtistName}", artist.Name.SanitizeForLog());
             }
         }
 

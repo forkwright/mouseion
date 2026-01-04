@@ -68,7 +68,7 @@ public class AddTrackService : IAddTrackService
             if (existing != null)
             {
                 _logger.LogInformation("Track already exists: {TrackTitle} - ForeignId: {ForeignTrackId}",
-                    track.Title, track.ForeignTrackId);
+                    track.Title.SanitizeForLog(), track.ForeignTrackId.SanitizeForLog());
                 return existing;
             }
         }
@@ -78,7 +78,7 @@ public class AddTrackService : IAddTrackService
 
         var added = await _trackRepository.InsertAsync(track, ct).ConfigureAwait(false);
         _logger.LogInformation("Added track: {TrackNumber}. {TrackTitle} - Album ID: {AlbumId}, Artist ID: {ArtistId}",
-            track.TrackNumber, added.Title, added.AlbumId, added.ArtistId);
+            track.TrackNumber, added.Title.SanitizeForLog(), added.AlbumId, added.ArtistId);
 
         return added;
     }
@@ -111,7 +111,7 @@ public class AddTrackService : IAddTrackService
             if (existing != null)
             {
                 _logger.LogInformation("Track already exists: {TrackTitle} - ForeignId: {ForeignTrackId}",
-                    track.Title, track.ForeignTrackId);
+                    track.Title.SanitizeForLog(), track.ForeignTrackId.SanitizeForLog());
                 return existing;
             }
         }
@@ -121,7 +121,7 @@ public class AddTrackService : IAddTrackService
 
         var added = _trackRepository.Insert(track);
         _logger.LogInformation("Added track: {TrackNumber}. {TrackTitle} - Album ID: {AlbumId}, Artist ID: {ArtistId}",
-            track.TrackNumber, added.Title, added.AlbumId, added.ArtistId);
+            track.TrackNumber, added.Title.SanitizeForLog(), added.AlbumId, added.ArtistId);
 
         return added;
     }
@@ -139,7 +139,7 @@ public class AddTrackService : IAddTrackService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding track: {TrackTitle}", track.Title);
+                _logger.LogError(ex, "Error adding track: {TrackTitle}", track.Title.SanitizeForLog());
             }
         }
 
@@ -159,7 +159,7 @@ public class AddTrackService : IAddTrackService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding track: {TrackTitle}", track.Title);
+                _logger.LogError(ex, "Error adding track: {TrackTitle}", track.Title.SanitizeForLog());
             }
         }
 
