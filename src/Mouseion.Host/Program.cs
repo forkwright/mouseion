@@ -146,7 +146,7 @@ try
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbTrendingMovies>(Reuse.Singleton, serviceKey: "TMDbTrendingMovies");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbUpcomingMovies>(Reuse.Singleton, serviceKey: "TMDbUpcomingMovies");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbNowPlayingMovies>(Reuse.Singleton, serviceKey: "TMDbNowPlayingMovies");
-    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RSSImport>(Reuse.Singleton, serviceKey: "RSSImport");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RssImport>(Reuse.Singleton, serviceKey: "RSSImport");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.Custom.CustomList>(Reuse.Singleton, serviceKey: "CustomList");
     container.RegisterDelegate<IEnumerable<Mouseion.Core.ImportLists.IImportList>>(r => new[]
     {
@@ -168,7 +168,7 @@ try
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbTrendingMovies>(Reuse.Singleton, serviceKey: "TMDbTrendingMovies");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbUpcomingMovies>(Reuse.Singleton, serviceKey: "TMDbUpcomingMovies");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbNowPlayingMovies>(Reuse.Singleton, serviceKey: "TMDbNowPlayingMovies");
-    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RSSImport>(Reuse.Singleton, serviceKey: "RSSImport");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RssImport>(Reuse.Singleton, serviceKey: "RSSImport");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.Custom.CustomList>(Reuse.Singleton, serviceKey: "CustomList");
     container.RegisterDelegate<IEnumerable<Mouseion.Core.ImportLists.IImportList>>(r => new[]
     {

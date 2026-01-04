@@ -3,13 +3,14 @@
 
 namespace Mouseion.Core.HealthCheck.Checks;
 
-public class UpdateCheck : HealthCheckBase
+public class UpdateCheck : IProvideHealthCheck
 {
-    public override HealthCheck Check()
+    public HealthCheck Check()
     {
         // Placeholder - update system not yet implemented
-        return new HealthCheck(GetType());
+        return new HealthCheck(
+            HealthCheckResult.Ok,
+            "Update system not yet implemented"
+        );
     }
-
-    public override bool CheckOnStartup => false;
 }
