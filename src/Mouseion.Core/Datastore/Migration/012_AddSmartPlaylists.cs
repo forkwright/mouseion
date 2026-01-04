@@ -6,11 +6,15 @@ using FluentMigrator;
 namespace Mouseion.Core.Datastore.Migration;
 
 [Migration(12)]
-public class Migration_012_AddSmartPlaylists : FluentMigrator.Migration
+public class Migration012AddSmartPlaylists : FluentMigrator.Migration
 {
+    private const string TableSmartPlaylists = "SmartPlaylists";
+    private const string TableSmartPlaylistTracks = "SmartPlaylistTracks";
+    private const string ColumnSmartPlaylistId = "SmartPlaylistId";
+
     public override void Up()
     {
-        Create.Table("SmartPlaylists")
+        Create.Table(TableSmartPlaylists)
             .WithColumn("Id").AsString().PrimaryKey()
             .WithColumn("Name").AsString().NotNullable()
             .WithColumn("FilterRequestJson").AsString().NotNullable()
@@ -19,22 +23,22 @@ public class Migration_012_AddSmartPlaylists : FluentMigrator.Migration
             .WithColumn("CreatedAt").AsString().NotNullable()
             .WithColumn("UpdatedAt").AsString().NotNullable();
 
-        Create.Table("SmartPlaylistTracks")
-            .WithColumn("SmartPlaylistId").AsString().NotNullable()
+        Create.Table(TableSmartPlaylistTracks)
+            .WithColumn(ColumnSmartPlaylistId).AsString().NotNullable()
             .WithColumn("TrackId").AsString().NotNullable()
             .WithColumn("Position").AsInt32().NotNullable();
 
         Create.PrimaryKey("PK_SmartPlaylistTracks")
-            .OnTable("SmartPlaylistTracks")
-            .Columns("SmartPlaylistId", "TrackId");
+            .OnTable(TableSmartPlaylistTracks)
+            .Columns(ColumnSmartPlaylistId, "TrackId");
 
         Create.Index("idx_smart_playlist_tracks_playlist")
-            .OnTable("SmartPlaylistTracks")
-            .OnColumn("SmartPlaylistId");
+            .OnTable(TableSmartPlaylistTracks)
+            .OnColumn(ColumnSmartPlaylistId);
 
         Create.Index("idx_smart_playlist_tracks_position")
-            .OnTable("SmartPlaylistTracks")
-            .OnColumn("SmartPlaylistId")
+            .OnTable(TableSmartPlaylistTracks)
+            .OnColumn(ColumnSmartPlaylistId)
             .Ascending()
             .OnColumn("Position")
             .Ascending();
@@ -42,7 +46,7 @@ public class Migration_012_AddSmartPlaylists : FluentMigrator.Migration
 
     public override void Down()
     {
-        Delete.Table("SmartPlaylistTracks");
-        Delete.Table("SmartPlaylists");
+        Delete.Table(TableSmartPlaylistTracks);
+        Delete.Table(TableSmartPlaylists);
     }
 }

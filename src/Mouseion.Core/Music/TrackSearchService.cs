@@ -191,20 +191,20 @@ public class TrackSearchService : ITrackSearchService
         string normalizedQuery)
     {
         // Exact match (highest priority)
-        if (trackTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 100.0;
-        if (artistName?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 90.0;
-        if (albumTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 85.0;
+        if (trackTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 100.0;
+        if (artistName?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 90.0;
+        if (albumTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 85.0;
         if (genres.Any(g => g.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase))) return 80.0;
 
         // Starts with (second priority)
-        if (trackTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 70.0;
-        if (artistName?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 65.0;
-        if (albumTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 60.0;
+        if (trackTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 70.0;
+        if (artistName?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 65.0;
+        if (albumTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 60.0;
 
         // Contains (third priority)
-        if (trackTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 50.0;
-        if (artistName?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 45.0;
-        if (albumTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 40.0;
+        if (trackTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 50.0;
+        if (artistName?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 45.0;
+        if (albumTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) ?? false) return 40.0;
         if (genres.Any(g => g.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase))) return 35.0;
 
         return 0.0;
