@@ -100,7 +100,7 @@ public class QBittorrentClient : IDownloadClient
         return TimeSpan.FromSeconds(torrent.Eta);
     }
 
-    private DownloadItemStatus MapTorrentState(string state, bool dhtEnabled)
+    private static DownloadItemStatus MapTorrentState(string state, bool dhtEnabled)
     {
         return state switch
         {

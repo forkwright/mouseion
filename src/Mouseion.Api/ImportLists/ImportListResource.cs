@@ -67,27 +67,6 @@ public static class ImportListResourceMapper
         };
     }
 
-    public static ImportListDefinition ToDefinition(this ImportListResource resource)
-    {
-        return new ImportListDefinition
-        {
-            Id = resource.Id,
-            Name = resource.Name,
-            Implementation = resource.Implementation,
-            Enabled = resource.Enabled,
-            EnableAuto = resource.EnableAuto,
-            ListType = resource.ListType,
-            MediaType = resource.MediaType,
-            MinRefreshInterval = resource.MinRefreshInterval,
-            Monitor = resource.Monitor,
-            QualityProfileId = resource.QualityProfileId,
-            RootFolderPath = resource.RootFolderPath,
-            SearchOnAdd = resource.SearchOnAdd,
-            Settings = resource.Settings,
-            Tags = resource.Tags
-        };
-    }
-
     public static ImportListItemResource ToResource(this ImportListItem item)
     {
         return new ImportListItemResource
@@ -108,6 +87,27 @@ public static class ImportListResourceMapper
             Asin = item.Asin,
             PodcastGuid = item.PodcastGuid,
             FeedUrl = item.FeedUrl
+        };
+    }
+
+    public static ImportListDefinition ToDefinition(this ImportListResource resource)
+    {
+        return new ImportListDefinition
+        {
+            Id = resource.Id,
+            Name = resource.Name,
+            Implementation = resource.Implementation,
+            Enabled = resource.Enabled,
+            EnableAuto = resource.EnableAuto,
+            ListType = resource.ListType,
+            MediaType = resource.MediaType,
+            MinRefreshInterval = resource.MinRefreshInterval,
+            Monitor = resource.Monitor,
+            QualityProfileId = resource.QualityProfileId,
+            RootFolderPath = resource.RootFolderPath,
+            SearchOnAdd = resource.SearchOnAdd,
+            Settings = resource.Settings,
+            Tags = resource.Tags
         };
     }
 }

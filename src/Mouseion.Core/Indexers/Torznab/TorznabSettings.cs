@@ -3,10 +3,6 @@
 
 namespace Mouseion.Core.Indexers.Torznab;
 
-public class TorznabSettings
+public class TorznabSettings : Indexers.IndexerSettings
 {
-    public bool Enabled { get; set; }
-    public string BaseUrl { get; set; } = string.Empty;
-    public string ApiKey { get; set; } = string.Empty;
-    public int MinimumSeeders { get; set; }
 }

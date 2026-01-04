@@ -44,7 +44,7 @@ public class ImportListFactory : IImportListFactory
                 impl.Definition = def;
             }
             return impl;
-        }).Where(x => x != null).Cast<IImportList>().ToList();
+        }).OfType<IImportList>().ToList();
     }
 
     public List<IImportList> GetAll()
@@ -58,6 +58,6 @@ public class ImportListFactory : IImportListFactory
                 impl.Definition = def;
             }
             return impl;
-        }).Where(x => x != null).Cast<IImportList>().ToList();
+        }).OfType<IImportList>().ToList();
     }
 }

@@ -21,7 +21,7 @@ public class QBittorrentProxy
         _logger = logger;
     }
 
-    private string BuildUrl(QBittorrentSettings settings, string resource)
+    private static string BuildUrl(QBittorrentSettings settings, string resource)
     {
         var protocol = settings.UseSsl ? "https" : "http";
         var urlBase = string.IsNullOrWhiteSpace(settings.UrlBase)

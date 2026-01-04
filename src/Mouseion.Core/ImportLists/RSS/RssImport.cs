@@ -8,13 +8,13 @@ using Mouseion.Common.Http;
 
 namespace Mouseion.Core.ImportLists.RSS;
 
-public class RSSImport : ImportListBase<RSSImportSettings>
+public class RssImport : ImportListBase<RssImportSettings>
 {
     private readonly IHttpClient _httpClient;
 
-    public RSSImport(
+    public RssImport(
         IHttpClient httpClient,
-        ILogger<RSSImport> logger)
+        ILogger<RssImport> logger)
         : base(logger)
     {
         _httpClient = httpClient;

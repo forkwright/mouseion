@@ -5,7 +5,7 @@ using Mouseion.Core.MediaTypes;
 
 namespace Mouseion.Core.ImportLists.RSS;
 
-public class RSSImportSettings : ImportListSettingsBase
+public class RssImportSettings : ImportListSettingsBase
 {
     public string FeedUrl { get; set; } = string.Empty;
     public MediaType MediaType { get; set; } = MediaType.Movie;
