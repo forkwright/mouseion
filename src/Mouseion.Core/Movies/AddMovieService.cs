@@ -56,7 +56,7 @@ public class AddMovieService : IAddMovieService
             if (existing != null)
             {
                 _logger.LogInformation("Movie already exists: {MovieTitle} ({Year}) - TMDB ID: {TmdbId}",
-                    movie.Title.SanitizeForLog(), movie.Year, movie.TmdbId.SanitizeForLog());
+                    movie.Title.SanitizeForLog(), movie.Year, movie.TmdbId?.SanitizeForLog());
                 return existing;
             }
         }
@@ -101,7 +101,7 @@ public class AddMovieService : IAddMovieService
             if (existing != null)
             {
                 _logger.LogInformation("Movie already exists: {MovieTitle} ({Year}) - TMDB ID: {TmdbId}",
-                    movie.Title.SanitizeForLog(), movie.Year, movie.TmdbId.SanitizeForLog());
+                    movie.Title.SanitizeForLog(), movie.Year, movie.TmdbId?.SanitizeForLog());
                 return existing;
             }
         }
