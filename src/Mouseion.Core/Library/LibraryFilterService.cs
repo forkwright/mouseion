@@ -172,7 +172,7 @@ public class LibraryFilterService : ILibraryFilterService
             .GroupBy(f => f.SampleRate!.Value)
             .ToDictionary(g => g.Key, g => g.Count());
 
-        var losslessCount = musicFiles.Count(f => f.Lossless == true);
+        var losslessCount = musicFiles.Count(f => f.Lossless);
 
         return new FilterSummary
         {

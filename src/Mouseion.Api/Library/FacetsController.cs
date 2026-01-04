@@ -114,16 +114,22 @@ public class FacetsController : ControllerBase
 
     private List<int> GetUniqueBitDepths(System.Data.IDbConnection conn)
     {
-        // BitDepth is not currently stored in database, return common hi-res values as defaults
-        // When BitDepth is added to MusicFiles table, update this query:
-        // const string sql = @"
-        //     SELECT DISTINCT ""BitDepth""
-        //     FROM ""MusicFiles""
-        //     WHERE ""BitDepth"" IS NOT NULL AND ""BitDepth"" > 0
-        //     ORDER BY ""BitDepth""";
+        const string sql = @"
+            SELECT DISTINCT ""BitDepth""
+            FROM ""MusicFiles""
+            WHERE ""BitDepth"" IS NOT NULL AND ""BitDepth"" > 0
+            ORDER BY ""BitDepth""";
 
-        var commonBitDepths = new List<int> { 16, 24, 32 };
-        return commonBitDepths;
+        try
+        {
+            var bitDepths = conn.Query<int>(sql).ToList();
+            return bitDepths.Count > 0 ? bitDepths : new List<int> { 16, 24, 32 };
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Error querying unique bit depths, returning defaults");
+            return new List<int> { 16, 24, 32 };
+        }
     }
 
     private List<string> GetUniqueGenres(System.Data.IDbConnection conn)
@@ -140,33 +146,9 @@ public class FacetsController : ControllerBase
 
             foreach (var jsonArray in genreJsonArrays)
             {
-                if (string.IsNullOrWhiteSpace(jsonArray))
-                    continue;
-
-                try
+                if (!string.IsNullOrWhiteSpace(jsonArray))
                 {
-                    // Genres are stored as JSON array in database
-                    using var doc = System.Text.Json.JsonDocument.Parse(jsonArray);
-                    var root = doc.RootElement;
-
-                    if (root.ValueKind == System.Text.Json.JsonValueKind.Array)
-                    {
-                        foreach (var element in root.EnumerateArray())
-                        {
-                            if (element.ValueKind == System.Text.Json.JsonValueKind.String)
-                            {
-                                var genre = element.GetString();
-                                if (!string.IsNullOrWhiteSpace(genre))
-                                {
-                                    genres.Add(genre);
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (System.Text.Json.JsonException)
-                {
-                    _logger.Warning("Invalid JSON in genres field");
+                    ParseGenresFromJson(jsonArray, genres);
                 }
             }
 
@@ -179,19 +161,53 @@ public class FacetsController : ControllerBase
         }
     }
 
+    private void ParseGenresFromJson(string jsonArray, HashSet<string> genres)
+    {
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(jsonArray);
+            var root = doc.RootElement;
+
+            if (root.ValueKind != System.Text.Json.JsonValueKind.Array)
+                return;
+
+            foreach (var element in root.EnumerateArray())
+            {
+                if (element.ValueKind != System.Text.Json.JsonValueKind.String)
+                    continue;
+
+                var genre = element.GetString();
+                if (!string.IsNullOrWhiteSpace(genre))
+                {
+                    genres.Add(genre);
+                }
+            }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            _logger.Warning("Invalid JSON in genres field");
+        }
+    }
+
     private RangeResource GetDynamicRangeRange(System.Data.IDbConnection conn)
     {
-        // DynamicRange is not currently stored in database, return sensible defaults
-        // When DynamicRange is added to MusicFiles table, update this query:
-        // const string sql = @"
-        //     SELECT
-        //         MIN(COALESCE(""DynamicRange"", 0)) as MinValue,
-        //         MAX(COALESCE(""DynamicRange"", 0)) as MaxValue
-        //     FROM ""MusicFiles""
-        //     WHERE ""DynamicRange"" IS NOT NULL";
+        const string sql = @"
+            SELECT
+                MIN(COALESCE(""DynamicRange"", 0)) as MinValue,
+                MAX(COALESCE(""DynamicRange"", 0)) as MaxValue
+            FROM ""MusicFiles""
+            WHERE ""DynamicRange"" IS NOT NULL";
 
-        // For now, return typical dynamic range values (LUFS)
-        return new RangeResource { Min = 0, Max = 20 };
+        try
+        {
+            var result = conn.QuerySingleOrDefault<(int Min, int Max)>(sql);
+            return result != default ? new RangeResource { Min = result.Min, Max = result.Max } : new RangeResource { Min = 0, Max = 20 };
+        }
+        catch (Exception ex)
+        {
+            _logger.Warning(ex, "Error querying dynamic range, returning defaults");
+            return new RangeResource { Min = 0, Max = 20 };
+        }
     }
 
     private RangeResource GetYearRange(System.Data.IDbConnection conn)

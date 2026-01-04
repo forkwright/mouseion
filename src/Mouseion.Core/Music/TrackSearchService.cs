@@ -16,22 +16,13 @@ public interface ITrackSearchService
 public class TrackSearchService : ITrackSearchService
 {
     private readonly IDatabase _database;
-    private readonly ITrackRepository _trackRepository;
-    private readonly IAlbumRepository _albumRepository;
-    private readonly IArtistRepository _artistRepository;
     private readonly IMusicFileRepository _musicFileRepository;
 
     public TrackSearchService(
         IDatabase database,
-        ITrackRepository trackRepository,
-        IAlbumRepository albumRepository,
-        IArtistRepository artistRepository,
         IMusicFileRepository musicFileRepository)
     {
         _database = database;
-        _trackRepository = trackRepository;
-        _albumRepository = albumRepository;
-        _artistRepository = artistRepository;
         _musicFileRepository = musicFileRepository;
     }
 
@@ -187,76 +178,59 @@ public class TrackSearchService : ITrackSearchService
         string normalizedQuery,
         string[] queryWords)
     {
-        var score = 0.0;
+        var baseScore = GetBaseMatchScore(trackTitle, artistName, albumTitle, genres, normalizedQuery);
+        var multiWordBonus = GetMultiWordBonus(trackTitle, artistName, albumTitle, genres, queryWords);
+        return baseScore + multiWordBonus;
+    }
 
+    private static double GetBaseMatchScore(
+        string trackTitle,
+        string? artistName,
+        string? albumTitle,
+        List<string> genres,
+        string normalizedQuery)
+    {
         // Exact match (highest priority)
-        if (trackTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 100.0;
-        }
-        else if (artistName?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 90.0;
-        }
-        else if (albumTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 85.0;
-        }
-        else if (genres.Any(g => g.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase)))
-        {
-            score += 80.0;
-        }
+        if (trackTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 100.0;
+        if (artistName?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 90.0;
+        if (albumTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 85.0;
+        if (genres.Any(g => g.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase))) return 80.0;
+
         // Starts with (second priority)
-        else if (trackTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 70.0;
-        }
-        else if (artistName?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 65.0;
-        }
-        else if (albumTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 60.0;
-        }
+        if (trackTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 70.0;
+        if (artistName?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 65.0;
+        if (albumTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 60.0;
+
         // Contains (third priority)
-        else if (trackTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 50.0;
-        }
-        else if (artistName?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 45.0;
-        }
-        else if (albumTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
-        {
-            score += 40.0;
-        }
-        else if (genres.Any(g => g.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase)))
-        {
-            score += 35.0;
-        }
+        if (trackTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 50.0;
+        if (artistName?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 45.0;
+        if (albumTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) is true) return 40.0;
+        if (genres.Any(g => g.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase))) return 35.0;
 
-        // Multi-word query bonus: check if all words are present
-        if (queryWords.Length > 1)
-        {
-            var trackLower = trackTitle?.ToLowerInvariant() ?? "";
-            var artistLower = artistName?.ToLowerInvariant() ?? "";
-            var albumLower = albumTitle?.ToLowerInvariant() ?? "";
-            var genresLower = string.Join(" ", genres).ToLowerInvariant();
+        return 0.0;
+    }
 
-            var allInTrack = queryWords.All(w => trackLower.Contains(w));
-            var allInArtist = queryWords.All(w => artistLower.Contains(w));
-            var allInAlbum = queryWords.All(w => albumLower.Contains(w));
-            var allInGenre = queryWords.All(w => genresLower.Contains(w));
+    private static double GetMultiWordBonus(
+        string trackTitle,
+        string? artistName,
+        string? albumTitle,
+        List<string> genres,
+        string[] queryWords)
+    {
+        if (queryWords.Length <= 1)
+            return 0.0;
 
-            if (allInTrack) score += 30.0;
-            else if (allInArtist) score += 25.0;
-            else if (allInAlbum) score += 20.0;
-            else if (allInGenre) score += 15.0;
-        }
+        var trackLower = trackTitle?.ToLowerInvariant() ?? "";
+        var artistLower = artistName?.ToLowerInvariant() ?? "";
+        var albumLower = albumTitle?.ToLowerInvariant() ?? "";
+        var genresLower = string.Join(" ", genres).ToLowerInvariant();
 
-        return score;
+        if (queryWords.All(w => trackLower.Contains(w))) return 30.0;
+        if (queryWords.All(w => artistLower.Contains(w))) return 25.0;
+        if (queryWords.All(w => albumLower.Contains(w))) return 20.0;
+        if (queryWords.All(w => genresLower.Contains(w))) return 15.0;
+
+        return 0.0;
     }
 
     private static int? ExtractBitDepth(string? audioFormat)
