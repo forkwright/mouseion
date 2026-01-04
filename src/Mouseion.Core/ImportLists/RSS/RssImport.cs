@@ -2,18 +2,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using System.ServiceModel.Syndication;
-using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Extensions.Logging;
 using Mouseion.Common.Http;
 
 namespace Mouseion.Core.ImportLists.RSS;
 
-public class RSSImport : ImportListBase<RSSImportSettings>
+public class RssImport : ImportListBase<RssImportSettings>
 {
     private readonly IHttpClient _httpClient;
 
-    public RSSImport(IHttpClient httpClient, ILogger<RSSImport> logger) : base(logger)
+    public RssImport(
+        IHttpClient httpClient,
+        ILogger<RssImport> logger)
+        : base(logger)
     {
         _httpClient = httpClient;
     }
@@ -35,6 +37,7 @@ public class RSSImport : ImportListBase<RSSImportSettings>
         try
         {
             Logger.LogInformation("Fetching RSS feed from {Url}", Settings.FeedUrl);
+
             var request = new HttpRequestBuilder(Settings.FeedUrl).Build();
             var response = await _httpClient.GetAsync(request);
 
@@ -45,7 +48,12 @@ public class RSSImport : ImportListBase<RSSImportSettings>
             }
 
             var items = ParseRssFeed(response.Content);
-            return new ImportListFetchResult { Items = CleanupListItems(items), SyncedLists = 1 };
+
+            return new ImportListFetchResult
+            {
+                Items = CleanupListItems(items),
+                SyncedLists = 1
+            };
         }
         catch (Exception ex)
         {
@@ -57,20 +65,27 @@ public class RSSImport : ImportListBase<RSSImportSettings>
     private List<ImportListItem> ParseRssFeed(string content)
     {
         var items = new List<ImportListItem>();
+
         try
         {
             using var stringReader = new StringReader(content);
             using var xmlReader = XmlReader.Create(stringReader);
+
             var feed = SyndicationFeed.Load(xmlReader);
 
             foreach (var feedItem in feed.Items)
             {
                 var title = feedItem.Title?.Text ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(title)) continue;
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    continue;
+                }
 
+                // Basic title parsing (Title (Year) format)
                 var year = 0;
                 var cleanTitle = title;
-                var yearMatch = Regex.Match(title, @"\((\d{4})\)");
+
+                var yearMatch = System.Text.RegularExpressions.Regex.Match(title, @"\((\d{4})\)");
                 if (yearMatch.Success)
                 {
                     year = int.Parse(yearMatch.Groups[1].Value);

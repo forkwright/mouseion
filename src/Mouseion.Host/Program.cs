@@ -146,7 +146,7 @@ try
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbTrendingMovies>(Reuse.Singleton, serviceKey: "TMDbTrendingMovies");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbUpcomingMovies>(Reuse.Singleton, serviceKey: "TMDbUpcomingMovies");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbNowPlayingMovies>(Reuse.Singleton, serviceKey: "TMDbNowPlayingMovies");
-    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RSSImport>(Reuse.Singleton, serviceKey: "RSSImport");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RssImport>(Reuse.Singleton, serviceKey: "RSSImport");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.Custom.CustomList>(Reuse.Singleton, serviceKey: "CustomList");
     container.RegisterDelegate<IEnumerable<Mouseion.Core.ImportLists.IImportList>>(r => new[]
     {
@@ -168,7 +168,7 @@ try
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbTrendingMovies>(Reuse.Singleton, serviceKey: "TMDbTrendingMovies");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbUpcomingMovies>(Reuse.Singleton, serviceKey: "TMDbUpcomingMovies");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbNowPlayingMovies>(Reuse.Singleton, serviceKey: "TMDbNowPlayingMovies");
-    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RSSImport>(Reuse.Singleton, serviceKey: "RSSImport");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RssImport>(Reuse.Singleton, serviceKey: "RSSImport");
     container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.Custom.CustomList>(Reuse.Singleton, serviceKey: "CustomList");
     container.RegisterDelegate<IEnumerable<Mouseion.Core.ImportLists.IImportList>>(r => new[]
     {
@@ -213,6 +213,27 @@ try
 
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
+
+    // Register infrastructure services
+    container.Register<Mouseion.Core.SystemInfo.ISystemService, Mouseion.Core.SystemInfo.SystemService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.HealthCheck.IHealthCheckService, Mouseion.Core.HealthCheck.HealthCheckService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.RootFolderCheck>(Reuse.Singleton, serviceKey: "RootFolderCheck");
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>(Reuse.Singleton, serviceKey: "DiskSpaceCheck");
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.UpdateCheck>(Reuse.Singleton, serviceKey: "UpdateCheck");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.HealthCheck.IProvideHealthCheck>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "RootFolderCheck"),
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "DiskSpaceCheck"),
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "UpdateCheck")
+    }, Reuse.Singleton);
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.HealthCheckTask>(Reuse.Singleton, serviceKey: "HealthCheckTask");
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.DiskScanTask>(Reuse.Singleton, serviceKey: "DiskScanTask");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.Jobs.IScheduledTask>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "HealthCheckTask"),
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "DiskScanTask")
+    }, Reuse.Singleton);
+
     // Create ASP.NET Core builder
     var builder = WebApplication.CreateBuilder(args);
 
@@ -235,6 +256,8 @@ try
     builder.Services.AddHostedService<Mouseion.Core.Jobs.TaskScheduler>();
     builder.Services.AddHttpClient();
     builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddHttpClient("QBittorrent");
+    builder.Services.AddHostedService<Mouseion.Core.Jobs.TaskScheduler>();
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v3", new Microsoft.OpenApi.Models.OpenApiInfo

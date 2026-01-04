@@ -74,7 +74,7 @@ public class FacetsController : ControllerBase
         };
     }
 
-    private List<string> GetUniquFormats(System.Data.IDbConnection conn)
+    private List<string> GetUniquFormats(global::System.Data.IDbConnection conn)
     {
         const string sql = @"
             SELECT DISTINCT COALESCE(""AudioFormat"", 'Unknown') as Format
@@ -93,7 +93,7 @@ public class FacetsController : ControllerBase
         }
     }
 
-    private List<int> GetUniqueSampleRates(System.Data.IDbConnection conn)
+    private List<int> GetUniqueSampleRates(global::System.Data.IDbConnection conn)
     {
         const string sql = @"
             SELECT DISTINCT ""SampleRate""
@@ -112,7 +112,7 @@ public class FacetsController : ControllerBase
         }
     }
 
-    private List<int> GetUniqueBitDepths(System.Data.IDbConnection conn)
+    private List<int> GetUniqueBitDepths(global::System.Data.IDbConnection conn)
     {
         const string sql = @"
             SELECT DISTINCT ""BitDepth""
@@ -132,7 +132,7 @@ public class FacetsController : ControllerBase
         }
     }
 
-    private List<string> GetUniqueGenres(System.Data.IDbConnection conn)
+    private List<string> GetUniqueGenres(global::System.Data.IDbConnection conn)
     {
         const string sql = @"
             SELECT ""Genres""
@@ -165,15 +165,15 @@ public class FacetsController : ControllerBase
     {
         try
         {
-            using var doc = System.Text.Json.JsonDocument.Parse(jsonArray);
+            using var doc = global::System.Text.Json.JsonDocument.Parse(jsonArray);
             var root = doc.RootElement;
 
-            if (root.ValueKind != System.Text.Json.JsonValueKind.Array)
+            if (root.ValueKind != global::System.Text.Json.JsonValueKind.Array)
                 return;
 
             foreach (var element in root.EnumerateArray())
             {
-                if (element.ValueKind != System.Text.Json.JsonValueKind.String)
+                if (element.ValueKind != global::System.Text.Json.JsonValueKind.String)
                     continue;
 
                 var genre = element.GetString();
@@ -183,13 +183,13 @@ public class FacetsController : ControllerBase
                 }
             }
         }
-        catch (System.Text.Json.JsonException)
+        catch (global::System.Text.Json.JsonException)
         {
             _logger.Warning("Invalid JSON in genres field");
         }
     }
 
-    private RangeResource GetDynamicRangeRange(System.Data.IDbConnection conn)
+    private RangeResource GetDynamicRangeRange(global::System.Data.IDbConnection conn)
     {
         const string sql = @"
             SELECT
@@ -210,7 +210,7 @@ public class FacetsController : ControllerBase
         }
     }
 
-    private RangeResource GetYearRange(System.Data.IDbConnection conn)
+    private RangeResource GetYearRange(global::System.Data.IDbConnection conn)
     {
         const string sql = @"
             SELECT

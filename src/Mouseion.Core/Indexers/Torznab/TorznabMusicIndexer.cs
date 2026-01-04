@@ -195,26 +195,3 @@ public class TorznabMusicIndexer
         return null;
     }
 }
-
-public class TorznabSettings : IndexerSettings
-{
-    public TorznabSettings()
-    {
-        BaseUrl = string.Empty;
-        ApiKey = string.Empty;
-        MinimumSeeders = 1;
-    }
-
-    public new string ApiKey { get; set; }
-}
-
-public class TorznabRelease
-{
-    public string Title { get; set; } = string.Empty;
-    public long Size { get; set; }
-    public DateTime? PublishDate { get; set; }
-    public string? DownloadUrl { get; set; }
-    public string? InfoUrl { get; set; }
-    public int Seeders { get; set; }
-    public int Peers { get; set; }
-}
