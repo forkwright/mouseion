@@ -135,6 +135,50 @@ try
     container.Register<Mouseion.Core.MetadataSource.IProvideMusicInfo, Mouseion.Core.MetadataSource.MusicBrainzInfoProxy>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.IProvideMovieInfo, Mouseion.Core.MetadataSource.TmdbInfoProxy>(Reuse.Singleton);
 
+    // Register import lists
+    container.Register<Mouseion.Core.ImportLists.IImportListRepository, Mouseion.Core.ImportLists.ImportListRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.ImportExclusions.IImportListExclusionRepository, Mouseion.Core.ImportLists.ImportExclusions.ImportListExclusionRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.ImportExclusions.IImportListExclusionService, Mouseion.Core.ImportLists.ImportExclusions.ImportListExclusionService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.IImportListFactory, Mouseion.Core.ImportLists.ImportListFactory>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.IImportListSyncService, Mouseion.Core.ImportLists.ImportListSyncService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbPopularMovies>(Reuse.Singleton, serviceKey: "TMDbPopularMovies");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbTrendingMovies>(Reuse.Singleton, serviceKey: "TMDbTrendingMovies");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbUpcomingMovies>(Reuse.Singleton, serviceKey: "TMDbUpcomingMovies");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbNowPlayingMovies>(Reuse.Singleton, serviceKey: "TMDbNowPlayingMovies");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RSSImport>(Reuse.Singleton, serviceKey: "RSSImport");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.Custom.CustomList>(Reuse.Singleton, serviceKey: "CustomList");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.ImportLists.IImportList>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "TMDbPopularMovies"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "TMDbTrendingMovies"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "TMDbUpcomingMovies"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "TMDbNowPlayingMovies"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "RSSImport"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "CustomList")
+    }, Reuse.Singleton);
+
+    // Register import lists
+    container.Register<Mouseion.Core.ImportLists.IImportListRepository, Mouseion.Core.ImportLists.ImportListRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.ImportExclusions.IImportListExclusionRepository, Mouseion.Core.ImportLists.ImportExclusions.ImportListExclusionRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.ImportExclusions.IImportListExclusionService, Mouseion.Core.ImportLists.ImportExclusions.ImportListExclusionService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.IImportListFactory, Mouseion.Core.ImportLists.ImportListFactory>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.IImportListSyncService, Mouseion.Core.ImportLists.ImportListSyncService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbPopularMovies>(Reuse.Singleton, serviceKey: "TMDbPopularMovies");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbTrendingMovies>(Reuse.Singleton, serviceKey: "TMDbTrendingMovies");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbUpcomingMovies>(Reuse.Singleton, serviceKey: "TMDbUpcomingMovies");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.TMDb.TMDbNowPlayingMovies>(Reuse.Singleton, serviceKey: "TMDbNowPlayingMovies");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.RSS.RSSImport>(Reuse.Singleton, serviceKey: "RSSImport");
+    container.Register<Mouseion.Core.ImportLists.IImportList, Mouseion.Core.ImportLists.Custom.CustomList>(Reuse.Singleton, serviceKey: "CustomList");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.ImportLists.IImportList>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "TMDbPopularMovies"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "TMDbTrendingMovies"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "TMDbUpcomingMovies"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "TMDbNowPlayingMovies"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "RSSImport"),
+        r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "CustomList")
+    }, Reuse.Singleton);
+
     // Register indexers
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseSettings>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseIndexer>(Reuse.Singleton);
@@ -143,6 +187,28 @@ try
     container.Register<Mouseion.Core.Indexers.Gazelle.GazelleIndexer>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.Torznab.TorznabSettings>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.Torznab.TorznabMusicIndexer>(Reuse.Singleton);
+
+    // Register health checks
+    container.Register<Mouseion.Core.HealthCheck.IHealthCheckService, Mouseion.Core.HealthCheck.HealthCheckService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.RootFolderCheck>(Reuse.Singleton, serviceKey: "RootFolder");
+    container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>(Reuse.Singleton, serviceKey: "DiskSpace");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.HealthCheck.IProvideHealthCheck>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "RootFolder"),
+        r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "DiskSpace")
+    }, Reuse.Singleton);
+
+    // Register scheduled tasks
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.HealthCheckTask>(Reuse.Singleton, serviceKey: "HealthCheck");
+    container.Register<Mouseion.Core.Jobs.IScheduledTask, Mouseion.Core.Jobs.Tasks.DiskScanTask>(Reuse.Singleton, serviceKey: "DiskScan");
+    container.RegisterDelegate<IEnumerable<Mouseion.Core.Jobs.IScheduledTask>>(r => new[]
+    {
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "HealthCheck"),
+        r.Resolve<Mouseion.Core.Jobs.IScheduledTask>(serviceKey: "DiskScan")
+    }, Reuse.Singleton);
+
+    // Register system info
+    container.Register<Mouseion.Core.SystemInfo.ISystemService, Mouseion.Core.SystemInfo.SystemService>(Reuse.Singleton);
 
     // Register security services
     container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
@@ -165,6 +231,8 @@ try
     builder.Services.AddSignalR();
     builder.Services.AddMouseionTelemetry();
     builder.Services.AddMemoryCache();
+    builder.Services.AddHostedService<Mouseion.Core.Jobs.TaskScheduler>();
+    builder.Services.AddHttpClient();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
     {
