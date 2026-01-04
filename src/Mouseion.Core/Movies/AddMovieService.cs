@@ -77,7 +77,7 @@ public class AddMovieService : IAddMovieService
 
         var added = await _movieRepository.InsertAsync(movie, ct).ConfigureAwait(false);
         _logger.LogInformation("Added movie: {MovieTitle} ({Year}) - TMDB ID: {TmdbId}, Collection ID: {CollectionId}",
-            added.Title.SanitizeForLog(), added.Year, added.TmdbId.SanitizeForLog(), added.CollectionId);
+            added.Title.SanitizeForLog(), added.Year, added.TmdbId?.SanitizeForLog(), added.CollectionId);
 
         return added;
     }
@@ -122,7 +122,7 @@ public class AddMovieService : IAddMovieService
 
         var added = _movieRepository.Insert(movie);
         _logger.LogInformation("Added movie: {MovieTitle} ({Year}) - TMDB ID: {TmdbId}, Collection ID: {CollectionId}",
-            added.Title.SanitizeForLog(), added.Year, added.TmdbId.SanitizeForLog(), added.CollectionId);
+            added.Title.SanitizeForLog(), added.Year, added.TmdbId?.SanitizeForLog(), added.CollectionId);
 
         return added;
     }

@@ -63,7 +63,7 @@ public class AddAlbumService : IAddAlbumService
 
         var added = await _albumRepository.InsertAsync(album, ct).ConfigureAwait(false);
         _logger.LogInformation("Added album: {AlbumTitle} ({ReleaseDate}) - MusicBrainz: {MusicBrainzId}, Artist ID: {ArtistId}",
-            added.Title.SanitizeForLog(), added.ReleaseDate?.Year, added.MusicBrainzId.SanitizeForLog(), added.ArtistId);
+            added.Title.SanitizeForLog(), added.ReleaseDate?.Year, added.MusicBrainzId?.SanitizeForLog(), added.ArtistId);
 
         return added;
     }
@@ -94,7 +94,7 @@ public class AddAlbumService : IAddAlbumService
 
         var added = _albumRepository.Insert(album);
         _logger.LogInformation("Added album: {AlbumTitle} ({ReleaseDate}) - MusicBrainz: {MusicBrainzId}, Artist ID: {ArtistId}",
-            added.Title.SanitizeForLog(), added.ReleaseDate?.Year, added.MusicBrainzId.SanitizeForLog(), added.ArtistId);
+            added.Title.SanitizeForLog(), added.ReleaseDate?.Year, added.MusicBrainzId?.SanitizeForLog(), added.ArtistId);
 
         return added;
     }

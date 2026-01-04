@@ -50,7 +50,7 @@ public class AddArtistService : IAddArtistService
 
         var added = await _artistRepository.InsertAsync(artist, ct).ConfigureAwait(false);
         _logger.LogInformation("Added artist: {ArtistName} - MusicBrainz: {MusicBrainzId}",
-            added.Name.SanitizeForLog(), added.MusicBrainzId.SanitizeForLog());
+            added.Name.SanitizeForLog(), added.MusicBrainzId?.SanitizeForLog());
 
         return added;
     }
@@ -71,7 +71,7 @@ public class AddArtistService : IAddArtistService
 
         var added = _artistRepository.Insert(artist);
         _logger.LogInformation("Added artist: {ArtistName} - MusicBrainz: {MusicBrainzId}",
-            added.Name.SanitizeForLog(), added.MusicBrainzId.SanitizeForLog());
+            added.Name.SanitizeForLog(), added.MusicBrainzId?.SanitizeForLog());
 
         return added;
     }
