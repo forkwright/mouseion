@@ -43,3 +43,11 @@ public class FilterRequest
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
 }
+
+public class FilterSummary
+{
+    public double? AvgDynamicRange { get; set; }
+    public Dictionary<string, int> FormatDistribution { get; set; } = new();
+    public Dictionary<int, int> SampleRateDistribution { get; set; } = new();
+    public int LosslessCount { get; set; }
+}
