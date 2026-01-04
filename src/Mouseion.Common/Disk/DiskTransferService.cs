@@ -541,6 +541,12 @@ namespace Mouseion.Common.Disk
                 return true;
             }
 
+            if (folder.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                Logger.Verbose("Ignoring symbolic link folder {FolderFullName}", folder.FullName);
+                return true;
+            }
+
             return false;
         }
 
@@ -549,6 +555,12 @@ namespace Mouseion.Common.Disk
             if (file.Name.StartsWith(".nfs") || file.Name == "debug.log" || file.Name.EndsWith(".socket"))
             {
                 Logger.Verbose("Ignoring file {FileFullName}", file.FullName);
+                return true;
+            }
+
+            if (file.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                Logger.Verbose("Ignoring symbolic link file {FileFullName}", file.FullName);
                 return true;
             }
 
