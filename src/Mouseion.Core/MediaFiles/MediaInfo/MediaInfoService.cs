@@ -223,11 +223,6 @@ public class MediaInfoService : IMediaInfoService
 
     private FFProbeAnalysis ParseStreamJson(string json)
     {
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        };
-
         var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
@@ -373,19 +368,17 @@ public class MediaInfoService : IMediaInfoService
             var doc = JsonDocument.Parse(json);
             if (doc.RootElement.TryGetProperty("frames", out var frames))
             {
-                foreach (var frame in frames.EnumerateArray())
+                // Only process first frame
+                var firstFrame = frames.EnumerateArray().FirstOrDefault();
+                if (firstFrame.ValueKind != default && firstFrame.TryGetProperty("side_data_list", out var sideDataList))
                 {
-                    if (frame.TryGetProperty("side_data_list", out var sideDataList))
+                    foreach (var data in sideDataList.EnumerateArray())
                     {
-                        foreach (var data in sideDataList.EnumerateArray())
+                        if (data.TryGetProperty("side_data_type", out var type))
                         {
-                            if (data.TryGetProperty("side_data_type", out var type))
-                            {
-                                sideData.Add(type.GetString() ?? string.Empty);
-                            }
+                            sideData.Add(type.GetString() ?? string.Empty);
                         }
                     }
-                    break; // Only first frame
                 }
             }
         }
@@ -438,9 +431,9 @@ public class MediaInfoService : IMediaInfoService
 
     private static TimeSpan GetBestRuntime(TimeSpan? audio, TimeSpan? video, TimeSpan general)
     {
-        if (!video.HasValue || video.Value.TotalMilliseconds == 0)
+        if (!video.HasValue || video.Value == TimeSpan.Zero)
         {
-            if (!audio.HasValue || audio.Value.TotalMilliseconds == 0)
+            if (!audio.HasValue || audio.Value == TimeSpan.Zero)
             {
                 return general;
             }
@@ -451,14 +444,29 @@ public class MediaInfoService : IMediaInfoService
         return video.Value;
     }
 
-    private static long GetBitrate(MediaStream? mediaStream)
+    private static long GetBitrate(VideoStream? videoStream)
     {
-        if (mediaStream?.BitRate is > 0)
+        if (videoStream?.BitRate is > 0)
         {
-            return mediaStream.BitRate;
+            return videoStream.BitRate;
         }
 
-        if ((mediaStream?.Tags?.TryGetValue("BPS", out var bitratePerSecond) ?? false) && !string.IsNullOrWhiteSpace(bitratePerSecond))
+        if ((videoStream?.Tags?.TryGetValue("BPS", out var bitratePerSecond) ?? false) && !string.IsNullOrWhiteSpace(bitratePerSecond))
+        {
+            return Convert.ToInt64(bitratePerSecond);
+        }
+
+        return 0;
+    }
+
+    private static long GetBitrate(AudioStream? audioStream)
+    {
+        if (audioStream?.BitRate is > 0)
+        {
+            return audioStream.BitRate;
+        }
+
+        if ((audioStream?.Tags?.TryGetValue("BPS", out var bitratePerSecond) ?? false) && !string.IsNullOrWhiteSpace(bitratePerSecond))
         {
             return Convert.ToInt64(bitratePerSecond);
         }
@@ -510,22 +518,7 @@ public class MediaInfoService : IMediaInfoService
 
         if (hasDovi)
         {
-            if (hasHdr10Plus)
-            {
-                return HdrFormat.DolbyVisionHdr10Plus;
-            }
-
-            if (HlgTransferFunctions.Contains(transferFunction))
-            {
-                return HdrFormat.DolbyVisionHlg;
-            }
-
-            if (PqTransferFunctions.Contains(transferFunction))
-            {
-                return HdrFormat.DolbyVisionHdr10;
-            }
-
-            return HdrFormat.DolbyVision;
+            return GetDolbyVisionFormat(transferFunction, hasHdr10Plus);
         }
 
         if (!ValidHdrColourPrimaries.Contains(colorPrimaries) || !ValidHdrTransferFunctions.Contains(transferFunction))
@@ -533,6 +526,31 @@ public class MediaInfoService : IMediaInfoService
             return HdrFormat.None;
         }
 
+        return GetStandardHdrFormat(transferFunction, hasHdr10Plus, hasMasteringMetadata);
+    }
+
+    private static HdrFormat GetDolbyVisionFormat(string? transferFunction, bool hasHdr10Plus)
+    {
+        if (hasHdr10Plus)
+        {
+            return HdrFormat.DolbyVisionHdr10Plus;
+        }
+
+        if (HlgTransferFunctions.Contains(transferFunction))
+        {
+            return HdrFormat.DolbyVisionHlg;
+        }
+
+        if (PqTransferFunctions.Contains(transferFunction))
+        {
+            return HdrFormat.DolbyVisionHdr10;
+        }
+
+        return HdrFormat.DolbyVision;
+    }
+
+    private static HdrFormat GetStandardHdrFormat(string? transferFunction, bool hasHdr10Plus, bool hasMasteringMetadata)
+    {
         if (HlgTransferFunctions.Contains(transferFunction))
         {
             return HdrFormat.Hlg10;
@@ -561,7 +579,7 @@ public class MediaInfoService : IMediaInfoService
         return input.Replace("\r", "").Replace("\n", "");
     }
 
-    private class FFProbeAnalysis
+    private sealed class FFProbeAnalysis
     {
         public FormatInfo? Format { get; set; }
         public List<VideoStream>? VideoStreams { get; set; }
@@ -571,21 +589,21 @@ public class MediaInfoService : IMediaInfoService
         public AudioStream? PrimaryAudioStream { get; set; }
     }
 
-    private class FormatInfo
+    private sealed class FormatInfo
     {
         public string? FormatName { get; set; }
         public TimeSpan Duration { get; set; }
         public Dictionary<string, string> Tags { get; set; } = new();
     }
 
-    private class MediaStream
+    private sealed class MediaStream
     {
         public long BitRate { get; set; }
         public TimeSpan? Duration { get; set; }
         public Dictionary<string, string> Tags { get; set; } = new();
     }
 
-    private class VideoStream : MediaStream
+    private sealed class VideoStream
     {
         public int Index { get; set; }
         public string? CodecName { get; set; }
@@ -598,9 +616,12 @@ public class MediaInfoService : IMediaInfoService
         public string? ColorTransfer { get; set; }
         public decimal FrameRate { get; set; }
         public List<string> SideDataList { get; set; } = new();
+        public long BitRate { get; set; }
+        public TimeSpan? Duration { get; set; }
+        public Dictionary<string, string> Tags { get; set; } = new();
     }
 
-    private class AudioStream : MediaStream
+    private sealed class AudioStream
     {
         public string? CodecName { get; set; }
         public string? CodecTagString { get; set; }
@@ -608,9 +629,12 @@ public class MediaInfoService : IMediaInfoService
         public int Channels { get; set; }
         public string? ChannelLayout { get; set; }
         public string Language { get; set; } = string.Empty;
+        public long BitRate { get; set; }
+        public TimeSpan? Duration { get; set; }
+        public Dictionary<string, string> Tags { get; set; } = new();
     }
 
-    private class SubtitleStream
+    private sealed class SubtitleStream
     {
         public string Language { get; set; } = string.Empty;
     }

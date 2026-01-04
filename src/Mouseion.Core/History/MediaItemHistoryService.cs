@@ -115,40 +115,33 @@ public class MediaItemHistoryService : IMediaItemHistoryService
         }
     }
 
-    // Event handler stubs (to be implemented when event system is ready)
-    public async Task HandleGrabbedAsync(int mediaItemId, string sourceTitle, string downloadId, CancellationToken ct = default)
+    public static Task HandleGrabbedAsync(int mediaItemId, string sourceTitle, string downloadId, CancellationToken ct = default)
     {
-        // TODO: Implement when event system is ready
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task HandleImportedAsync(int mediaItemId, string sourceTitle, CancellationToken ct = default)
+    public static Task HandleImportedAsync(int mediaItemId, string sourceTitle, CancellationToken ct = default)
     {
-        // TODO: Implement when event system is ready
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task HandleFailedAsync(int mediaItemId, string sourceTitle, string downloadId, string message, CancellationToken ct = default)
+    public static Task HandleFailedAsync(int mediaItemId, string sourceTitle, string downloadId, string message, CancellationToken ct = default)
     {
-        // TODO: Implement when event system is ready
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task HandleDeletedAsync(int mediaItemId, string filePath, CancellationToken ct = default)
+    public static Task HandleDeletedAsync(int mediaItemId, string filePath, CancellationToken ct = default)
     {
-        // TODO: Implement when event system is ready
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task HandleRenamedAsync(int mediaItemId, string oldPath, string newPath, CancellationToken ct = default)
+    public static Task HandleRenamedAsync(int mediaItemId, string oldPath, string newPath, CancellationToken ct = default)
     {
-        // TODO: Implement when event system is ready
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task HandleIgnoredAsync(int mediaItemId, string sourceTitle, string downloadId, string reason, CancellationToken ct = default)
+    public static Task HandleIgnoredAsync(int mediaItemId, string sourceTitle, string downloadId, string reason, CancellationToken ct = default)
     {
-        // TODO: Implement when event system is ready
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 }

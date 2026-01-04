@@ -6,7 +6,7 @@ using FluentMigrator;
 namespace Mouseion.Core.Datastore.Migration;
 
 [Migration(14, "Add Blocklists table")]
-public class Migration_014_AddBlocklists : FluentMigrator.Migration
+public class Migration014AddBlocklists : FluentMigrator.Migration
 {
     public override void Up()
     {

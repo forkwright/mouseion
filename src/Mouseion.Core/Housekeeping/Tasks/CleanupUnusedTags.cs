@@ -39,7 +39,7 @@ public class CleanupUnusedTags : IHousekeepingTask
 
         foreach (var table in taggedTables)
         {
-            var tags = await GetUsedTagsFromTableAsync(connection, table, cancellationToken);
+            var tags = await GetUsedTagsFromTableAsync(connection, table);
             usedTags.AddRange(tags);
         }
 
@@ -68,8 +68,7 @@ public class CleanupUnusedTags : IHousekeepingTask
 
     private static async Task<IEnumerable<int>> GetUsedTagsFromTableAsync(
         IDbConnection connection,
-        string table,
-        CancellationToken cancellationToken)
+        string table)
     {
         var query = $"SELECT DISTINCT \"Tags\" FROM \"{table}\" WHERE NOT \"Tags\" = '[]' AND NOT \"Tags\" IS NULL";
         var tagLists = await connection.QueryAsync<List<int>>(query);

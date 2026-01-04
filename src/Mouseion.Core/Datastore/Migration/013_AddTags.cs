@@ -12,7 +12,7 @@ using FluentMigrator;
 namespace Mouseion.Core.Datastore.Migration;
 
 [Migration(13, "Add Tags table")]
-public class Migration_013_AddTags : FluentMigrator.Migration
+public class Migration013AddTags : FluentMigrator.Migration
 {
     public override void Up()
     {

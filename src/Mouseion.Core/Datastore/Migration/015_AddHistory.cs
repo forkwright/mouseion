@@ -6,11 +6,13 @@ using FluentMigrator;
 namespace Mouseion.Core.Datastore.Migration;
 
 [Migration(15, "Add History table")]
-public class Migration_015_AddHistory : FluentMigrator.Migration
+public class Migration015AddHistory : FluentMigrator.Migration
 {
+    private const string TableName = "History";
+
     public override void Up()
     {
-        Create.Table("History")
+        Create.Table(TableName)
             .WithColumn("Id").AsInt32().PrimaryKey().Identity()
             .WithColumn("MediaItemId").AsInt32().NotNullable().Indexed()
             .WithColumn("MediaType").AsInt32().NotNullable()
@@ -22,18 +24,18 @@ public class Migration_015_AddHistory : FluentMigrator.Migration
             .WithColumn("DownloadId").AsString().Nullable();
 
         Create.Index("IX_History_MediaItemId_Date")
-            .OnTable("History")
+            .OnTable(TableName)
             .OnColumn("MediaItemId").Ascending()
             .OnColumn("Date").Descending();
 
         Create.Index("IX_History_DownloadId_Date")
-            .OnTable("History")
+            .OnTable(TableName)
             .OnColumn("DownloadId").Ascending()
             .OnColumn("Date").Descending();
     }
 
     public override void Down()
     {
-        Delete.Table("History");
+        Delete.Table(TableName);
     }
 }

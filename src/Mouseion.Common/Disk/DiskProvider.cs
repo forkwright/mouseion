@@ -7,19 +7,10 @@
 // Copyright (C) 2010-2025 Radarr Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-using Serilog;
-
 namespace Mouseion.Common.Disk;
 
 public class DiskProvider : DiskProviderBase
 {
-    private readonly ILogger _logger;
-
-    public DiskProvider(ILogger logger)
-        : base()
-    {
-        _logger = logger;
-    }
 
     public override long? GetAvailableSpace(string path)
     {

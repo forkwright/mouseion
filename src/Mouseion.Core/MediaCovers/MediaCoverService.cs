@@ -79,40 +79,60 @@ public class MediaCoverService : IMediaCoverService
     {
         if (mediaItemId == 0)
         {
-            // Media item isn't in Mouseion yet, map via proxy to avoid referrer issues
-            foreach (var mediaCover in covers)
-            {
-                mediaCover.Url = _mediaCoverProxy.RegisterUrl(mediaCover.RemoteUrl);
-            }
+            ConvertToProxyUrls(covers);
         }
         else
         {
-            foreach (var mediaCover in covers)
-            {
-                if (mediaCover.CoverType == MediaCoverType.Unknown)
-                {
-                    continue;
-                }
-
-                var filePath = GetCoverPath(mediaItemId, mediaCover.CoverType);
-                mediaCover.Url = $"/MediaCover/{mediaItemId}/{mediaCover.CoverType.ToString().ToLower()}{GetExtension(mediaCover.CoverType)}";
-
-                DateTime? lastWrite = null;
-                if (fileInfos != null && fileInfos.TryGetValue(filePath, out var file))
-                {
-                    lastWrite = file.LastWriteTimeUtc;
-                }
-                else if (_diskProvider.FileExists(filePath))
-                {
-                    lastWrite = _diskProvider.FileGetLastWrite(filePath);
-                }
-
-                if (lastWrite.HasValue)
-                {
-                    mediaCover.Url += "?lastWrite=" + lastWrite.Value.Ticks;
-                }
-            }
+            ConvertToMediaCoverUrls(mediaItemId, covers, fileInfos);
         }
+    }
+
+    private void ConvertToProxyUrls(IEnumerable<MediaCover> covers)
+    {
+        foreach (var mediaCover in covers)
+        {
+            mediaCover.Url = _mediaCoverProxy.RegisterUrl(mediaCover.RemoteUrl);
+        }
+    }
+
+    private void ConvertToMediaCoverUrls(int mediaItemId, IEnumerable<MediaCover> covers, Dictionary<string, FileInfo>? fileInfos)
+    {
+        foreach (var mediaCover in covers)
+        {
+            if (mediaCover.CoverType == MediaCoverType.Unknown)
+            {
+                continue;
+            }
+
+            SetMediaCoverUrl(mediaItemId, mediaCover, fileInfos);
+        }
+    }
+
+    private void SetMediaCoverUrl(int mediaItemId, MediaCover mediaCover, Dictionary<string, FileInfo>? fileInfos)
+    {
+        var filePath = GetCoverPath(mediaItemId, mediaCover.CoverType);
+        mediaCover.Url = $"/MediaCover/{mediaItemId}/{mediaCover.CoverType.ToString().ToLower()}{GetExtension(mediaCover.CoverType)}";
+
+        var lastWrite = GetLastWriteTime(filePath, fileInfos);
+        if (lastWrite.HasValue)
+        {
+            mediaCover.Url += "?lastWrite=" + lastWrite.Value.Ticks;
+        }
+    }
+
+    private DateTime? GetLastWriteTime(string filePath, Dictionary<string, FileInfo>? fileInfos)
+    {
+        if (fileInfos != null && fileInfos.TryGetValue(filePath, out var file))
+        {
+            return file.LastWriteTimeUtc;
+        }
+
+        if (_diskProvider.FileExists(filePath))
+        {
+            return _diskProvider.FileGetLastWrite(filePath);
+        }
+
+        return null;
     }
 
     public async Task<bool> EnsureCoversAsync(int mediaItemId, IEnumerable<MediaCover> covers)
