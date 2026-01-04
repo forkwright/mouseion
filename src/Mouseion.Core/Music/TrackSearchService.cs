@@ -1,0 +1,311 @@
+// Copyright (c) 2025 Mouseion Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+using Dapper;
+using Mouseion.Core.Datastore;
+using Mouseion.Core.MediaTypes;
+
+namespace Mouseion.Core.Music;
+
+public interface ITrackSearchService
+{
+    Task<List<TrackSearchResult>> SearchAsync(string query, int limit, CancellationToken ct = default);
+    List<TrackSearchResult> Search(string query, int limit);
+}
+
+public class TrackSearchService : ITrackSearchService
+{
+    private readonly IDatabase _database;
+    private readonly ITrackRepository _trackRepository;
+    private readonly IAlbumRepository _albumRepository;
+    private readonly IArtistRepository _artistRepository;
+    private readonly IMusicFileRepository _musicFileRepository;
+
+    public TrackSearchService(
+        IDatabase database,
+        ITrackRepository trackRepository,
+        IAlbumRepository albumRepository,
+        IArtistRepository artistRepository,
+        IMusicFileRepository musicFileRepository)
+    {
+        _database = database;
+        _trackRepository = trackRepository;
+        _albumRepository = albumRepository;
+        _artistRepository = artistRepository;
+        _musicFileRepository = musicFileRepository;
+    }
+
+    public async Task<List<TrackSearchResult>> SearchAsync(string query, int limit, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return new List<TrackSearchResult>();
+        }
+
+        var normalizedQuery = query.Trim().ToLowerInvariant();
+        var queryWords = normalizedQuery.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        using var conn = _database.OpenConnection();
+
+        // Search across tracks with joins to get artist/album names and genres
+        var sql = @"
+            SELECT
+                m.*,
+                art.Name as ArtistName,
+                alb.Title as AlbumTitle,
+                alb.Genres as AlbumGenres
+            FROM ""MediaItems"" m
+            LEFT JOIN ""Artists"" art ON m.""ArtistId"" = art.""Id""
+            LEFT JOIN ""Albums"" alb ON m.""AlbumId"" = alb.""Id""
+            WHERE m.""MediaType"" = @MediaType
+            ORDER BY m.""Id""
+        ";
+
+        var trackData = await conn.QueryAsync<dynamic>(
+            sql,
+            new { MediaType = (int)MediaType.Music }).ConfigureAwait(false);
+
+        var results = new List<TrackSearchResult>();
+
+        foreach (var row in trackData)
+        {
+            var track = MapToTrack(row);
+            var artistName = row.ArtistName as string;
+            var albumTitle = row.AlbumTitle as string;
+            var albumGenres = row.AlbumGenres as string;
+
+            // Parse genres (stored as JSON array string)
+            var genres = ParseGenres(albumGenres);
+            var primaryGenre = genres.FirstOrDefault();
+
+            // Calculate relevance score
+            var score = CalculateRelevanceScore(
+                track.Title,
+                artistName,
+                albumTitle,
+                genres,
+                normalizedQuery,
+                queryWords);
+
+            if (score > 0)
+            {
+                // Get audio quality info from MusicFile
+                int? bitDepth = null;
+                int? dynamicRange = null;
+                bool lossless = false;
+
+                var musicFiles = await _musicFileRepository.GetByTrackIdAsync(track.Id, ct).ConfigureAwait(false);
+                if (musicFiles.Count > 0)
+                {
+                    var musicFile = musicFiles[0];
+                    // For now, we'll extract from the audio file path or metadata
+                    // This will be enhanced when we add explicit columns to MusicFiles table
+                    bitDepth = ExtractBitDepth(musicFile.AudioFormat);
+                    lossless = IsLosslessFormat(musicFile.AudioFormat);
+                }
+
+                results.Add(new TrackSearchResult
+                {
+                    Track = track,
+                    ArtistName = artistName,
+                    AlbumTitle = albumTitle,
+                    Genre = primaryGenre,
+                    BitDepth = bitDepth,
+                    DynamicRange = dynamicRange,
+                    Lossless = lossless,
+                    RelevanceScore = score
+                });
+            }
+        }
+
+        return results
+            .OrderByDescending(r => r.RelevanceScore)
+            .Take(limit)
+            .ToList();
+    }
+
+    public List<TrackSearchResult> Search(string query, int limit)
+    {
+        return SearchAsync(query, limit).GetAwaiter().GetResult();
+    }
+
+    private static Track MapToTrack(dynamic row)
+    {
+        return new Track
+        {
+            Id = row.Id,
+            AlbumId = row.AlbumId,
+            ArtistId = row.ArtistId,
+            Title = row.Title,
+            ForeignTrackId = row.ForeignTrackId,
+            MusicBrainzId = row.MusicBrainzId,
+            TrackNumber = row.TrackNumber,
+            DiscNumber = row.DiscNumber,
+            DurationSeconds = row.DurationSeconds,
+            Explicit = row.Explicit,
+            Monitored = row.Monitored,
+            QualityProfileId = row.QualityProfileId,
+            Path = row.Path,
+            RootFolderPath = row.RootFolderPath,
+            Added = row.Added
+        };
+    }
+
+    private static List<string> ParseGenres(string? genresJson)
+    {
+        if (string.IsNullOrWhiteSpace(genresJson))
+        {
+            return new List<string>();
+        }
+
+        try
+        {
+            // Simple JSON array parsing: ["Genre1","Genre2"]
+            var cleaned = genresJson.Trim('[', ']');
+            if (string.IsNullOrWhiteSpace(cleaned))
+            {
+                return new List<string>();
+            }
+
+            return cleaned
+                .Split(',')
+                .Select(g => g.Trim(' ', '"'))
+                .Where(g => !string.IsNullOrWhiteSpace(g))
+                .ToList();
+        }
+        catch
+        {
+            return new List<string>();
+        }
+    }
+
+    private static double CalculateRelevanceScore(
+        string trackTitle,
+        string? artistName,
+        string? albumTitle,
+        List<string> genres,
+        string normalizedQuery,
+        string[] queryWords)
+    {
+        var score = 0.0;
+
+        // Exact match (highest priority)
+        if (trackTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 100.0;
+        }
+        else if (artistName?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 90.0;
+        }
+        else if (albumTitle?.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 85.0;
+        }
+        else if (genres.Any(g => g.Equals(normalizedQuery, StringComparison.OrdinalIgnoreCase)))
+        {
+            score += 80.0;
+        }
+        // Starts with (second priority)
+        else if (trackTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 70.0;
+        }
+        else if (artistName?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 65.0;
+        }
+        else if (albumTitle?.StartsWith(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 60.0;
+        }
+        // Contains (third priority)
+        else if (trackTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 50.0;
+        }
+        else if (artistName?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 45.0;
+        }
+        else if (albumTitle?.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase) == true)
+        {
+            score += 40.0;
+        }
+        else if (genres.Any(g => g.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase)))
+        {
+            score += 35.0;
+        }
+
+        // Multi-word query bonus: check if all words are present
+        if (queryWords.Length > 1)
+        {
+            var trackLower = trackTitle?.ToLowerInvariant() ?? "";
+            var artistLower = artistName?.ToLowerInvariant() ?? "";
+            var albumLower = albumTitle?.ToLowerInvariant() ?? "";
+            var genresLower = string.Join(" ", genres).ToLowerInvariant();
+
+            var allInTrack = queryWords.All(w => trackLower.Contains(w));
+            var allInArtist = queryWords.All(w => artistLower.Contains(w));
+            var allInAlbum = queryWords.All(w => albumLower.Contains(w));
+            var allInGenre = queryWords.All(w => genresLower.Contains(w));
+
+            if (allInTrack) score += 30.0;
+            else if (allInArtist) score += 25.0;
+            else if (allInAlbum) score += 20.0;
+            else if (allInGenre) score += 15.0;
+        }
+
+        return score;
+    }
+
+    private static int? ExtractBitDepth(string? audioFormat)
+    {
+        if (string.IsNullOrWhiteSpace(audioFormat))
+        {
+            return null;
+        }
+
+        // Extract bit depth from format string (e.g., "FLAC 24-bit", "PCM 16-bit")
+        if (audioFormat.Contains("24", StringComparison.OrdinalIgnoreCase))
+        {
+            return 24;
+        }
+        if (audioFormat.Contains("16", StringComparison.OrdinalIgnoreCase))
+        {
+            return 16;
+        }
+        if (audioFormat.Contains("32", StringComparison.OrdinalIgnoreCase))
+        {
+            return 32;
+        }
+
+        return null;
+    }
+
+    private static bool IsLosslessFormat(string? audioFormat)
+    {
+        if (string.IsNullOrWhiteSpace(audioFormat))
+        {
+            return false;
+        }
+
+        return audioFormat.Contains("FLAC", StringComparison.OrdinalIgnoreCase) ||
+               audioFormat.Contains("PCM", StringComparison.OrdinalIgnoreCase) ||
+               audioFormat.Contains("APE", StringComparison.OrdinalIgnoreCase) ||
+               audioFormat.Contains("WavPack", StringComparison.OrdinalIgnoreCase) ||
+               audioFormat.Contains("DSD", StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+public class TrackSearchResult
+{
+    public Track Track { get; set; } = null!;
+    public string? ArtistName { get; set; }
+    public string? AlbumTitle { get; set; }
+    public string? Genre { get; set; }
+    public int? BitDepth { get; set; }
+    public int? DynamicRange { get; set; }
+    public bool Lossless { get; set; }
+    public double RelevanceScore { get; set; }
+}

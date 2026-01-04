@@ -24,19 +24,23 @@ public class FilterResult
     public int TotalCount { get; set; }
     public int Page { get; set; }
     public int PageSize { get; set; }
+    public FilterSummary? Summary { get; set; }
 }
 
 public class LibraryFilterService : ILibraryFilterService
 {
     private readonly ITrackRepository _trackRepository;
     private readonly IFilterQueryBuilder _queryBuilder;
+    private readonly IMusicFileRepository _musicFileRepository;
 
     public LibraryFilterService(
         ITrackRepository trackRepository,
-        IFilterQueryBuilder queryBuilder)
+        IFilterQueryBuilder queryBuilder,
+        IMusicFileRepository musicFileRepository)
     {
         _trackRepository = trackRepository;
         _queryBuilder = queryBuilder;
+        _musicFileRepository = musicFileRepository;
     }
 
     public async Task<FilterResult> FilterTracksAsync(FilterRequest request, CancellationToken ct = default)
@@ -46,12 +50,15 @@ public class LibraryFilterService : ILibraryFilterService
         var totalCount = await _trackRepository.CountAsync(ct).ConfigureAwait(false);
         var tracks = await _trackRepository.FilterAsync(request, ct).ConfigureAwait(false);
 
+        var summary = await ComputeSummaryAsync(tracks, ct).ConfigureAwait(false);
+
         return new FilterResult
         {
             Tracks = tracks,
             Page = request.Page,
             PageSize = request.PageSize,
-            TotalCount = totalCount
+            TotalCount = totalCount,
+            Summary = summary
         };
     }
 
@@ -62,12 +69,15 @@ public class LibraryFilterService : ILibraryFilterService
         var totalCount = _trackRepository.Count();
         var tracks = _trackRepository.Filter(request);
 
+        var summary = ComputeSummary(tracks);
+
         return new FilterResult
         {
             Tracks = tracks,
             Page = request.Page,
             PageSize = request.PageSize,
-            TotalCount = totalCount
+            TotalCount = totalCount,
+            Summary = summary
         };
     }
 
@@ -100,5 +110,76 @@ public class LibraryFilterService : ILibraryFilterService
                 throw new ArgumentException($"Field '{condition.Field}' is not allowed for filtering");
             }
         }
+    }
+
+    private async Task<FilterSummary> ComputeSummaryAsync(List<Track> tracks, CancellationToken ct = default)
+    {
+        if (tracks.Count == 0)
+        {
+            return new FilterSummary();
+        }
+
+        var trackIds = tracks.Select(t => t.Id).ToList();
+        var musicFiles = new List<MusicFile>();
+
+        foreach (var trackId in trackIds)
+        {
+            var files = await _musicFileRepository.GetByTrackIdAsync(trackId, ct).ConfigureAwait(false);
+            musicFiles.AddRange(files);
+        }
+
+        return ComputeSummaryFromFiles(musicFiles);
+    }
+
+    private FilterSummary ComputeSummary(List<Track> tracks)
+    {
+        if (tracks.Count == 0)
+        {
+            return new FilterSummary();
+        }
+
+        var trackIds = tracks.Select(t => t.Id).ToList();
+        var musicFiles = new List<MusicFile>();
+
+        foreach (var trackId in trackIds)
+        {
+            var files = _musicFileRepository.GetByTrackId(trackId);
+            musicFiles.AddRange(files);
+        }
+
+        return ComputeSummaryFromFiles(musicFiles);
+    }
+
+    private static FilterSummary ComputeSummaryFromFiles(List<MusicFile> musicFiles)
+    {
+        if (musicFiles.Count == 0)
+        {
+            return new FilterSummary();
+        }
+
+        var dynamicRanges = musicFiles
+            .Where(f => f.DynamicRange.HasValue)
+            .Select(f => f.DynamicRange!.Value)
+            .ToList();
+
+        var formatDistribution = musicFiles
+            .Where(f => !string.IsNullOrEmpty(f.AudioFormat))
+            .GroupBy(f => f.AudioFormat!)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var sampleRateDistribution = musicFiles
+            .Where(f => f.SampleRate.HasValue)
+            .GroupBy(f => f.SampleRate!.Value)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var losslessCount = musicFiles.Count(f => f.Lossless == true);
+
+        return new FilterSummary
+        {
+            AvgDynamicRange = dynamicRanges.Count > 0 ? dynamicRanges.Average() : null,
+            FormatDistribution = formatDistribution,
+            SampleRateDistribution = sampleRateDistribution,
+            LosslessCount = losslessCount
+        };
     }
 }

@@ -80,6 +80,7 @@ try
     container.Register<Mouseion.Core.Music.IMusicQualityParser, Mouseion.Core.Music.MusicQualityParser>(Reuse.Singleton);
     container.Register<Mouseion.Core.Music.IAcoustIDService, Mouseion.Core.Music.AcoustIDService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Music.IMusicReleaseMonitoringService, Mouseion.Core.Music.MusicReleaseMonitoringService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Music.ITrackSearchService, Mouseion.Core.Music.TrackSearchService>(Reuse.Singleton);
 
     // Register audio analysis services
     container.Register<Mouseion.Core.MediaFiles.Audio.IDynamicRangeAnalyzer, Mouseion.Core.MediaFiles.Audio.DynamicRangeAnalyzer>(Reuse.Singleton);
