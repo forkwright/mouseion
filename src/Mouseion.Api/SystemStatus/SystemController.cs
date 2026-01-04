@@ -7,9 +7,9 @@ using Mouseion.Core.SystemInfo;
 
 namespace Mouseion.Api.SystemStatus;
 
-[Authorize]
 [ApiController]
-[Route("api/v3/[controller]")]
+[Route("api/v3/system")]
+[Authorize]
 public class SystemController : ControllerBase
 {
     private readonly ISystemService _systemService;
@@ -20,7 +20,7 @@ public class SystemController : ControllerBase
     }
 
     [HttpGet("status")]
-    public IActionResult GetStatus()
+    public ActionResult<Core.SystemInfo.SystemInfo> GetStatus()
     {
         var systemInfo = _systemService.GetSystemInfo();
         return Ok(systemInfo);
