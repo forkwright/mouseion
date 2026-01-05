@@ -443,14 +443,14 @@ public class MediaInfoService : IMediaInfoService
 
     private static TimeSpan GetBestRuntime(TimeSpan? audio, TimeSpan? video, TimeSpan general)
     {
+        if ((!video.HasValue || video.Value == TimeSpan.Zero) && (!audio.HasValue || audio.Value == TimeSpan.Zero))
+        {
+            return general;
+        }
+
         if (!video.HasValue || video.Value == TimeSpan.Zero)
         {
-            if (!audio.HasValue || audio.Value == TimeSpan.Zero)
-            {
-                return general;
-            }
-
-            return audio.Value;
+            return audio!.Value;
         }
 
         return video.Value;

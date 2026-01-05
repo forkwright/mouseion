@@ -349,12 +349,10 @@ namespace Mouseion.Common.Disk
 
             if (mode.HasFlag(TransferMode.Copy))
             {
-                if (isBtrfs || isZfs)
+                // Attempt reflink for btrfs/zfs filesystems
+                if ((isBtrfs || isZfs) && _diskProvider.TryCreateRefLink(sourcePath, targetPath))
                 {
-                    if (_diskProvider.TryCreateRefLink(sourcePath, targetPath))
-                    {
-                        return TransferMode.Copy;
-                    }
+                    return TransferMode.Copy;
                 }
 
                 TryCopyFileVerified(sourcePath, targetPath, originalSize);
@@ -363,20 +361,19 @@ namespace Mouseion.Common.Disk
 
             if (mode.HasFlag(TransferMode.Move))
             {
-                if (isBtrfs || isZfs)
+                // Attempt rename for btrfs/zfs on same mount
+                if ((isBtrfs || isZfs) && isSameMount && _diskProvider.TryRenameFile(sourcePath, targetPath))
                 {
-                    if (isSameMount && _diskProvider.TryRenameFile(sourcePath, targetPath))
-                    {
-                        Logger.Verbose("Renamed [{SourcePath}] to [{TargetPath}].", sourcePath, targetPath);
-                        return TransferMode.Move;
-                    }
+                    Logger.Verbose("Renamed [{SourcePath}] to [{TargetPath}].", sourcePath, targetPath);
+                    return TransferMode.Move;
+                }
 
-                    if (_diskProvider.TryCreateRefLink(sourcePath, targetPath))
-                    {
-                        Logger.Verbose("Reflink successful, deleting source [{SourcePath}].", sourcePath);
-                        _diskProvider.DeleteFile(sourcePath);
-                        return TransferMode.Move;
-                    }
+                // Attempt reflink for btrfs/zfs filesystems
+                if ((isBtrfs || isZfs) && _diskProvider.TryCreateRefLink(sourcePath, targetPath))
+                {
+                    Logger.Verbose("Reflink successful, deleting source [{SourcePath}].", sourcePath);
+                    _diskProvider.DeleteFile(sourcePath);
+                    return TransferMode.Move;
                 }
 
                 if (isCifs && !isSameMount)

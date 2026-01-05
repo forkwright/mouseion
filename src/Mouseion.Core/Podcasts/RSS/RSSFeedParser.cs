@@ -118,24 +118,20 @@ public class RSSFeedParser : IRSSFeedParser
 
         // Handle HH:MM:SS or MM:SS format
         var parts = durationStr.Split(':');
-        if (parts.Length == 3)
+        if (parts.Length == 3 &&
+            int.TryParse(parts[0], out var hours) &&
+            int.TryParse(parts[1], out var minutes) &&
+            int.TryParse(parts[2], out var secs))
         {
-            if (int.TryParse(parts[0], out var hours) &&
-                int.TryParse(parts[1], out var minutes) &&
-                int.TryParse(parts[2], out var secs))
-            {
-                seconds = hours * 3600 + minutes * 60 + secs;
-                return true;
-            }
+            seconds = hours * 3600 + minutes * 60 + secs;
+            return true;
         }
-        else if (parts.Length == 2)
+        else if (parts.Length == 2 &&
+                 int.TryParse(parts[0], out var mins) &&
+                 int.TryParse(parts[1], out var s))
         {
-            if (int.TryParse(parts[0], out var minutes) &&
-                int.TryParse(parts[1], out var secs))
-            {
-                seconds = minutes * 60 + secs;
-                return true;
-            }
+            seconds = mins * 60 + s;
+            return true;
         }
         else if (int.TryParse(durationStr, out seconds))
         {

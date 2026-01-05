@@ -86,22 +86,20 @@ namespace Mouseion.Common.Http.Dispatchers
                 cts.CancelAfter(TimeSpan.FromSeconds(100));
             }
 
-            if (request.Credentials != null)
+            // Pattern matching handles null check automatically
+            if (request.Credentials is BasicNetworkCredential bc)
             {
-                if (request.Credentials is BasicNetworkCredential bc)
+                var authInfo = bc.UserName + ":" + bc.Password;
+                authInfo = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(authInfo));
+                requestMessage.Headers.Add("Authorization", "Basic " + authInfo);
+            }
+            else if (request.Credentials is NetworkCredential nc)
+            {
+                var creds = GetCredentialCache();
+                foreach (var authtype in new[] { "Basic", "Digest" })
                 {
-                    var authInfo = bc.UserName + ":" + bc.Password;
-                    authInfo = Convert.ToBase64String(Encoding.GetEncoding("ISO-8859-1").GetBytes(authInfo));
-                    requestMessage.Headers.Add("Authorization", "Basic " + authInfo);
-                }
-                else if (request.Credentials is NetworkCredential nc)
-                {
-                    var creds = GetCredentialCache();
-                    foreach (var authtype in new[] { "Basic", "Digest" })
-                    {
-                        creds.Remove((Uri)request.Url, authtype);
-                        creds.Add((Uri)request.Url, authtype, nc);
-                    }
+                    creds.Remove((Uri)request.Url, authtype);
+                    creds.Add((Uri)request.Url, authtype, nc);
                 }
             }
 
