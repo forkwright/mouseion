@@ -297,19 +297,7 @@ try
         });
     });
 
-    // Configure CORS (restrictive by default)
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(policy =>
-        {
-            policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
-    });
-
-    // Configure CORS (restrictive by default)
+    // Configure CORS (restrictive by default - requires AllowedOrigins in appsettings.json)
     builder.Services.AddCors(options =>
     {
         options.AddDefaultPolicy(policy =>
