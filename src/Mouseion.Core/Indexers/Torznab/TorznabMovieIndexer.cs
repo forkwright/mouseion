@@ -79,7 +79,7 @@ public class TorznabMovieIndexer
                 .SetHeader("User-Agent", "Mouseion/1.0")
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("Torznab indexer returned {StatusCode}", response.StatusCode);

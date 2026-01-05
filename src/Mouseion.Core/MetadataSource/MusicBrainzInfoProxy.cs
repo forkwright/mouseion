@@ -84,11 +84,6 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
         }
     }
 
-    public Artist? GetArtistByMusicBrainzId(string mbid)
-    {
-        return GetArtistByMusicBrainzIdAsync(mbid).GetAwaiter().GetResult();
-    }
-
     public async Task<Album?> GetAlbumByMusicBrainzIdAsync(string mbid, CancellationToken ct = default)
     {
         var cacheKey = $"album_mbid_{mbid}";
@@ -140,11 +135,6 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
         }
     }
 
-    public Album? GetAlbumByMusicBrainzId(string mbid)
-    {
-        return GetAlbumByMusicBrainzIdAsync(mbid).GetAwaiter().GetResult();
-    }
-
     public async Task<List<Artist>> SearchArtistsByNameAsync(string name, CancellationToken ct = default)
     {
         var cacheKey = $"artist_search_{name.ToLowerInvariant()}";
@@ -191,11 +181,6 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
             _logger.LogWarning(ex, "Request timed out or was cancelled: artist name search {Name}", name.SanitizeForLog());
             return new List<Artist>();
         }
-    }
-
-    public List<Artist> SearchArtistsByName(string name)
-    {
-        return SearchArtistsByNameAsync(name).GetAwaiter().GetResult();
     }
 
     public async Task<List<Album>> SearchAlbumsByTitleAsync(string title, CancellationToken ct = default)
@@ -246,11 +231,6 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
         }
     }
 
-    public List<Album> SearchAlbumsByTitle(string title)
-    {
-        return SearchAlbumsByTitleAsync(title).GetAwaiter().GetResult();
-    }
-
     public async Task<List<Album>> GetAlbumsByArtistAsync(string artistMbid, CancellationToken ct = default)
     {
         try
@@ -288,31 +268,16 @@ public class MusicBrainzInfoProxy : IProvideMusicInfo
         }
     }
 
-    public List<Album> GetAlbumsByArtist(string artistMbid)
-    {
-        return GetAlbumsByArtistAsync(artistMbid).GetAwaiter().GetResult();
-    }
-
     public async Task<List<Album>> GetTrendingAlbumsAsync(CancellationToken ct = default)
     {
         _logger.LogDebug("GetTrendingAlbums not supported by MusicBrainz");
         return await Task.FromResult(new List<Album>()).ConfigureAwait(false);
     }
 
-    public List<Album> GetTrendingAlbums()
-    {
-        return GetTrendingAlbumsAsync().GetAwaiter().GetResult();
-    }
-
     public async Task<List<Album>> GetPopularAlbumsAsync(CancellationToken ct = default)
     {
         _logger.LogDebug("GetPopularAlbums not supported by MusicBrainz");
         return await Task.FromResult(new List<Album>()).ConfigureAwait(false);
-    }
-
-    public List<Album> GetPopularAlbums()
-    {
-        return GetPopularAlbumsAsync().GetAwaiter().GetResult();
     }
 
     private Artist? ParseArtist(string json, string mbid)

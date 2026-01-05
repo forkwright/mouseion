@@ -152,7 +152,7 @@ public class MediaCoverService : IMediaCoverService
 
             try
             {
-                alreadyExists = _coverExistsSpecification.AlreadyExists(cover.RemoteUrl, fileName);
+                alreadyExists = await _coverExistsSpecification.AlreadyExistsAsync(cover.RemoteUrl, fileName).ConfigureAwait(false);
 
                 if (!alreadyExists)
                 {

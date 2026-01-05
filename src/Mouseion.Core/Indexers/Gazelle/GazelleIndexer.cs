@@ -88,7 +88,7 @@ public class GazelleIndexer
                 .SetHeader("Authorization", _settings.ApiKey)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("Gazelle returned {StatusCode}", response.StatusCode);
