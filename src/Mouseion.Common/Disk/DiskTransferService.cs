@@ -513,17 +513,17 @@ namespace Mouseion.Common.Disk
                 // Re-throw without rollback - file already exists at target
                 throw;
             }
-            catch (IOException ex)
+            catch (IOException)
             {
                 RollbackPartialMove(sourcePath, targetPath);
                 throw;
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 RollbackPartialMove(sourcePath, targetPath);
                 throw;
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
                 RollbackPartialMove(sourcePath, targetPath);
                 throw;
