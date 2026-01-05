@@ -362,6 +362,8 @@ try
     Log.Information("Mouseion started successfully - listening on {Urls}", string.Join(", ", app.Urls));
     app.Run();
 }
+// Top-level exception handler - generic Exception is appropriate here to catch any unhandled
+// application errors for logging before termination. This is the final safety net.
 catch (Exception ex)
 {
     Log.Fatal(ex, "Mouseion terminated unexpectedly");
