@@ -99,11 +99,6 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
     }
 
-    public Movie? GetByTmdbId(int tmdbId)
-    {
-        return GetByTmdbIdAsync(tmdbId).GetAwaiter().GetResult();
-    }
-
     public async Task<Movie?> GetByImdbIdAsync(string imdbId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
@@ -157,11 +152,6 @@ public class TmdbInfoProxy : IProvideMovieInfo
             _logger.LogWarning(ex, "Request timed out or was cancelled: movie by IMDB ID {ImdbId}", imdbId);
             return null;
         }
-    }
-
-    public Movie? GetByImdbId(string imdbId)
-    {
-        return GetByImdbIdAsync(imdbId).GetAwaiter().GetResult();
     }
 
     public async Task<List<Movie>> SearchByTitleAsync(string title, int? year = null, CancellationToken ct = default)
@@ -221,11 +211,6 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
     }
 
-    public List<Movie> SearchByTitle(string title, int? year = null)
-    {
-        return SearchByTitleAsync(title, year).GetAwaiter().GetResult();
-    }
-
     public async Task<List<Movie>> GetTrendingAsync(CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
@@ -261,11 +246,6 @@ public class TmdbInfoProxy : IProvideMovieInfo
             _logger.LogWarning(ex, "Request timed out or was cancelled: trending movies");
             return new List<Movie>();
         }
-    }
-
-    public List<Movie> GetTrending()
-    {
-        return GetTrendingAsync().GetAwaiter().GetResult();
     }
 
     public async Task<List<Movie>> GetPopularAsync(CancellationToken ct = default)
@@ -305,11 +285,6 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
     }
 
-    public List<Movie> GetPopular()
-    {
-        return GetPopularAsync().GetAwaiter().GetResult();
-    }
-
     public async Task<List<Movie>> GetUpcomingAsync(CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
@@ -347,11 +322,6 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
     }
 
-    public List<Movie> GetUpcoming()
-    {
-        return GetUpcomingAsync().GetAwaiter().GetResult();
-    }
-
     public async Task<List<Movie>> GetNowPlayingAsync(CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
@@ -387,11 +357,6 @@ public class TmdbInfoProxy : IProvideMovieInfo
             _logger.LogWarning(ex, "Request timed out or was cancelled: now playing movies");
             return new List<Movie>();
         }
-    }
-
-    public List<Movie> GetNowPlaying()
-    {
-        return GetNowPlayingAsync().GetAwaiter().GetResult();
     }
 
     private Movie? ParseMovie(string json)

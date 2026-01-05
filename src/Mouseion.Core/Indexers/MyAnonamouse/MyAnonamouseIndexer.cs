@@ -162,7 +162,7 @@ public partial class MyAnonamouseIndexer
                 .SetHeader("Cookie", $"mam_id={_settings.MamId}")
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("MyAnonamouse returned {StatusCode}", response.StatusCode);

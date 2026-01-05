@@ -161,7 +161,7 @@ namespace Mouseion.Common.Disk
             var sourceFolders = _diskProvider.GetDirectoryInfos(sourcePath);
             var targetFolders = _diskProvider.GetDirectoryInfos(targetPath);
 
-            foreach (var subDir in targetFolders.Where(v => !sourceFolders.Any(d => d.Name == v.Name)))
+            foreach (var subDir in targetFolders.Where(v => sourceFolders.All(d => d.Name != v.Name)))
             {
                 if (ShouldIgnore(subDir))
                 {
@@ -184,7 +184,7 @@ namespace Mouseion.Common.Disk
             var sourceFiles = _diskProvider.GetFileInfos(sourcePath);
             var targetFiles = _diskProvider.GetFileInfos(targetPath);
 
-            foreach (var targetFile in targetFiles.Where(v => !sourceFiles.Any(d => d.Name == v.Name)))
+            foreach (var targetFile in targetFiles.Where(v => sourceFiles.All(d => d.Name != v.Name)))
             {
                 if (ShouldIgnore(targetFile))
                 {

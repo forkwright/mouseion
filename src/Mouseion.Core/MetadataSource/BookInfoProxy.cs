@@ -104,7 +104,7 @@ public class BookInfoProxy : IProvideBookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("OpenLibrary returned {StatusCode} for work {WorkId}", response.StatusCode, workId.SanitizeForLog());
@@ -201,7 +201,7 @@ public class BookInfoProxy : IProvideBookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("OpenLibrary search returned {StatusCode}", response.StatusCode);
@@ -275,7 +275,7 @@ public class BookInfoProxy : IProvideBookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("OpenLibrary search returned {StatusCode}", response.StatusCode);
@@ -349,7 +349,7 @@ public class BookInfoProxy : IProvideBookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("OpenLibrary search returned {StatusCode}", response.StatusCode);
@@ -423,7 +423,7 @@ public class BookInfoProxy : IProvideBookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("OpenLibrary trending returned {StatusCode}", response.StatusCode);

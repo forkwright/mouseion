@@ -18,10 +18,6 @@ public interface ITVDBProxy
     Task<Series?> GetSeriesByTvdbIdAsync(int tvdbId, CancellationToken ct = default);
     Task<List<Episode>> GetEpisodesBySeriesIdAsync(int tvdbId, CancellationToken ct = default);
     Task<List<Series>> SearchSeriesAsync(string query, CancellationToken ct = default);
-
-    Series? GetSeriesByTvdbId(int tvdbId);
-    List<Episode> GetEpisodesBySeriesId(int tvdbId);
-    List<Series> SearchSeries(string query);
 }
 
 public class TVDBProxy : ITVDBProxy
@@ -69,11 +65,6 @@ public class TVDBProxy : ITVDBProxy
         }
     }
 
-    public Series? GetSeriesByTvdbId(int tvdbId)
-    {
-        return GetSeriesByTvdbIdAsync(tvdbId).GetAwaiter().GetResult();
-    }
-
     public async Task<List<Episode>> GetEpisodesBySeriesIdAsync(int tvdbId, CancellationToken ct = default)
     {
         _logger.LogInformation("Fetching episodes from TVDB for series: {TvdbId}", tvdbId);
@@ -102,11 +93,6 @@ public class TVDBProxy : ITVDBProxy
         }
     }
 
-    public List<Episode> GetEpisodesBySeriesId(int tvdbId)
-    {
-        return GetEpisodesBySeriesIdAsync(tvdbId).GetAwaiter().GetResult();
-    }
-
     public async Task<List<Series>> SearchSeriesAsync(string query, CancellationToken ct = default)
     {
         _logger.LogInformation("Searching TVDB for: {Query}", query);
@@ -133,10 +119,5 @@ public class TVDBProxy : ITVDBProxy
             _logger.LogWarning(ex, "Request timed out or was cancelled: TVDB search {Query}", query);
             return new List<Series>();
         }
-    }
-
-    public List<Series> SearchSeries(string query)
-    {
-        return SearchSeriesAsync(query).GetAwaiter().GetResult();
     }
 }

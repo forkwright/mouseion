@@ -15,7 +15,7 @@ namespace Mouseion.Core.MediaCovers;
 
 public interface ICoverExistsSpecification
 {
-    bool AlreadyExists(string url, string path);
+    Task<bool> AlreadyExistsAsync(string url, string path);
 }
 
 public class CoverExistsSpecification : ICoverExistsSpecification
@@ -31,7 +31,7 @@ public class CoverExistsSpecification : ICoverExistsSpecification
         _logger = logger;
     }
 
-    public bool AlreadyExists(string url, string path)
+    public async Task<bool> AlreadyExistsAsync(string url, string path)
     {
         if (!_diskProvider.FileExists(path))
         {
@@ -40,9 +40,9 @@ public class CoverExistsSpecification : ICoverExistsSpecification
 
         try
         {
-            var headers = _httpClient.Head(new HttpRequest(url)).Headers;
+            var response = await _httpClient.HeadAsync(new HttpRequest(url)).ConfigureAwait(false);
             var fileSize = _diskProvider.GetFileSize(path);
-            return fileSize == headers.ContentLength;
+            return fileSize == response.Headers.ContentLength;
         }
         catch (HttpRequestException ex)
         {

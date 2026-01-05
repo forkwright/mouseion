@@ -99,7 +99,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("Audnexus returned {StatusCode} for ASIN {Asin}", response.StatusCode, asin.SanitizeForLog());
@@ -196,7 +196,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("Audnexus search returned {StatusCode}", response.StatusCode);
@@ -270,7 +270,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("Audnexus search returned {StatusCode}", response.StatusCode);
@@ -344,7 +344,7 @@ public class AudiobookInfoProxy : IProvideAudiobookInfo
                 .SetHeader("User-Agent", UserAgent)
                 .Build();
 
-            var response = _httpClient.Get(request);
+            var response = _httpClient.GetAsync(request).GetAwaiter().GetResult();
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 _logger.LogWarning("Audnexus search returned {StatusCode}", response.StatusCode);
