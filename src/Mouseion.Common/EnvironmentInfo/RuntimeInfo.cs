@@ -213,22 +213,12 @@ namespace Mouseion.Common.EnvironmentInfo
 
         private static bool InternalIsDebug()
         {
-            if (BuildInfo.IsDebug || Debugger.IsAttached)
-            {
-                return true;
-            }
-
-            return false;
+            return BuildInfo.IsDebug || Debugger.IsAttached;
         }
 
         private static bool InternalIsOfficialBuild()
         {
-            if (BuildInfo.Version.Major >= 10 || BuildInfo.Version.Revision > 20000)
-            {
-                return false;
-            }
-
-            return true;
+            return BuildInfo.Version.Major < 10 && BuildInfo.Version.Revision <= 20000;
         }
 
         public bool IsWindowsTray { get; private set; }
