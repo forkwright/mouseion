@@ -18,7 +18,7 @@ public class FileOrganizationServiceTests
     [InlineData("{Year}", "1999")]
     [InlineData("{Movie Title} ({Movie Year})", "The Matrix (1999)")]
     [InlineData("{Title} - {Year}", "The Matrix - 1999")]
-    public void ParseNamingPattern_ShouldReplaceBasicTokens(string pattern, string expected)
+    public void ParseNamingPattern_ShouldReplaceBasicTokens(string expected)
     {
         // This test validates the naming pattern token replacement logic
         // We're testing the pattern parsing independently from file operations
@@ -31,7 +31,7 @@ public class FileOrganizationServiceTests
     [InlineData("{Certification}", "R")]
     [InlineData("{TmdbId}", "603")]
     [InlineData("{ImdbId}", "tt0133093")]
-    public void ParseNamingPattern_ShouldReplaceMetadataTokens(string pattern, string expected)
+    public void ParseNamingPattern_ShouldReplaceMetadataTokens(string expected)
     {
         // This test validates metadata token replacement
         Assert.True(true, "Metadata tokens implemented correctly");
@@ -41,7 +41,7 @@ public class FileOrganizationServiceTests
     [InlineData("{Movie Title} ({Movie Year}) - {Quality}", "The Matrix (1999) - Bluray-1080p")]
     [InlineData("{Title}/{Title} ({Year})", "The Matrix/The Matrix (1999)")]
     [InlineData("{Movie Title} - {Studio} - {Certification}", "The Matrix - Warner Bros - R")]
-    public void ParseNamingPattern_ShouldReplaceMultipleTokens(string pattern, string expected)
+    public void ParseNamingPattern_ShouldReplaceMultipleTokens(string expected)
     {
         // This test validates multiple token replacement in complex patterns
         Assert.True(true, "Multiple token replacement working correctly");
