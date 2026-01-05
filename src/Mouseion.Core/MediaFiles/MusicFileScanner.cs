@@ -114,6 +114,13 @@ public class MusicFileScanner : IMusicFileScanner
         }
 
         var safeAlbumTitle = album.Title.SafeFilename();
+
+        if (!artist.Path.IsPathTraversalSafe(safeAlbumTitle))
+        {
+            _logger.LogWarning("Rejecting potentially unsafe album path for album {AlbumId}: {AlbumTitle}", albumId, album.Title);
+            return new ScanResult { Success = false, Error = $"Album {albumId} has unsafe path" };
+        }
+
         var albumPath = Path.Combine(artist.Path, safeAlbumTitle);
         _logger.LogInformation("Scanning album: {Album} at {Path}", album.Title, albumPath);
         return await ScanPathAsync(albumPath, ct).ConfigureAwait(false);
@@ -142,6 +149,13 @@ public class MusicFileScanner : IMusicFileScanner
         }
 
         var safeAlbumTitle = album.Title.SafeFilename();
+
+        if (!artist.Path.IsPathTraversalSafe(safeAlbumTitle))
+        {
+            _logger.LogWarning("Rejecting potentially unsafe album path for album {AlbumId}: {AlbumTitle}", albumId, album.Title);
+            return new ScanResult { Success = false, Error = $"Album {albumId} has unsafe path" };
+        }
+
         var albumPath = Path.Combine(artist.Path, safeAlbumTitle);
         _logger.LogInformation("Scanning album: {Album} at {Path}", album.Title, albumPath);
         return ScanPath(albumPath);
