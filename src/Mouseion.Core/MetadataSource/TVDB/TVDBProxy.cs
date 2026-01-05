@@ -7,6 +7,7 @@
 // Copyright (C) 2010-2025 Radarr Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.Net.Http;
 using Microsoft.Extensions.Logging;
 using Mouseion.Core.TV;
 
@@ -56,9 +57,14 @@ public class TVDBProxy : ITVDBProxy
             _logger.LogWarning("TVDB API integration not yet implemented");
             return null;
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error fetching series from TVDB: {TvdbId}", tvdbId);
+            _logger.LogError(ex, "Network error fetching series from TVDB: {TvdbId}", tvdbId);
+            return null;
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: series from TVDB {TvdbId}", tvdbId);
             return null;
         }
     }
@@ -84,9 +90,14 @@ public class TVDBProxy : ITVDBProxy
             _logger.LogWarning("TVDB API integration not yet implemented");
             return new List<Episode>();
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error fetching episodes from TVDB for series: {TvdbId}", tvdbId);
+            _logger.LogError(ex, "Network error fetching episodes from TVDB for series: {TvdbId}", tvdbId);
+            return new List<Episode>();
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: episodes from TVDB for series {TvdbId}", tvdbId);
             return new List<Episode>();
         }
     }
@@ -112,9 +123,14 @@ public class TVDBProxy : ITVDBProxy
             _logger.LogWarning("TVDB API integration not yet implemented");
             return new List<Series>();
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error searching TVDB for: {Query}", query);
+            _logger.LogError(ex, "Network error searching TVDB for: {Query}", query);
+            return new List<Series>();
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: TVDB search {Query}", query);
             return new List<Series>();
         }
     }

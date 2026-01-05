@@ -7,6 +7,7 @@
 // Copyright (C) 2010-2025 Radarr Contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.Net.Http;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -81,9 +82,19 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return result;
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error fetching movie by TMDb ID: {TmdbId}", tmdbId);
+            _logger.LogError(ex, "Network error fetching movie by TMDb ID: {TmdbId}", tmdbId);
+            return null;
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to parse response for movie TMDb ID: {TmdbId}", tmdbId);
+            return null;
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: movie by TMDb ID {TmdbId}", tmdbId);
             return null;
         }
     }
@@ -131,9 +142,19 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return result;
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error fetching movie by IMDB ID: {ImdbId}", imdbId);
+            _logger.LogError(ex, "Network error fetching movie by IMDB ID: {ImdbId}", imdbId);
+            return null;
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to parse response for movie IMDB ID: {ImdbId}", imdbId);
+            return null;
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: movie by IMDB ID {ImdbId}", imdbId);
             return null;
         }
     }
@@ -183,9 +204,19 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return result;
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error searching movies by title: {Title}", title.SanitizeForLog());
+            _logger.LogError(ex, "Network error searching movies by title: {Title}", title.SanitizeForLog());
+            return new List<Movie>();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to parse search results for movie title: {Title}", title.SanitizeForLog());
+            return new List<Movie>();
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: movie title search {Title}", title.SanitizeForLog());
             return new List<Movie>();
         }
     }
@@ -215,9 +246,19 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return ParseSearchResults(response.Content);
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error fetching trending movies");
+            _logger.LogError(ex, "Network error fetching trending movies");
+            return new List<Movie>();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to parse response for trending movies");
+            return new List<Movie>();
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: trending movies");
             return new List<Movie>();
         }
     }
@@ -247,9 +288,19 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return ParseSearchResults(response.Content);
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error fetching popular movies");
+            _logger.LogError(ex, "Network error fetching popular movies");
+            return new List<Movie>();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to parse response for popular movies");
+            return new List<Movie>();
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: popular movies");
             return new List<Movie>();
         }
     }
@@ -279,9 +330,19 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return ParseSearchResults(response.Content);
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error fetching upcoming movies");
+            _logger.LogError(ex, "Network error fetching upcoming movies");
+            return new List<Movie>();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to parse response for upcoming movies");
+            return new List<Movie>();
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: upcoming movies");
             return new List<Movie>();
         }
     }
@@ -311,9 +372,19 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return ParseSearchResults(response.Content);
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error fetching now playing movies");
+            _logger.LogError(ex, "Network error fetching now playing movies");
+            return new List<Movie>();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Failed to parse response for now playing movies");
+            return new List<Movie>();
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Request timed out or was cancelled: now playing movies");
             return new List<Movie>();
         }
     }
@@ -354,7 +425,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return movie;
         }
-        catch (Exception ex)
+        catch (JsonException ex)
         {
             _logger.LogError(ex, "Error parsing TMDb movie JSON");
             return null;
@@ -377,7 +448,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return null;
         }
-        catch (Exception ex)
+        catch (JsonException ex)
         {
             _logger.LogError(ex, "Error parsing TMDb find result");
             return null;
@@ -405,7 +476,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
                 }
             }
         }
-        catch (Exception ex)
+        catch (JsonException ex)
         {
             _logger.LogError(ex, "Error parsing TMDb search results");
         }
@@ -442,7 +513,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
             return movie;
         }
-        catch (Exception ex)
+        catch (JsonException ex)
         {
             _logger.LogWarning(ex, "Error parsing movie from search result");
             return null;
