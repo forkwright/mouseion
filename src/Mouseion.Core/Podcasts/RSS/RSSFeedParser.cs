@@ -16,11 +16,12 @@ public interface IRSSFeedParser
 public class RSSFeedParser : IRSSFeedParser
 {
     private readonly ILogger<RSSFeedParser> _logger;
-    private static readonly HttpClient _httpClient = new();
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public RSSFeedParser(ILogger<RSSFeedParser> logger)
+    public RSSFeedParser(ILogger<RSSFeedParser> logger, IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<(PodcastShow Show, List<PodcastEpisode> Episodes)> ParseFeedAsync(
@@ -31,7 +32,8 @@ public class RSSFeedParser : IRSSFeedParser
         {
             _logger.LogInformation("Parsing RSS feed: {FeedUrl}", feedUrl);
 
-            var response = await _httpClient.GetStringAsync(feedUrl, ct).ConfigureAwait(false);
+            var httpClient = _httpClientFactory.CreateClient();
+            var response = await httpClient.GetStringAsync(feedUrl, ct).ConfigureAwait(false);
 
             using var stringReader = new StringReader(response);
             using var xmlReader = XmlReader.Create(stringReader);
