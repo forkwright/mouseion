@@ -427,9 +427,13 @@ namespace Mouseion.Common.Disk
                     Logger.Error("Failed to properly rollback the file move [{SourcePath}] to [{TargetPath}], incomplete file may be left in target path.", sourcePath, targetPath);
                 }
             }
-            catch (Exception ex)
+            catch (IOException ex)
             {
-                Logger.Error(ex, "Failed to properly rollback the file move [{SourcePath}] to [{TargetPath}], incomplete file may be left in target path.", sourcePath, targetPath);
+                Logger.Error(ex, "Failed to properly rollback the file move [{SourcePath}] to [{TargetPath}], incomplete file may be left in target path (I/O error)", sourcePath, targetPath);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Logger.Error(ex, "Failed to properly rollback the file move [{SourcePath}] to [{TargetPath}], incomplete file may be left in target path (access denied)", sourcePath, targetPath);
             }
         }
 
@@ -443,9 +447,13 @@ namespace Mouseion.Common.Disk
 
                 _diskProvider.MoveFile(targetPath, sourcePath);
             }
-            catch (Exception ex)
+            catch (IOException ex)
             {
-                Logger.Error(ex, "Failed to properly rollback the file move [{SourcePath}] to [{TargetPath}], file may be left in target path.", sourcePath, targetPath);
+                Logger.Error(ex, "Failed to properly rollback the file move [{SourcePath}] to [{TargetPath}], file may be left in target path (I/O error)", sourcePath, targetPath);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Logger.Error(ex, "Failed to properly rollback the file move [{SourcePath}] to [{TargetPath}], file may be left in target path (access denied)", sourcePath, targetPath);
             }
         }
 
@@ -462,9 +470,13 @@ namespace Mouseion.Common.Disk
                     _diskProvider.DeleteFile(targetPath);
                 }
             }
-            catch (Exception ex)
+            catch (IOException ex)
             {
-                Logger.Error(ex, "Failed to properly rollback the file copy [{SourcePath}] to [{TargetPath}], file may be left in target path.", sourcePath, targetPath);
+                Logger.Error(ex, "Failed to properly rollback the file copy [{SourcePath}] to [{TargetPath}], file may be left in target path (I/O error)", sourcePath, targetPath);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Logger.Error(ex, "Failed to properly rollback the file copy [{SourcePath}] to [{TargetPath}], file may be left in target path (access denied)", sourcePath, targetPath);
             }
         }
 
@@ -496,13 +508,24 @@ namespace Mouseion.Common.Disk
                 _diskProvider.MoveFile(sourcePath, targetPath);
                 VerifyFile(sourcePath, targetPath, originalSize, "move");
             }
-            catch (Exception ex)
+            catch (FileAlreadyExistsException)
             {
-                if (ex is not FileAlreadyExistsException)
-                {
-                    RollbackPartialMove(sourcePath, targetPath);
-                }
-
+                // Re-throw without rollback - file already exists at target
+                throw;
+            }
+            catch (IOException ex)
+            {
+                RollbackPartialMove(sourcePath, targetPath);
+                throw;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                RollbackPartialMove(sourcePath, targetPath);
+                throw;
+            }
+            catch (InvalidOperationException ex)
+            {
+                RollbackPartialMove(sourcePath, targetPath);
                 throw;
             }
         }

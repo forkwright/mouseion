@@ -88,9 +88,19 @@ public class RSSFeedParser : IRSSFeedParser
 
             return (show, episodes);
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Failed to parse RSS feed: {FeedUrl}", feedUrl);
+            _logger.LogError(ex, "Network error fetching RSS feed: {FeedUrl}", feedUrl);
+            throw;
+        }
+        catch (XmlException ex)
+        {
+            _logger.LogError(ex, "XML parsing error for RSS feed: {FeedUrl}", feedUrl);
+            throw;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Invalid RSS feed format: {FeedUrl}", feedUrl);
             throw;
         }
     }

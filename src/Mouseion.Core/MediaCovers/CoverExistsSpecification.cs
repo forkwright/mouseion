@@ -44,9 +44,19 @@ public class CoverExistsSpecification : ICoverExistsSpecification
             var fileSize = _diskProvider.GetFileSize(path);
             return fileSize == headers.ContentLength;
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
-            _logger.LogWarning(ex, "Failed to check if cover already exists for {Url}", url);
+            _logger.LogWarning(ex, "Network error checking if cover exists for {Url}", url);
+            return true; // Assume exists to avoid re-download on temporary failures
+        }
+        catch (HttpException ex)
+        {
+            _logger.LogWarning(ex, "HTTP error checking if cover exists for {Url}", url);
+            return true; // Assume exists to avoid re-download on temporary failures
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(ex, "I/O error checking if cover exists for {Url}", url);
             return true; // Assume exists to avoid re-download on temporary failures
         }
     }

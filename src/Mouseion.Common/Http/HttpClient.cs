@@ -263,9 +263,13 @@ namespace Mouseion.Common.Http
                 {
                     container.SetCookies((Uri)url, cookieHeader);
                 }
-                catch (Exception ex)
+                catch (System.Net.CookieException ex)
                 {
-                    _logger.Debug(ex, "Invalid cookie in {Url}", url);
+                    _logger.Debug(ex, "Invalid cookie format in {Url}", url);
+                }
+                catch (ArgumentException ex)
+                {
+                    _logger.Debug(ex, "Invalid cookie argument in {Url}", url);
                 }
             }
         }

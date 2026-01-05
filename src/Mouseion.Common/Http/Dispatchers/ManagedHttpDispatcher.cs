@@ -134,9 +134,13 @@ namespace Mouseion.Common.Http.Dispatchers
                             data = await responseMessage.Content.ReadAsByteArrayAsync(cts.Token);
                         }
                     }
-                    catch (Exception ex)
+                    catch (HttpRequestException ex)
                     {
                         throw new WebException("Failed to read complete http response", ex, WebExceptionStatus.ReceiveFailure, null);
+                    }
+                    catch (IOException ex)
+                    {
+                        throw new WebException("Failed to read complete http response (I/O error)", ex, WebExceptionStatus.ReceiveFailure, null);
                     }
 
                     var headers = responseMessage.Headers.ToNameValueCollection();
@@ -273,9 +277,14 @@ namespace Mouseion.Common.Http.Dispatchers
                         ip.Address.AddressFamily == AddressFamily.InterNetwork &&
                         !IPAddress.IsLoopback(ip.Address)));
             }
-            catch (Exception e)
+            catch (System.Net.NetworkInformation.NetworkInformationException ex)
             {
-                _logger.Debug(e, "Caught exception while GetAllNetworkInterfaces assuming IPv4 connectivity: {Message}", e.Message);
+                _logger.Debug(ex, "Network information error while checking IPv4 connectivity, assuming IPv4 available");
+                return true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.Debug(ex, "Error checking network interfaces, assuming IPv4 connectivity available");
                 return true;
             }
         }
