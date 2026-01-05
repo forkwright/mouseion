@@ -19,6 +19,7 @@ namespace Mouseion.Common.EnvironmentInfo
         string AppDataFolder { get; }
         string TempFolder { get; }
         string StartUpFolder { get; }
+        string GetMediaCoverPath();
     }
 
     public class AppFolderInfo : IAppFolderInfo
@@ -32,9 +33,9 @@ namespace Mouseion.Common.EnvironmentInfo
                 _dataSpecialFolder = Environment.SpecialFolder.ApplicationData;
             }
 
-            if (startupContext.Args.ContainsKey(StartupContext.APPDATA))
+            if (startupContext.Args.TryGetValue(StartupContext.APPDATA, out var appDataPath))
             {
-                AppDataFolder = startupContext.Args[StartupContext.APPDATA];
+                AppDataFolder = appDataPath;
                 logger.Information("Data directory is being overridden to [{AppDataFolder}]", AppDataFolder);
             }
             else
@@ -51,5 +52,10 @@ namespace Mouseion.Common.EnvironmentInfo
         public string StartUpFolder { get; private set; }
 
         public string TempFolder { get; private set; }
+
+        public string GetMediaCoverPath()
+        {
+            return Path.Combine(AppDataFolder, "MediaCover");
+        }
     }
 }

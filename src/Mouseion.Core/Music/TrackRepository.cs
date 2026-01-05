@@ -19,12 +19,14 @@ public interface ITrackRepository : IBasicRepository<Track>
     Task<Track?> FindByForeignIdAsync(string foreignTrackId, CancellationToken ct = default);
     Task<List<Track>> GetByAlbumIdAsync(int albumId, CancellationToken ct = default);
     Task<List<Track>> GetByArtistIdAsync(int artistId, CancellationToken ct = default);
+    Task<List<Track>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken ct = default);
     Task<List<Track>> GetMonitoredAsync(CancellationToken ct = default);
     Task<List<Track>> FilterAsync(FilterRequest request, CancellationToken ct = default);
 
     Track? FindByForeignId(string foreignTrackId);
     List<Track> GetByAlbumId(int albumId);
     List<Track> GetByArtistId(int artistId);
+    List<Track> GetByIds(IEnumerable<int> ids);
     List<Track> GetMonitored();
     List<Track> Filter(FilterRequest request);
 }
@@ -126,6 +128,35 @@ public class TrackRepository : BasicRepository<Track>, ITrackRepository
             new { ArtistId = artistId }).ToList();
     }
 
+    public async Task<List<Track>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    {
+        var idList = ids.ToList();
+        if (idList.Count == 0)
+        {
+            return new List<Track>();
+        }
+
+        using var conn = _database.OpenConnection();
+        var result = await conn.QueryAsync<Track>(
+            $"SELECT * FROM \"MediaItems\" WHERE \"Id\" IN @Ids AND \"MediaType\" = {(int)MediaType.Music}",
+            new { Ids = idList }).ConfigureAwait(false);
+        return result.ToList();
+    }
+
+    public List<Track> GetByIds(IEnumerable<int> ids)
+    {
+        var idList = ids.ToList();
+        if (idList.Count == 0)
+        {
+            return new List<Track>();
+        }
+
+        using var conn = _database.OpenConnection();
+        return conn.Query<Track>(
+            $"SELECT * FROM \"MediaItems\" WHERE \"Id\" IN @Ids AND \"MediaType\" = {(int)MediaType.Music}",
+            new { Ids = idList }).ToList();
+    }
+
     public async Task<List<Track>> GetMonitoredAsync(CancellationToken ct = default)
     {
         using var conn = _database.OpenConnection();
@@ -151,6 +182,8 @@ public class TrackRepository : BasicRepository<Track>, ITrackRepository
             "SELECT * FROM \"MusicFiles\"",
             $@"SELECT m.* FROM ""MediaItems"" m
                INNER JOIN ""MusicFiles"" mf ON m.""Id"" = mf.""TrackId""
+               LEFT JOIN ""Albums"" al ON m.""AlbumId"" = al.""Id""
+               LEFT JOIN ""Artists"" ar ON m.""ArtistId"" = ar.""Id""
                WHERE m.""MediaType"" = {(int)MediaType.Music} AND");
 
         using var conn = _database.OpenConnection();
@@ -166,6 +199,8 @@ public class TrackRepository : BasicRepository<Track>, ITrackRepository
             "SELECT * FROM \"MusicFiles\"",
             $@"SELECT m.* FROM ""MediaItems"" m
                INNER JOIN ""MusicFiles"" mf ON m.""Id"" = mf.""TrackId""
+               LEFT JOIN ""Albums"" al ON m.""AlbumId"" = al.""Id""
+               LEFT JOIN ""Artists"" ar ON m.""ArtistId"" = ar.""Id""
                WHERE m.""MediaType"" = {(int)MediaType.Music} AND");
 
         using var conn = _database.OpenConnection();

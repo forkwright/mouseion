@@ -10,6 +10,8 @@ public interface IAudioAnalysisService
 {
     Task<AudioAnalysis?> GetAnalysisAsync(int trackId, CancellationToken ct = default);
     AudioAnalysis? GetAnalysis(int trackId);
+    Task<Dictionary<int, AudioAnalysis>> GetAnalysisBatchAsync(IEnumerable<int> trackIds, CancellationToken ct = default);
+    Dictionary<int, AudioAnalysis> GetAnalysisBatch(IEnumerable<int> trackIds);
 }
 
 public class AudioAnalysisService : IAudioAnalysisService
@@ -108,6 +110,40 @@ public class AudioAnalysisService : IAudioAnalysisService
             Lossless = IsLosslessFormat(fileInfo.Codec),
             Transcoded = false
         };
+    }
+
+    public async Task<Dictionary<int, AudioAnalysis>> GetAnalysisBatchAsync(IEnumerable<int> trackIds, CancellationToken ct = default)
+    {
+        var trackIdList = trackIds.ToList();
+        var result = new Dictionary<int, AudioAnalysis>();
+
+        foreach (var trackId in trackIdList)
+        {
+            var analysis = await GetAnalysisAsync(trackId, ct).ConfigureAwait(false);
+            if (analysis != null)
+            {
+                result[trackId] = analysis;
+            }
+        }
+
+        return result;
+    }
+
+    public Dictionary<int, AudioAnalysis> GetAnalysisBatch(IEnumerable<int> trackIds)
+    {
+        var trackIdList = trackIds.ToList();
+        var result = new Dictionary<int, AudioAnalysis>();
+
+        foreach (var trackId in trackIdList)
+        {
+            var analysis = GetAnalysis(trackId);
+            if (analysis != null)
+            {
+                result[trackId] = analysis;
+            }
+        }
+
+        return result;
     }
 
     private static bool IsLosslessFormat(string codec)

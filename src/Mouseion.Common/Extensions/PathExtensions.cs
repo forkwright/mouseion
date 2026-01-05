@@ -157,13 +157,15 @@ namespace Mouseion.Common.Extensions
                 return false;
             }
 
+            // Early return if path has leading/trailing whitespace on Windows
+            if (OsInfo.IsWindows && path.Trim() != path)
+            {
+                return false;
+            }
+
+            // Check directory component names for leading/trailing whitespace on Windows
             if (OsInfo.IsWindows)
             {
-                if (path.Trim() != path)
-                {
-                    return false;
-                }
-
                 var directoryInfo = new DirectoryInfo(path);
 
                 while (directoryInfo != null)
@@ -421,6 +423,19 @@ namespace Mouseion.Common.Extensions
         private static bool IsPathValidForNonWindows(string path)
         {
             return path.StartsWith('/');
+        }
+
+        public static bool IsPathTraversalSafe(this string basePath, string relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+            {
+                return false;
+            }
+
+            var fullPath = Path.GetFullPath(Path.Combine(basePath, relativePath));
+            var baseFullPath = Path.GetFullPath(basePath);
+
+            return fullPath.StartsWith(baseFullPath, DiskProviderBase.PathStringComparison);
         }
     }
 }
