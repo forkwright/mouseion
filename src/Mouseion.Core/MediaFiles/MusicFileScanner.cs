@@ -121,6 +121,7 @@ public class MusicFileScanner : IMusicFileScanner
             return new ScanResult { Success = false, Error = $"Album {albumId} has unsafe path" };
         }
 
+        // Path traversal safe: validated by IsPathTraversalSafe() on line 118
         var albumPath = Path.Combine(artist.Path, safeAlbumTitle);
         _logger.LogInformation("Scanning album: {Album} at {Path}", album.Title, albumPath);
         return await ScanPathAsync(albumPath, ct).ConfigureAwait(false);
@@ -156,6 +157,7 @@ public class MusicFileScanner : IMusicFileScanner
             return new ScanResult { Success = false, Error = $"Album {albumId} has unsafe path" };
         }
 
+        // Path traversal safe: validated by IsPathTraversalSafe() on line 154
         var albumPath = Path.Combine(artist.Path, safeAlbumTitle);
         _logger.LogInformation("Scanning album: {Album} at {Path}", album.Title, albumPath);
         return ScanPath(albumPath);
