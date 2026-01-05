@@ -110,7 +110,11 @@ public class AddAlbumService : IAddAlbumService
                 var added = await AddAlbumAsync(album, ct).ConfigureAwait(false);
                 addedAlbums.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for album: {AlbumTitle}", album.Title.SanitizeForLog());
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding album: {AlbumTitle}", album.Title.SanitizeForLog());
             }
@@ -130,7 +134,11 @@ public class AddAlbumService : IAddAlbumService
                 var added = AddAlbum(album);
                 addedAlbums.Add(added);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Validation failed for album: {AlbumTitle}", album.Title.SanitizeForLog());
+            }
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, "Error adding album: {AlbumTitle}", album.Title.SanitizeForLog());
             }
