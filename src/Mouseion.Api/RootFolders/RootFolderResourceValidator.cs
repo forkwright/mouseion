@@ -53,7 +53,19 @@ public class RootFolderResourceValidator : AbstractValidator<RootFolderResource>
 
             return true;
         }
-        catch
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        catch (System.Security.SecurityException)
+        {
+            return false;
+        }
+        catch (NotSupportedException)
+        {
+            return false;
+        }
+        catch (PathTooLongException)
         {
             return false;
         }

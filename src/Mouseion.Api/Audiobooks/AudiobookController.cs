@@ -112,17 +112,17 @@ public class AudiobookController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<AudiobookResource>> AddAudiobook([FromBody] AudiobookResource resource, CancellationToken ct = default)
     {
-                var audiobook = ToModel(resource);
-            var added = await _addAudiobookService.AddAudiobookAsync(audiobook, ct).ConfigureAwait(false);
-            return CreatedAtAction(nameof(GetAudiobook), new { id = added.Id }, ToResource(added));
+        var audiobook = ToModel(resource);
+        var added = await _addAudiobookService.AddAudiobookAsync(audiobook, ct).ConfigureAwait(false);
+        return CreatedAtAction(nameof(GetAudiobook), new { id = added.Id }, ToResource(added));
     }
 
     [HttpPost("batch")]
     public async Task<ActionResult<List<AudiobookResource>>> AddAudiobooks([FromBody] List<AudiobookResource> resources, CancellationToken ct = default)
     {
-                var audiobooks = resources.Select(ToModel).ToList();
-            var added = await _addAudiobookService.AddAudiobooksAsync(audiobooks, ct).ConfigureAwait(false);
-            return Ok(added.Select(ToResource).ToList());
+        var audiobooks = resources.Select(ToModel).ToList();
+        var added = await _addAudiobookService.AddAudiobooksAsync(audiobooks, ct).ConfigureAwait(false);
+        return Ok(added.Select(ToResource).ToList());
     }
 
     [HttpPut("{id:int}")]

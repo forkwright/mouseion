@@ -116,7 +116,7 @@ public class MovieController : ControllerBase
     {
         var movie = ToModel(resource);
         var added = await _addMovieService.AddMovieAsync(movie, ct).ConfigureAwait(false);
-        return CreatedAtAction(nameof(GetMovie), new { id = added.Id}, ToResource(added));
+        return CreatedAtAction(nameof(GetMovie), new { id = added.Id }, ToResource(added));
     }
 
     [HttpPost("batch")]

@@ -82,9 +82,9 @@ public class BookSeriesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<BookSeriesResource>> AddSeries([FromBody] BookSeriesResource resource, CancellationToken ct = default)
     {
-                var series = ToModel(resource);
-            var added = await _seriesRepository.InsertAsync(series, ct).ConfigureAwait(false);
-            return CreatedAtAction(nameof(GetSeries), new { id = added.Id }, ToResource(added));
+        var series = ToModel(resource);
+        var added = await _seriesRepository.InsertAsync(series, ct).ConfigureAwait(false);
+        return CreatedAtAction(nameof(GetSeries), new { id = added.Id }, ToResource(added));
     }
 
     [HttpPut("{id:int}")]

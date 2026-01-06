@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Mouseion.Api.Common;
 using Mouseion.Common.Disk;
 using Mouseion.Common.Exceptions;
+using Mouseion.Common.Extensions;
 using Mouseion.Common.Http;
 using Mouseion.Core.ImportLists.Exceptions;
 
@@ -43,7 +44,7 @@ public class GlobalExceptionHandlerMiddleware
         {
             await _next(context);
         }
-        catch (Exception ex)
+        catch (Exception ex) // lgtm[cs/catch-of-all-exceptions] - Global exception handler needs to catch everything
         {
             await HandleExceptionAsync(context, ex);
         }
@@ -160,8 +161,8 @@ public class GlobalExceptionHandlerMiddleware
         };
 
         var logMessage = "HTTP {StatusCode} - {Method} {Path} - TraceId: {TraceId}";
-        var method = context.Request.Method;
-        var path = context.Request.Path;
+        var method = context.Request.Method.SanitizeForLog();
+        var path = context.Request.Path.ToString().SanitizeForLog();
 
         if (logLevel == LogLevel.Error)
         {
@@ -169,7 +170,7 @@ public class GlobalExceptionHandlerMiddleware
         }
         else
         {
-            _logger.Log(logLevel, logMessage + " - {Message}", (int)statusCode, method, path, traceId, exception.Message);
+            _logger.Log(logLevel, logMessage + " - {Message}", (int)statusCode, method, path, traceId, exception.Message.SanitizeForLog());
         }
     }
 }

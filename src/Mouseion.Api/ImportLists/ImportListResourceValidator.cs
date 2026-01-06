@@ -44,7 +44,7 @@ public class ImportListResourceValidator : AbstractValidator<ImportListResource>
             JsonDocument.Parse(json);
             return true;
         }
-        catch
+        catch (JsonException)
         {
             return false;
         }
