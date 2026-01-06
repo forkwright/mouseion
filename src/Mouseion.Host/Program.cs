@@ -145,6 +145,14 @@ try
     container.Register<Mouseion.Core.History.IMediaItemHistoryRepository, Mouseion.Core.History.MediaItemHistoryRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.History.IMediaItemHistoryService, Mouseion.Core.History.MediaItemHistoryService>(Reuse.Singleton);
 
+    // Register blocklist services
+    container.Register<Mouseion.Core.Blocklisting.IBlocklistRepository, Mouseion.Core.Blocklisting.BlocklistRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Blocklisting.IBlocklistService, Mouseion.Core.Blocklisting.BlocklistService>(Reuse.Singleton);
+
+    // Register history services
+    container.Register<Mouseion.Core.History.IMediaItemHistoryRepository, Mouseion.Core.History.MediaItemHistoryRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.History.IMediaItemHistoryService, Mouseion.Core.History.MediaItemHistoryService>(Reuse.Singleton);
+
     // Register metadata providers
     container.Register<Mouseion.Common.Http.IHttpClient, Mouseion.Common.Http.HttpClient>(Reuse.Singleton);
     container.Register<Mouseion.Core.MetadataSource.ResilientMetadataClient>(Reuse.Singleton);
@@ -184,7 +192,6 @@ try
         r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "RSSImport"),
         r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "CustomList")
     }, Reuse.Singleton);
-
     // Register indexers
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseSettings>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseIndexer>(Reuse.Singleton);
