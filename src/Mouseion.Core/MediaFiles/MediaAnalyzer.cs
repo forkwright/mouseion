@@ -28,7 +28,7 @@ public class MediaAnalyzer : IMediaAnalyzer
         {
             using var file = TagLib.File.Create(filePath);
 
-            // Try MP3 ID3v2 CTOC/CHAP frames (fully supported in TagLibSharp 2.3.0)
+            // Try MP3 ID3v2 CTOC/CHAP frames
             if (file is TagLib.Mpeg.AudioFile mp3File)
             {
                 chapters = ParseId3v2Chapters(mp3File);
@@ -38,9 +38,15 @@ public class MediaAnalyzer : IMediaAnalyzer
                 }
             }
 
-            // TODO: M4B/MP4 chapter atoms (chpl atom) - TagLibSharp doesn't expose this
-            // Would require custom binary parsing of moov.udta.chpl atom
-            // Deferred to future enhancement or external tool integration
+            // Try M4B/MP4 chapter markers (QuickTime chapter track)
+            if (file is TagLib.Mpeg4.File mp4File)
+            {
+                chapters = ParseMp4Chapters(mp4File);
+                if (chapters.Count > 0)
+                {
+                    return chapters;
+                }
+            }
 
             // Fallback: single chapter spanning the file
             if (file.Properties.Duration.TotalMilliseconds > 0)
@@ -107,6 +113,21 @@ public class MediaAnalyzer : IMediaAnalyzer
         {
             // Graceful degradation
         }
+
+        return chapters;
+    }
+
+    private List<ChapterInfo> ParseMp4Chapters(TagLib.Mpeg4.File mp4File)
+    {
+        var chapters = new List<ChapterInfo>();
+
+        // M4B/MP4 chapter parsing limitations:
+        // - TagLibSharp doesn't expose chapter data from moov.udta.chpl (Nero chapters)
+        // - QuickTime chapter tracks require custom MP4 atom parsing
+        // - Would need AtomicParsley or FFmpeg integration for full support
+        //
+        // Current behavior: Returns empty list, triggering fallback to single-chapter
+        // Future enhancement: Integrate FFmpeg chapter extraction or custom atom parser
 
         return chapters;
     }
