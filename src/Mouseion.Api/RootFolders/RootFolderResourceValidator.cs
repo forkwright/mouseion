@@ -1,6 +1,8 @@
 // Copyright (c) 2025 Mouseion Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.IO;
+using System.Security;
 using FluentValidation;
 
 namespace Mouseion.Api.RootFolders;
@@ -57,7 +59,7 @@ public class RootFolderResourceValidator : AbstractValidator<RootFolderResource>
         {
             return false;
         }
-        catch (System.Security.SecurityException)
+        catch (SecurityException)
         {
             return false;
         }
