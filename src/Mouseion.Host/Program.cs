@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Mouseion Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using AspNetCoreRateLimit;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
 using Mouseion.Api.Security;
@@ -303,6 +304,13 @@ try
         });
     });
 
+    // Configure rate limiting (DoS prevention)
+    builder.Services.AddMemoryCache();
+    builder.Services.Configure<AspNetCoreRateLimit.IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+    builder.Services.Configure<AspNetCoreRateLimit.ClientRateLimitOptions>(builder.Configuration.GetSection("ClientRateLimiting"));
+    builder.Services.AddInMemoryRateLimiting();
+    builder.Services.AddSingleton<AspNetCoreRateLimit.IRateLimitConfiguration, AspNetCoreRateLimit.RateLimitConfiguration>();
+
     // Build the app
     var app = builder.Build();
 
@@ -332,9 +340,11 @@ try
     });
     app.UseSecurityHeaders(); // Custom security headers middleware
     app.UseHttpsRedirection();
+    app.UseIpRateLimiting(); // IP-based rate limiting
     app.UseCors();
     app.UseRouting();
     app.UseAuthentication();
+    app.UseClientRateLimiting(); // API key-based rate limiting (after authentication)
     app.UseAuthorization();
 
     // Map controllers and SignalR hubs
