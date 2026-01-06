@@ -32,6 +32,7 @@ Plus audiobooks, podcasts, and comics in a single application.
 | 5: TV/Podcasts | Weeks 13-14 | Episode tracking, RSS | ✅ Done |
 | 6: Infrastructure | Weeks 15-16 | Download clients, notifications, health checks | ✅ Done |
 | 7: File Scanning | Weeks 17-20 | Music scanning, movie org, history, covers | ✅ Done |
+| 8: Polish & Enhancements | Weeks 21-24 | Movie org, subtitles, auto-tagging, import pipeline | 📋 Planning |
 
 ---
 
@@ -237,17 +238,64 @@ Plus audiobooks, podcasts, and comics in a single application.
 - [x] AcoustID fingerprinting for duplicate detection
 - [x] Gazelle indexer support (RED, OPS)
 
-**Remaining (Phase 8 priorities):**
-- [ ] Movie file organization and renaming
-- [ ] Subtitles foundation (OpenSubtitles, hash-based matching)
-- [ ] Auto-tagging improvements (genre, language detection)
-- [ ] Advanced file import pipeline (hardlink/copy strategies)
-
 **Success Criteria:**
 - ✅ Music files scanned with quality detection
 - ✅ History tracking functional for imports/upgrades
 - ✅ Cover art management integrated
-- ⏳ Movie files organized per naming convention (deferred to Phase 8)
+- ✅ All Phase 7 features complete
+
+---
+
+## Phase 8: Polish & Enhancements (Weeks 21-24)
+
+**Goal:** Production polish and advanced features beyond *arr parity
+
+**Priority Features:**
+
+1. **Movie File Organization** (Issue #96)
+   - [ ] Configurable naming patterns (`{Movie Title} ({Year}) - {Quality}`)
+   - [ ] Automatic folder creation per movie
+   - [ ] Rename on import/upgrade with dry-run mode
+   - [ ] File move strategies (copy, hardlink, symlink)
+
+2. **Subtitles Foundation** (Issue #97)
+   - [ ] OpenSubtitles API integration (v1 REST API)
+   - [ ] Hash-based subtitle matching (MovieHash, OSDBHash)
+   - [ ] Language preference configuration
+   - [ ] Automatic download on movie import
+   - [ ] Manual search and download via API
+
+3. **Auto-Tagging Improvements** (Issue #98)
+   - [ ] Genre extraction from metadata providers (TMDb, MusicBrainz, Goodreads)
+   - [ ] Language detection for audio/video files (FFmpeg audio streams)
+   - [ ] Custom tag rules (e.g., "tag as 'Audiophile' if FLAC 24-bit")
+   - [ ] Automatic tag application on import
+   - [ ] Tag management API (add, remove, bulk update)
+
+4. **Advanced File Import Pipeline** (Issue #99)
+   - [ ] Import strategies: hardlink (preferred), copy, move, symlink
+   - [ ] Automatic strategy selection based on filesystem
+   - [ ] Import verification (hash check after copy)
+   - [ ] RecycleBinService for safe deletion
+   - [ ] Atomic operations with rollback on failure
+
+**Technical Debt (Issues #100-107):**
+- [ ] Quality detection system (UpgradeSpecification.cs)
+- [ ] TVDB API implementation (TVDBProxy.cs)
+- [ ] Notification persistence (NotificationController.cs)
+- [ ] Calendar file checking (MovieCalendarService.cs)
+- [ ] Chapter parsing M4B/MP3 (ChapterService)
+- [ ] Sync-over-async refactoring (22 instances)
+- [ ] Replace Thread.Sleep with Task.Delay (3 instances)
+- [ ] Add logging to catch blocks
+
+**Success Criteria:**
+- ⏳ Movie files organized per naming convention
+- ⏳ Subtitles download automatically
+- ⏳ Auto-tagging rules functional
+- ⏳ File import strategies support all modes
+- ⏳ All TODO comments resolved
+- ⏳ Zero sync-over-async anti-patterns
 
 ---
 

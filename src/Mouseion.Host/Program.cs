@@ -135,6 +135,15 @@ try
     container.Register<Mouseion.Core.Movies.IAddCollectionService, Mouseion.Core.Movies.AddCollectionService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Movies.IMovieStatisticsService, Mouseion.Core.Movies.MovieStatisticsService>(Reuse.Singleton);
     container.Register<Mouseion.Core.Movies.ICollectionStatisticsService, Mouseion.Core.Movies.CollectionStatisticsService>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Movies.Organization.IFileOrganizationService, Mouseion.Core.Movies.Organization.FileOrganizationService>(Reuse.Singleton);
+
+    // Register blocklist services
+    container.Register<Mouseion.Core.Blocklisting.IBlocklistRepository, Mouseion.Core.Blocklisting.BlocklistRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Blocklisting.IBlocklistService, Mouseion.Core.Blocklisting.BlocklistService>(Reuse.Singleton);
+
+    // Register history services
+    container.Register<Mouseion.Core.History.IMediaItemHistoryRepository, Mouseion.Core.History.MediaItemHistoryRepository>(Reuse.Singleton);
+    container.Register<Mouseion.Core.History.IMediaItemHistoryService, Mouseion.Core.History.MediaItemHistoryService>(Reuse.Singleton);
 
     // Register blocklist services
     container.Register<Mouseion.Core.Blocklisting.IBlocklistRepository, Mouseion.Core.Blocklisting.BlocklistRepository>(Reuse.Singleton);
@@ -158,6 +167,10 @@ try
     container.Register<Mouseion.Core.MediaCovers.IMediaCoverProxy, Mouseion.Core.MediaCovers.MediaCoverProxy>(Reuse.Singleton);
     container.Register<Mouseion.Core.MediaCovers.IMediaCoverService, Mouseion.Core.MediaCovers.MediaCoverService>(Reuse.Singleton);
 
+    // Register subtitle services
+    container.Register<Mouseion.Core.Subtitles.IOpenSubtitlesProxy, Mouseion.Core.Subtitles.OpenSubtitlesProxy>(Reuse.Singleton);
+    container.Register<Mouseion.Core.Subtitles.ISubtitleService, Mouseion.Core.Subtitles.SubtitleService>(Reuse.Singleton);
+
     // Register import lists
     container.Register<Mouseion.Core.ImportLists.IImportListRepository, Mouseion.Core.ImportLists.ImportListRepository>(Reuse.Singleton);
     container.Register<Mouseion.Core.ImportLists.ImportExclusions.IImportListExclusionRepository, Mouseion.Core.ImportLists.ImportExclusions.ImportListExclusionRepository>(Reuse.Singleton);
@@ -179,7 +192,6 @@ try
         r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "RSSImport"),
         r.Resolve<Mouseion.Core.ImportLists.IImportList>(serviceKey: "CustomList")
     }, Reuse.Singleton);
-
     // Register indexers
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseSettings>(Reuse.Singleton);
     container.Register<Mouseion.Core.Indexers.MyAnonamouse.MyAnonamouseIndexer>(Reuse.Singleton);
@@ -264,6 +276,11 @@ try
     builder.Services.AddHttpClient();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddHttpClient("QBittorrent");
+    builder.Services.AddHttpClient("OpenSubtitles", client =>
+    {
+        client.DefaultRequestHeaders.Add("Api-Key", builder.Configuration["OpenSubtitles:ApiKey"] ?? string.Empty);
+        client.DefaultRequestHeaders.Add("User-Agent", "Mouseion v1");
+    });
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v3", new Microsoft.OpenApi.Models.OpenApiInfo
