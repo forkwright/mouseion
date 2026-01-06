@@ -4,6 +4,7 @@
 using AspNetCoreRateLimit;
 using DryIoc;
 using DryIoc.Microsoft.DependencyInjection;
+using FluentValidation;
 using Mouseion.Api.Security;
 using Mouseion.Common.EnvironmentInfo;
 using Mouseion.Common.Instrumentation;
@@ -269,6 +270,10 @@ try
 
     // Add ASP.NET Core services
     builder.Services.AddControllers();
+
+    // Add FluentValidation (registers all validators in Mouseion.Api assembly)
+    builder.Services.AddValidatorsFromAssemblyContaining<Mouseion.Api.Common.ApiProblemDetails>();
+
     builder.Services.AddSignalR();
     builder.Services.AddMouseionTelemetry();
     builder.Services.AddMemoryCache();
@@ -331,6 +336,7 @@ try
     Log.Information("Database initialized");
 
     // Configure middleware pipeline
+    app.UseMiddleware<Mouseion.Api.Middleware.GlobalExceptionHandlerMiddleware>();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
