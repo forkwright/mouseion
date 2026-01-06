@@ -66,30 +66,6 @@ public static class BookQualityParser
         return ParseQualityName(normalizedNameFallback);
     }
 
-    private static QualityModel ParseFromExtension(string name, QualityModel result, ILogger? logger = null)
-    {
-        try
-        {
-            var extension = Path.GetExtension(name);
-            if (string.IsNullOrEmpty(extension))
-            {
-                return result;
-            }
-
-            if (MediaFileExtensions.EbookExtensions.Contains(extension))
-            {
-                result.Quality = MediaFileExtensions.GetQualityForExtension(extension);
-                result.SourceDetectionSource = QualityDetectionSource.Extension;
-            }
-        }
-        catch (ArgumentException ex)
-        {
-            logger?.LogDebug(ex, "Unable to parse extension from '{Name}'", name.SanitizeForLog());
-        }
-
-        return result;
-    }
-
     private static QualityModel ParseQualityName(string name)
     {
         var result = new QualityModel { Quality = Quality.EbookUnknown };

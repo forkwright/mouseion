@@ -15,14 +15,10 @@ namespace Mouseion.Core.Movies.Import.Specifications;
 
 public class UpgradeSpecification : IMovieImportSpecification
 {
-    private readonly IMovieFileRepository _movieFileRepository;
     private readonly ILogger<UpgradeSpecification> _logger;
 
-    public UpgradeSpecification(
-        IMovieFileRepository movieFileRepository,
-        ILogger<UpgradeSpecification> logger)
+    public UpgradeSpecification(ILogger<UpgradeSpecification> logger)
     {
-        _movieFileRepository = movieFileRepository;
         _logger = logger;
     }
 
