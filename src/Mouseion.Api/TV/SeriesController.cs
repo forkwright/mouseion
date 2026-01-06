@@ -89,31 +89,17 @@ public class SeriesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<SeriesResource>> AddSeries([FromBody] SeriesResource resource, CancellationToken ct = default)
     {
-        try
-        {
-            var series = ToModel(resource);
+                var series = ToModel(resource);
             var added = await _addSeriesService.AddSeriesAsync(series, ct).ConfigureAwait(false);
             return CreatedAtAction(nameof(GetSeriesById), new { id = added.Id }, ToResource(added));
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
     }
 
     [HttpPost("batch")]
     public async Task<ActionResult<List<SeriesResource>>> AddSeriesList([FromBody] List<SeriesResource> resources, CancellationToken ct = default)
     {
-        try
-        {
-            var seriesList = resources.Select(ToModel).ToList();
+                var seriesList = resources.Select(ToModel).ToList();
             var added = await _addSeriesService.AddSeriesListAsync(seriesList, ct).ConfigureAwait(false);
             return Ok(added.Select(ToResource).ToList());
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
     }
 
     [HttpPut("{id:int}")]

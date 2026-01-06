@@ -34,9 +34,7 @@ public class LibraryController : ControllerBase
         [FromBody] FilterRequest request,
         CancellationToken ct = default)
     {
-        try
-        {
-            var result = await _filterService.FilterTracksAsync(request, ct).ConfigureAwait(false);
+                var result = await _filterService.FilterTracksAsync(request, ct).ConfigureAwait(false);
 
             return Ok(new FilterPagedResult<TrackResource>
             {
@@ -46,11 +44,6 @@ public class LibraryController : ControllerBase
                 TotalCount = result.TotalCount,
                 Summary = result.Summary
             });
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
     }
 
     private static TrackResource ToResource(Track track)

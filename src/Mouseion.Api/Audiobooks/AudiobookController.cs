@@ -112,31 +112,17 @@ public class AudiobookController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<AudiobookResource>> AddAudiobook([FromBody] AudiobookResource resource, CancellationToken ct = default)
     {
-        try
-        {
-            var audiobook = ToModel(resource);
+                var audiobook = ToModel(resource);
             var added = await _addAudiobookService.AddAudiobookAsync(audiobook, ct).ConfigureAwait(false);
             return CreatedAtAction(nameof(GetAudiobook), new { id = added.Id }, ToResource(added));
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
     }
 
     [HttpPost("batch")]
     public async Task<ActionResult<List<AudiobookResource>>> AddAudiobooks([FromBody] List<AudiobookResource> resources, CancellationToken ct = default)
     {
-        try
-        {
-            var audiobooks = resources.Select(ToModel).ToList();
+                var audiobooks = resources.Select(ToModel).ToList();
             var added = await _addAudiobookService.AddAudiobooksAsync(audiobooks, ct).ConfigureAwait(false);
             return Ok(added.Select(ToResource).ToList());
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
     }
 
     [HttpPut("{id:int}")]

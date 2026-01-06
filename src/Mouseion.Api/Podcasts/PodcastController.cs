@@ -83,9 +83,7 @@ public class PodcastController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PodcastShowResource>> AddPodcast([FromBody] AddPodcastRequest request, CancellationToken ct = default)
     {
-        try
-        {
-            var show = await _addPodcastService.AddPodcastAsync(
+                var show = await _addPodcastService.AddPodcastAsync(
                 request.FeedUrl,
                 request.RootFolderPath,
                 request.QualityProfileId,
@@ -93,11 +91,6 @@ public class PodcastController : ControllerBase
                 ct).ConfigureAwait(false);
 
             return CreatedAtAction(nameof(GetPodcast), new { id = show.Id }, ToShowResource(show));
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
     }
 
     [HttpPut("{id:int}")]
