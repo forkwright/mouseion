@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Mouseion Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -51,7 +52,7 @@ namespace Mouseion.Api.Notifications
         /// Create a new notification configuration
         /// </summary>
         [HttpPost]
-        public ActionResult<NotificationResource> Create([FromBody] NotificationResource resource)
+        public ActionResult<NotificationResource> Create([FromBody][Required] NotificationResource resource)
         {
             _logger.LogDebug("Creating notification: {Name}", resource.Name.SanitizeForLog());
             // Tracked in #46: Implement repository-backed notification operations
@@ -62,7 +63,7 @@ namespace Mouseion.Api.Notifications
         /// Update an existing notification configuration
         /// </summary>
         [HttpPut("{id:int}")]
-        public ActionResult<NotificationResource> Update(int id, [FromBody] NotificationResource resource)
+        public ActionResult<NotificationResource> Update(int id, [FromBody][Required] NotificationResource resource)
         {
             _logger.LogDebug("Updating notification {Id}", id);
             // Tracked in #46: Implement repository-backed notification operations
