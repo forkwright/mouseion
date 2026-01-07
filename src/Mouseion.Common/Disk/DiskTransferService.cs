@@ -477,7 +477,7 @@ namespace Mouseion.Common.Disk
             }
         }
 
-        // TODO: Convert to async when IDiskProvider interface supports async operations
+        // Tracked in #106: Replace Thread.Sleep() with async Task.Delay()
         // Waiting for filesystem operations to complete before proceeding with rollback
         private static void WaitForIO()
         {

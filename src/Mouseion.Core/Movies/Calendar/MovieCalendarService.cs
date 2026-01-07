@@ -41,7 +41,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.InCinemas.Value,
                     ReleaseType = "Cinema",
                     Monitored = movie.Monitored,
-                    HasFile = false // TODO: Check if movie has file
+                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
                 });
             }
 
@@ -55,7 +55,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.DigitalRelease.Value,
                     ReleaseType = "Digital",
                     Monitored = movie.Monitored,
-                    HasFile = false // TODO: Check if movie has file
+                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
                 });
             }
 
@@ -69,7 +69,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.PhysicalRelease.Value,
                     ReleaseType = "Physical",
                     Monitored = movie.Monitored,
-                    HasFile = false // TODO: Check if movie has file
+                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
                 });
             }
         }
@@ -96,7 +96,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.InCinemas.Value,
                     ReleaseType = "Cinema",
                     Monitored = movie.Monitored,
-                    HasFile = false // TODO: Check if movie has file
+                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
                 });
             }
 
@@ -110,7 +110,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.DigitalRelease.Value,
                     ReleaseType = "Digital",
                     Monitored = movie.Monitored,
-                    HasFile = false // TODO: Check if movie has file
+                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
                 });
             }
 
@@ -124,7 +124,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.PhysicalRelease.Value,
                     ReleaseType = "Physical",
                     Monitored = movie.Monitored,
-                    HasFile = false // TODO: Check if movie has file
+                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
                 });
             }
         }
