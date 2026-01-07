@@ -152,7 +152,7 @@ public static class AudiobookQualityParser
         return Quality.AudiobookUnknown;
     }
 
-    public static bool IsAudiobookFile(string path)
+    public static bool IsAudiobookFile(string path, ILogger? logger = null)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -164,8 +164,12 @@ public static class AudiobookQualityParser
             var extension = Path.GetExtension(path);
             return MediaFileExtensions.AudiobookExtensions.Contains(extension);
         }
-        catch
+        catch (Exception ex)
         {
+            if (logger?.IsEnabled(LogLevel.Error) ?? false)
+            {
+                logger.LogError(ex, "Failed to check if path is audiobook file: {Path}", path);
+            }
             return false;
         }
     }
