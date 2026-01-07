@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mouseion.Core.Tests", "test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mouseion.Api.Tests", "tests\Mouseion.Api.Tests\Mouseion.Api.Tests.csproj", "{794275B3-694F-4087-B564-B7BA86F9C3B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mouseion.Common.Tests", "tests\Mouseion.Common.Tests\Mouseion.Common.Tests.csproj", "{D673A810-B433-4EAA-9D20-E511DA528B0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,18 @@ Global
 		{794275B3-694F-4087-B564-B7BA86F9C3B0}.Release|x64.Build.0 = Release|Any CPU
 		{794275B3-694F-4087-B564-B7BA86F9C3B0}.Release|x86.ActiveCfg = Release|Any CPU
 		{794275B3-694F-4087-B564-B7BA86F9C3B0}.Release|x86.Build.0 = Release|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Debug|x64.Build.0 = Debug|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Debug|x86.Build.0 = Debug|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Release|x64.ActiveCfg = Release|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Release|x64.Build.0 = Release|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Release|x86.ActiveCfg = Release|Any CPU
+		{D673A810-B433-4EAA-9D20-E511DA528B0F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,5 +141,6 @@ Global
 		{87F67641-5CB3-4A0C-84D6-D124B4B619B3} = {C08F99ED-0CE6-4C09-BFA0-C086353CB0AF}
 		{BEF593C7-22B1-4CED-BBD2-11EB32AC2000} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{794275B3-694F-4087-B564-B7BA86F9C3B0} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{D673A810-B433-4EAA-9D20-E511DA528B0F} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
