@@ -51,7 +51,6 @@ jobs:
           dotnet test --no-build --verbosity normal \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
-            --filter "FullyQualifiedName!~ControllerTests" \
             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
           dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
