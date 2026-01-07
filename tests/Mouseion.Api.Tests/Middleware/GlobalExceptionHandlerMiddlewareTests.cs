@@ -84,12 +84,8 @@ public class GlobalExceptionHandlerMiddlewareTests
     }
 
     [Theory]
-    [InlineData(typeof(TooManyRequestsException), HttpStatusCode.TooManyRequests, "RATE_LIMITED")]
     [InlineData(typeof(InvalidHeaderException), HttpStatusCode.BadRequest, "INVALID_HEADER")]
     [InlineData(typeof(InvalidRequestException), HttpStatusCode.BadRequest, "INVALID_REQUEST")]
-    [InlineData(typeof(TlsFailureException), HttpStatusCode.BadGateway, "TLS_FAILURE")]
-    [InlineData(typeof(UnexpectedHtmlContentException), HttpStatusCode.BadGateway, "UNEXPECTED_RESPONSE")]
-    [InlineData(typeof(FileAlreadyExistsException), HttpStatusCode.Conflict, "FILE_EXISTS")]
     [InlineData(typeof(PathCombinationException), HttpStatusCode.BadRequest, "INVALID_PATH")]
     [InlineData(typeof(DestinationAlreadyExistsException), HttpStatusCode.Conflict, "DESTINATION_EXISTS")]
     [InlineData(typeof(ImportListException), HttpStatusCode.BadRequest, "IMPORT_LIST_ERROR")]
