@@ -490,7 +490,7 @@ public static class MusicQualityParser
         return Quality.MusicOpus_128;
     }
 
-    public static bool IsMusicFile(string path)
+    public static bool IsMusicFile(string path, ILogger? logger = null)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -502,8 +502,12 @@ public static class MusicQualityParser
             var extension = Path.GetExtension(path);
             return MediaFileExtensions.MusicExtensions.Contains(extension);
         }
-        catch
+        catch (Exception ex)
         {
+            if (logger?.IsEnabled(LogLevel.Error) ?? false)
+            {
+                logger.LogError(ex, "Failed to check if path is music file: {Path}", path);
+            }
             return false;
         }
     }

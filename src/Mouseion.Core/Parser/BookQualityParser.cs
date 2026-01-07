@@ -119,7 +119,7 @@ public static class BookQualityParser
         return result;
     }
 
-    public static bool IsBookFile(string path)
+    public static bool IsBookFile(string path, ILogger? logger = null)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -131,8 +131,12 @@ public static class BookQualityParser
             var extension = Path.GetExtension(path);
             return MediaFileExtensions.EbookExtensions.Contains(extension);
         }
-        catch
+        catch (Exception ex)
         {
+            if (logger?.IsEnabled(LogLevel.Error) ?? false)
+            {
+                logger.LogError(ex, "Failed to check if path is book file: {Path}", path);
+            }
             return false;
         }
     }

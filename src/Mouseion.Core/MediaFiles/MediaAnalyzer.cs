@@ -8,6 +8,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using TagLib;
 
 namespace Mouseion.Core.MediaFiles;
@@ -20,6 +21,13 @@ public interface IMediaAnalyzer
 
 public class MediaAnalyzer : IMediaAnalyzer
 {
+    private readonly ILogger<MediaAnalyzer> _logger;
+
+    public MediaAnalyzer(ILogger<MediaAnalyzer> logger)
+    {
+        _logger = logger;
+    }
+
     public List<ChapterInfo> GetChapters(string filePath)
     {
         var chapters = new List<ChapterInfo>();
@@ -60,9 +68,12 @@ public class MediaAnalyzer : IMediaAnalyzer
                 });
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Graceful degradation: return empty list if file can't be parsed
+            if (_logger.IsEnabled(LogLevel.Error))
+            {
+                _logger.LogError(ex, "Failed to parse chapters from file: {FilePath}", filePath);
+            }
         }
 
         return chapters;
@@ -109,9 +120,9 @@ public class MediaAnalyzer : IMediaAnalyzer
                 });
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Graceful degradation
+            _logger.LogError(ex, "Failed to parse ID3v2 chapters from MP3 file");
         }
 
         return chapters;
