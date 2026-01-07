@@ -163,4 +163,20 @@ public class RecycleBinProviderTests : IDisposable
             Assert.False(File.Exists(file3));
         }
     }
+
+    [Fact]
+    public void DeleteFile_with_very_long_filename_should_be_handled()
+    {
+        var longName = new string('a', 200) + ".txt";
+        var testFile = Path.Combine(_tempDir, longName);
+        File.WriteAllText(testFile, "test content");
+
+        var result = _provider.DeleteFile(testFile);
+
+        if (_provider.IsAvailable)
+        {
+            Assert.True(result);
+            Assert.False(File.Exists(testFile));
+        }
+    }
 }
