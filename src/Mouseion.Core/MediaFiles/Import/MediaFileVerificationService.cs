@@ -110,7 +110,11 @@ public class MediaFileVerificationService : IMediaFileVerificationService
     {
         try
         {
+            // MD5 is used for file integrity verification, not cryptographic security.
+            // This is an acceptable use case as we're detecting file corruption, not protecting against malicious tampering.
+            #pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms
             using var md5 = MD5.Create();
+            #pragma warning restore CA5351
             using var stream = File.OpenRead(filePath);
 
             var hashBytes = md5.ComputeHash(stream);
