@@ -180,4 +180,97 @@ public class UpgradeSpecificationTests
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public void IsSatisfiedBy_should_allow_upgrade_when_candidate_is_better()
+    {
+        var movie = new Movie { Id = 1, Title = "Test Movie", Year = 2025 };
+        var filePath = "/movies/Test.Movie.2025.1080p.BluRay.mkv";
+
+        var existingFile = new MovieFile
+        {
+            Id = 1,
+            MovieId = 1,
+            Path = "/movies/Test.Movie.2025.720p.HDTV.mkv",
+            Quality = new QualityModel { Quality = Quality.HDTV720p, Revision = new Revision(1) }
+        };
+
+        _movieFileRepositoryMock
+            .Setup(x => x.FindByMovieId(1))
+            .Returns(existingFile);
+
+        var result = _specification.IsSatisfiedBy(filePath, movie);
+
+        Assert.Null(result); // No rejection = upgrade allowed
+    }
+
+    [Fact]
+    public void IsSatisfiedBy_should_reject_when_candidate_is_not_upgrade()
+    {
+        var movie = new Movie { Id = 1, Title = "Test Movie", Year = 2025 };
+        var filePath = "/movies/Test.Movie.2025.720p.HDTV.mkv";
+
+        var existingFile = new MovieFile
+        {
+            Id = 1,
+            MovieId = 1,
+            Path = "/movies/Test.Movie.2025.1080p.BluRay.mkv",
+            Quality = new QualityModel { Quality = Quality.Bluray1080p, Revision = new Revision(1) }
+        };
+
+        _movieFileRepositoryMock
+            .Setup(x => x.FindByMovieId(1))
+            .Returns(existingFile);
+
+        var result = _specification.IsSatisfiedBy(filePath, movie);
+
+        Assert.NotNull(result);
+        Assert.Contains("not an upgrade", result.Message);
+    }
+
+    [Fact]
+    public void IsSatisfiedBy_should_allow_when_existing_file_has_no_quality()
+    {
+        var movie = new Movie { Id = 1, Title = "Test Movie", Year = 2025 };
+        var filePath = "/movies/Test.Movie.2025.1080p.BluRay.mkv";
+
+        var existingFile = new MovieFile
+        {
+            Id = 1,
+            MovieId = 1,
+            Path = "/movies/Test.Movie.2025.720p.HDTV.mkv",
+            Quality = null // Legacy data without quality
+        };
+
+        _movieFileRepositoryMock
+            .Setup(x => x.FindByMovieId(1))
+            .Returns(existingFile);
+
+        var result = _specification.IsSatisfiedBy(filePath, movie);
+
+        Assert.Null(result); // Allow when existing quality is unknown
+    }
+
+    [Fact]
+    public void IsSatisfiedBy_should_allow_revision_upgrade()
+    {
+        var movie = new Movie { Id = 1, Title = "Test Movie", Year = 2025 };
+        var filePath = "/movies/Test.Movie.2025.1080p.BluRay.PROPER.mkv";
+
+        var existingFile = new MovieFile
+        {
+            Id = 1,
+            MovieId = 1,
+            Path = "/movies/Test.Movie.2025.1080p.BluRay.mkv",
+            Quality = new QualityModel { Quality = Quality.Bluray1080p, Revision = new Revision(1) }
+        };
+
+        _movieFileRepositoryMock
+            .Setup(x => x.FindByMovieId(1))
+            .Returns(existingFile);
+
+        var result = _specification.IsSatisfiedBy(filePath, movie);
+
+        Assert.Null(result); // PROPER is an upgrade
+    }
 }

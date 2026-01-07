@@ -42,6 +42,28 @@ public class UpgradeSpecification : IMovieImportSpecification
         // Get existing movie file (if any)
         var existingFile = await _movieFileRepository.FindByMovieIdAsync(movie.Id, ct).ConfigureAwait(false);
 
+        return CheckUpgrade(candidateQuality, existingFile, movie, filePath);
+    }
+
+    public ImportRejection? IsSatisfiedBy(string filePath, Movie movie)
+    {
+        // Parse quality from candidate file
+        var candidateQuality = QualityParser.ParseQuality(filePath, _logger);
+
+        if (candidateQuality.Quality == Quality.Unknown)
+        {
+            _logger.LogDebug("Cannot determine quality for {FilePath}, allowing import", filePath.SanitizeForLog());
+            return null;
+        }
+
+        // Get existing movie file (if any)
+        var existingFile = _movieFileRepository.FindByMovieId(movie.Id);
+
+        return CheckUpgrade(candidateQuality, existingFile, movie, filePath);
+    }
+
+    private ImportRejection? CheckUpgrade(QualityModel candidateQuality, MovieFile? existingFile, Movie movie, string filePath)
+    {
         if (existingFile == null)
         {
             _logger.LogDebug("No existing file for movie {MovieId}, allowing import", movie.Id);
@@ -77,56 +99,5 @@ public class UpgradeSpecification : IMovieImportSpecification
             filePath.SanitizeForLog());
 
         return null; // Upgrade allowed
-    }
-
-    public ImportRejection? IsSatisfiedBy(string filePath, Movie movie)
-    {
-        // Parse quality from candidate file
-        var candidateQuality = QualityParser.ParseQuality(filePath, _logger);
-
-        if (candidateQuality.Quality == Quality.Unknown)
-        {
-            _logger.LogDebug("Cannot determine quality for {FilePath}, allowing import", filePath.SanitizeForLog());
-            return null;
-        }
-
-        // Get existing movie file (if any)
-        var existingFile = _movieFileRepository.FindByMovieId(movie.Id);
-
-        if (existingFile == null)
-        {
-            _logger.LogDebug("No existing file for movie {MovieId}, allowing import", movie.Id);
-            return null;
-        }
-
-        if (existingFile.Quality == null)
-        {
-            _logger.LogDebug("Existing file has no quality data, allowing import");
-            return null;
-        }
-
-        // Check if candidate is an upgrade
-        var isUpgrade = QualityComparer.IsUpgrade(existingFile.Quality, candidateQuality);
-
-        if (!isUpgrade)
-        {
-            _logger.LogDebug(
-                "Quality {CandidateQuality} is not an upgrade over existing {ExistingQuality} for {FilePath}",
-                candidateQuality.Quality.Name,
-                existingFile.Quality.Quality.Name,
-                filePath.SanitizeForLog());
-
-            return new ImportRejection(
-                ImportRejectionReason.NotQualityUpgrade,
-                $"Quality {candidateQuality.Quality.Name} is not an upgrade over existing {existingFile.Quality.Quality.Name}");
-        }
-
-        _logger.LogDebug(
-            "Quality {CandidateQuality} is an upgrade over {ExistingQuality} for {FilePath}",
-            candidateQuality.Quality.Name,
-            existingFile.Quality.Quality.Name,
-            filePath.SanitizeForLog());
-
-        return null;
     }
 }
