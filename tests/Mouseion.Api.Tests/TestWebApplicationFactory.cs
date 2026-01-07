@@ -59,4 +59,9 @@ public class TestAppFolderInfo : IAppFolderInfo
     public string AppDataFolder => _testPath;
     public string TempFolder => Path.Combine(_testPath, "temp");
     public string StartUpFolder => _testPath;
+
+    public string GetMediaCoverPath()
+    {
+        return Path.Combine(_testPath, "MediaCover");
+    }
 }

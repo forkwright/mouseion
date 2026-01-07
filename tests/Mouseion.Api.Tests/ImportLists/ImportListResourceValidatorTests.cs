@@ -30,7 +30,7 @@ public class ImportListResourceValidatorTests
         var result = _validator.TestValidate(resource);
 
         // Assert
-        result.Should NotHaveAnyValidationErrors();
+        result.ShouldNotHaveAnyValidationErrors();
     }
 
     [Fact]
