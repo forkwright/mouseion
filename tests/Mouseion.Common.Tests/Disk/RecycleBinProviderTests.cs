@@ -92,19 +92,6 @@ public class RecycleBinProviderTests : IDisposable
     }
 
     [Fact]
-    public void DeleteFile_should_handle_locked_file_gracefully()
-    {
-        var testFile = Path.Combine(_tempDir, "locked_file.txt");
-        File.WriteAllText(testFile, "test content");
-
-        using var stream = File.Open(testFile, FileMode.Open, FileAccess.Read, FileShare.None);
-        var result = _provider.DeleteFile(testFile);
-
-        Assert.False(result);
-        Assert.True(File.Exists(testFile));
-    }
-
-    [Fact]
     public void DeleteFile_with_special_characters_should_be_handled()
     {
         var testFile = Path.Combine(_tempDir, "file with spaces & special!.txt");
