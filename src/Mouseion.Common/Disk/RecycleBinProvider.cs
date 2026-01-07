@@ -1,6 +1,7 @@
 // Copyright (c) 2025 Mouseion Project
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Mouseion.Common.EnvironmentInfo;
 using Serilog;
@@ -100,6 +101,7 @@ public class RecycleBinProvider : IRecycleBinProvider
         }
     }
 
+    [ExcludeFromCodeCoverage] // Windows-only P/Invoke - cannot test on Linux CI
     private bool DeleteFileWindows(string path)
     {
         try
