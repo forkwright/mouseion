@@ -3,22 +3,13 @@
 
 namespace Mouseion.Api.Tests;
 
-public abstract class ControllerTestBase : IDisposable
+public abstract class ControllerTestBase : IClassFixture<TestWebApplicationFactory>
 {
-    protected readonly TestWebApplicationFactory Factory;
     protected readonly HttpClient Client;
 
-    protected ControllerTestBase()
+    protected ControllerTestBase(TestWebApplicationFactory factory)
     {
-        Factory = new TestWebApplicationFactory();
-        Client = Factory.CreateClient();
+        Client = factory.CreateClient();
         Client.DefaultRequestHeaders.Add("X-Api-Key", "test-api-key");
-    }
-
-    public void Dispose()
-    {
-        Client?.Dispose();
-        Factory?.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

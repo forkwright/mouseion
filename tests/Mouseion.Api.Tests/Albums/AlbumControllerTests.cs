@@ -17,6 +17,9 @@ namespace Mouseion.Api.Tests.Albums;
 
 public class AlbumControllerTests : ControllerTestBase
 {
+    public AlbumControllerTests(TestWebApplicationFactory factory) : base(factory)
+    {
+    }
 
 
     [Fact]

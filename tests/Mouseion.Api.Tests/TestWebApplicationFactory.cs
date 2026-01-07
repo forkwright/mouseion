@@ -18,32 +18,25 @@ namespace Mouseion.Api.Tests;
 
 public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private string? _dbPath;
+    private readonly string _testDbPath;
+
+    public TestWebApplicationFactory()
+    {
+        // Use temp directory with unique GUID for test database
+        _testDbPath = Path.Combine(Path.GetTempPath(), $"mouseion_test_{Guid.NewGuid()}");
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureAppConfiguration((context, config) =>
         {
-            // Add test configuration
+            // Add test configuration including custom AppData path
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ApiKey"] = "test-api-key",
-                ["AllowedOrigins:0"] = "http://localhost"
+                ["AllowedOrigins:0"] = "http://localhost",
+                ["AppData"] = _testDbPath
             });
-        });
-
-        builder.ConfigureTestServices(services =>
-        {
-            // Override IAppFolderInfo to use temp directory for test database
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAppFolderInfo));
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
-
-            var testDir = Path.Combine(Path.GetTempPath(), $"mouseion_test_{Guid.NewGuid()}");
-            _dbPath = Path.Combine(testDir, "mouseion.db");
-            services.AddSingleton<IAppFolderInfo>(new TestAppFolderInfo(testDir));
         });
 
         builder.UseEnvironment("Test");
@@ -51,43 +44,18 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing && _dbPath != null)
+        base.Dispose(disposing);
+
+        if (disposing && Directory.Exists(_testDbPath))
         {
             try
             {
-                // Clean up test database directory
-                var testDir = Path.GetDirectoryName(_dbPath);
-                if (testDir != null && Directory.Exists(testDir))
-                {
-                    Directory.Delete(testDir, recursive: true);
-                }
+                Directory.Delete(_testDbPath, recursive: true);
             }
             catch
             {
                 // Ignore cleanup errors
             }
         }
-
-        base.Dispose(disposing);
-    }
-}
-
-public class TestAppFolderInfo : IAppFolderInfo
-{
-    private readonly string _testDir;
-
-    public TestAppFolderInfo(string testDir)
-    {
-        _testDir = testDir;
-        Directory.CreateDirectory(_testDir);
-    }
-
-    public string AppDataFolder => _testDir;
-    public string TempFolder => Path.Combine(_testDir, "temp");
-    public string StartUpFolder => _testDir;
-
-    public string GetMediaCoverPath()
-    {
-        return Path.Combine(_testDir, "MediaCover");
     }
 }

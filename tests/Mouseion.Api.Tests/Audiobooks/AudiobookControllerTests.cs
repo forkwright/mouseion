@@ -17,6 +17,9 @@ namespace Mouseion.Api.Tests.Audiobooks;
 
 public class AudiobookControllerTests : ControllerTestBase
 {
+        public AudiobookControllerTests(TestWebApplicationFactory factory) : base(factory)
+    {
+    }
 
 
     [Fact]

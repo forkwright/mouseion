@@ -18,6 +18,9 @@ namespace Mouseion.Api.Tests.Tracks;
 
 public class TrackControllerTests : ControllerTestBase
 {
+        public TrackControllerTests(TestWebApplicationFactory factory) : base(factory)
+    {
+    }
 
 
     [Fact]

@@ -16,7 +16,9 @@ namespace Mouseion.Api.Tests.Movies;
 
 public class MovieControllerTests : ControllerTestBase
 {
-
+    public MovieControllerTests(TestWebApplicationFactory factory) : base(factory)
+    {
+    }
 
     [Fact]
     public async Task GetMovies_ReturnsSuccessfully()

@@ -16,6 +16,9 @@ namespace Mouseion.Api.Tests.Artists;
 
 public class ArtistControllerTests : ControllerTestBase
 {
+    public ArtistControllerTests(TestWebApplicationFactory factory) : base(factory)
+    {
+    }
 
 
     [Fact]
