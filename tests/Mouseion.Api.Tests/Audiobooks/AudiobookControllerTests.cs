@@ -17,10 +17,9 @@ namespace Mouseion.Api.Tests.Audiobooks;
 
 public class AudiobookControllerTests : ControllerTestBase
 {
-        public AudiobookControllerTests(TestWebApplicationFactory factory) : base(factory)
+    public AudiobookControllerTests(TestWebApplicationFactory factory) : base(factory)
     {
     }
-
 
     [Fact]
     public async Task GetAudiobooks_ReturnsSuccessfully()

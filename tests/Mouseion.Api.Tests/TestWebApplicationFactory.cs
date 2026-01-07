@@ -18,24 +18,26 @@ namespace Mouseion.Api.Tests;
 
 public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly string _testDbPath;
+    private readonly string _testDir;
 
     public TestWebApplicationFactory()
     {
-        // Use temp directory with unique GUID for test database
-        _testDbPath = Path.Combine(Path.GetTempPath(), $"mouseion_test_{Guid.NewGuid()}");
+        // Use temp directory with unique GUID for each factory instance
+        _testDir = Path.Combine(Path.GetTempPath(), $"mouseion_test_{Guid.NewGuid()}");
+
+        // Set environment variable for AppFolderInfo to use
+        Environment.SetEnvironmentVariable("MOUSEION_TEST_APPDATA", _testDir);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureAppConfiguration((context, config) =>
         {
-            // Add test configuration including custom AppData path
+            // Add test configuration
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ApiKey"] = "test-api-key",
-                ["AllowedOrigins:0"] = "http://localhost",
-                ["AppData"] = _testDbPath
+                ["AllowedOrigins:0"] = "http://localhost"
             });
         });
 
@@ -44,18 +46,21 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void Dispose(bool disposing)
     {
-        base.Dispose(disposing);
-
-        if (disposing && Directory.Exists(_testDbPath))
+        if (disposing && Directory.Exists(_testDir))
         {
             try
             {
-                Directory.Delete(_testDbPath, recursive: true);
+                Directory.Delete(_testDir, recursive: true);
             }
             catch
             {
                 // Ignore cleanup errors
             }
         }
+
+        // Clear environment variable
+        Environment.SetEnvironmentVariable("MOUSEION_TEST_APPDATA", null);
+
+        base.Dispose(disposing);
     }
 }

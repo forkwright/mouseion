@@ -17,10 +17,9 @@ namespace Mouseion.Api.Tests.Books;
 
 public class BookControllerTests : ControllerTestBase
 {
-        public BookControllerTests(TestWebApplicationFactory factory) : base(factory)
+    public BookControllerTests(TestWebApplicationFactory factory) : base(factory)
     {
     }
-
 
     [Fact]
     public async Task GetBooks_ReturnsSuccessfully()

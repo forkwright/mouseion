@@ -16,10 +16,9 @@ namespace Mouseion.Api.Tests.Authors;
 
 public class AuthorControllerTests : ControllerTestBase
 {
-        public AuthorControllerTests(TestWebApplicationFactory factory) : base(factory)
+    public AuthorControllerTests(TestWebApplicationFactory factory) : base(factory)
     {
     }
-
 
     [Fact]
     public async Task GetAuthors_ReturnsSuccessfully()
