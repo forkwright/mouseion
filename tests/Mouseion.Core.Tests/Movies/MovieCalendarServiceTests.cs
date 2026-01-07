@@ -11,12 +11,17 @@ namespace Mouseion.Core.Tests.Movies;
 public class MovieCalendarServiceTests
 {
     private readonly Mock<IMovieRepository> _movieRepositoryMock;
+    private readonly Mock<IMovieFileRepository> _movieFileRepositoryMock;
     private readonly MovieCalendarService _calendarService;
 
     public MovieCalendarServiceTests()
     {
         _movieRepositoryMock = new Mock<IMovieRepository>();
-        _calendarService = new MovieCalendarService(_movieRepositoryMock.Object, NullLogger<MovieCalendarService>.Instance);
+        _movieFileRepositoryMock = new Mock<IMovieFileRepository>();
+        _calendarService = new MovieCalendarService(
+            _movieRepositoryMock.Object,
+            _movieFileRepositoryMock.Object,
+            NullLogger<MovieCalendarService>.Instance);
     }
 
     [Fact]
@@ -390,5 +395,53 @@ public class MovieCalendarServiceTests
         var result = await _calendarService.GetCalendarEntriesAsync(startDate, endDate);
 
         Assert.All(result, x => Assert.False(x.HasFile));
+    }
+
+    [Fact]
+    public async Task GetCalendarEntriesAsync_should_set_HasFile_true_when_movie_has_file()
+    {
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 1, 31);
+        var movies = new List<Movie>
+        {
+            new Movie
+            {
+                Id = 1,
+                Title = "Movie With File",
+                Year = 2025,
+                InCinemas = new DateTime(2025, 1, 15),
+                Monitored = true
+            },
+            new Movie
+            {
+                Id = 2,
+                Title = "Movie Without File",
+                Year = 2025,
+                DigitalRelease = new DateTime(2025, 1, 20),
+                Monitored = true
+            }
+        };
+
+        _movieRepositoryMock
+            .Setup(x => x.GetMoviesBetweenDatesAsync(startDate, endDate, false, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(movies);
+
+        // Movie 1 has a file, Movie 2 does not
+        _movieFileRepositoryMock
+            .Setup(x => x.FindByMovieIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new MovieFile { Id = 1, MovieId = 1, Path = "/movies/movie1.mkv" });
+
+        _movieFileRepositoryMock
+            .Setup(x => x.FindByMovieIdAsync(2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((MovieFile?)null);
+
+        var result = await _calendarService.GetCalendarEntriesAsync(startDate, endDate);
+
+        Assert.Equal(2, result.Count);
+        var movieWithFile = result.First(x => x.MovieId == 1);
+        var movieWithoutFile = result.First(x => x.MovieId == 2);
+
+        Assert.True(movieWithFile.HasFile);
+        Assert.False(movieWithoutFile.HasFile);
     }
 }

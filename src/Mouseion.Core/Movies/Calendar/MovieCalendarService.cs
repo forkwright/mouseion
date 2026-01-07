@@ -14,11 +14,16 @@ namespace Mouseion.Core.Movies.Calendar;
 public class MovieCalendarService : IMovieCalendarService
 {
     private readonly IMovieRepository _movieRepository;
+    private readonly IMovieFileRepository _movieFileRepository;
     private readonly ILogger<MovieCalendarService> _logger;
 
-    public MovieCalendarService(IMovieRepository movieRepository, ILogger<MovieCalendarService> logger)
+    public MovieCalendarService(
+        IMovieRepository movieRepository,
+        IMovieFileRepository movieFileRepository,
+        ILogger<MovieCalendarService> logger)
     {
         _movieRepository = movieRepository;
+        _movieFileRepository = movieFileRepository;
         _logger = logger;
     }
 
@@ -27,10 +32,26 @@ public class MovieCalendarService : IMovieCalendarService
         _logger.LogDebug("Getting calendar entries from {Start} to {End}, includeUnmonitored: {IncludeUnmonitored}", start, end, includeUnmonitored);
 
         var movies = await _movieRepository.GetMoviesBetweenDatesAsync(start, end, includeUnmonitored, ct).ConfigureAwait(false);
+
+        // Bulk check file existence to avoid N+1 queries
+        var movieIds = movies.Select(m => m.Id).Distinct().ToList();
+        var moviesWithFiles = new HashSet<int>();
+
+        foreach (var movieId in movieIds)
+        {
+            var file = await _movieFileRepository.FindByMovieIdAsync(movieId, ct).ConfigureAwait(false);
+            if (file != null)
+            {
+                moviesWithFiles.Add(movieId);
+            }
+        }
+
         var entries = new List<MovieCalendarEntry>();
 
         foreach (var movie in movies)
         {
+            var hasFile = moviesWithFiles.Contains(movie.Id);
+
             if (movie.InCinemas.HasValue && movie.InCinemas.Value >= start && movie.InCinemas.Value <= end)
             {
                 entries.Add(new MovieCalendarEntry
@@ -41,7 +62,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.InCinemas.Value,
                     ReleaseType = "Cinema",
                     Monitored = movie.Monitored,
-                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
+                    HasFile = hasFile
                 });
             }
 
@@ -55,7 +76,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.DigitalRelease.Value,
                     ReleaseType = "Digital",
                     Monitored = movie.Monitored,
-                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
+                    HasFile = hasFile
                 });
             }
 
@@ -69,7 +90,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.PhysicalRelease.Value,
                     ReleaseType = "Physical",
                     Monitored = movie.Monitored,
-                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
+                    HasFile = hasFile
                 });
             }
         }
@@ -82,10 +103,26 @@ public class MovieCalendarService : IMovieCalendarService
         _logger.LogDebug("Getting calendar entries from {Start} to {End}, includeUnmonitored: {IncludeUnmonitored}", start, end, includeUnmonitored);
 
         var movies = _movieRepository.GetMoviesBetweenDates(start, end, includeUnmonitored);
+
+        // Bulk check file existence to avoid N+1 queries
+        var movieIds = movies.Select(m => m.Id).Distinct().ToList();
+        var moviesWithFiles = new HashSet<int>();
+
+        foreach (var movieId in movieIds)
+        {
+            var file = _movieFileRepository.FindByMovieId(movieId);
+            if (file != null)
+            {
+                moviesWithFiles.Add(movieId);
+            }
+        }
+
         var entries = new List<MovieCalendarEntry>();
 
         foreach (var movie in movies)
         {
+            var hasFile = moviesWithFiles.Contains(movie.Id);
+
             if (movie.InCinemas.HasValue && movie.InCinemas.Value >= start && movie.InCinemas.Value <= end)
             {
                 entries.Add(new MovieCalendarEntry
@@ -96,7 +133,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.InCinemas.Value,
                     ReleaseType = "Cinema",
                     Monitored = movie.Monitored,
-                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
+                    HasFile = hasFile
                 });
             }
 
@@ -110,7 +147,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.DigitalRelease.Value,
                     ReleaseType = "Digital",
                     Monitored = movie.Monitored,
-                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
+                    HasFile = hasFile
                 });
             }
 
@@ -124,7 +161,7 @@ public class MovieCalendarService : IMovieCalendarService
                     ReleaseDate = movie.PhysicalRelease.Value,
                     ReleaseType = "Physical",
                     Monitored = movie.Monitored,
-                    HasFile = false // Tracked in #47: Implement file existence checks in calendar service
+                    HasFile = hasFile
                 });
             }
         }
