@@ -608,13 +608,6 @@ public class MediaInfoService : IMediaInfoService
         public Dictionary<string, string> Tags { get; set; } = new();
     }
 
-    private sealed class MediaStream
-    {
-        public long BitRate { get; set; }
-        public TimeSpan? Duration { get; set; }
-        public Dictionary<string, string> Tags { get; set; } = new();
-    }
-
     private sealed class VideoStream
     {
         public int Index { get; set; }
