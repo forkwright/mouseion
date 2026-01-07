@@ -18,6 +18,8 @@ namespace Mouseion.Api.Tests;
 
 public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private string? _dbPath;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureAppConfiguration((context, config) =>
@@ -39,29 +41,53 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
                 services.Remove(descriptor);
             }
 
-            var dbPath = Path.Combine(Path.GetTempPath(), $"mouseion_test_{Guid.NewGuid()}.db");
-            services.AddSingleton<IAppFolderInfo>(new TestAppFolderInfo(dbPath));
+            var testDir = Path.Combine(Path.GetTempPath(), $"mouseion_test_{Guid.NewGuid()}");
+            _dbPath = Path.Combine(testDir, "mouseion.db");
+            services.AddSingleton<IAppFolderInfo>(new TestAppFolderInfo(testDir));
         });
 
         builder.UseEnvironment("Test");
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && _dbPath != null)
+        {
+            try
+            {
+                // Clean up test database directory
+                var testDir = Path.GetDirectoryName(_dbPath);
+                if (testDir != null && Directory.Exists(testDir))
+                {
+                    Directory.Delete(testDir, recursive: true);
+                }
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
+        }
+
+        base.Dispose(disposing);
     }
 }
 
 public class TestAppFolderInfo : IAppFolderInfo
 {
-    private readonly string _testPath;
+    private readonly string _testDir;
 
-    public TestAppFolderInfo(string testPath)
+    public TestAppFolderInfo(string testDir)
     {
-        _testPath = Path.GetDirectoryName(testPath) ?? Path.GetTempPath();
+        _testDir = testDir;
+        Directory.CreateDirectory(_testDir);
     }
 
-    public string AppDataFolder => _testPath;
-    public string TempFolder => Path.Combine(_testPath, "temp");
-    public string StartUpFolder => _testPath;
+    public string AppDataFolder => _testDir;
+    public string TempFolder => Path.Combine(_testDir, "temp");
+    public string StartUpFolder => _testDir;
 
     public string GetMediaCoverPath()
     {
-        return Path.Combine(_testPath, "MediaCover");
+        return Path.Combine(_testDir, "MediaCover");
     }
 }

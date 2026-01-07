@@ -22,6 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Mouseion.Api\Mouseion.Api.csproj" />
     <ProjectReference Include="..\..\src\Mouseion.Core\Mouseion.Core.csproj" />
     <ProjectReference Include="..\..\src\Mouseion.Host\Mouseion.Host.csproj" />

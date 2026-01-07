@@ -15,20 +15,14 @@ using Mouseion.Api.Common;
 
 namespace Mouseion.Api.Tests.Albums;
 
-public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
+public class AlbumControllerTests : ControllerTestBase
 {
-    private readonly HttpClient _client;
 
-    public AlbumControllerTests(TestWebApplicationFactory factory)
-    {
-        _client = factory.CreateClient();
-        _client.DefaultRequestHeaders.Add("X-Api-Key", "test-api-key");
-    }
 
     [Fact]
     public async Task GetAlbums_ReturnsSuccessfully()
     {
-        var response = await _client.GetAsync("/api/v3/albums");
+        var response = await Client.GetAsync("/api/v3/albums");
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<PagedResult<AlbumResource>>();
@@ -45,7 +39,7 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
             Monitored = true,
             QualityProfileId = 1
         };
-        var artistResponse = await _client.PostAsJsonAsync("/api/v3/artists/music", artist);
+        var artistResponse = await Client.PostAsJsonAsync("/api/v3/artists/music", artist);
         var createdArtist = await artistResponse.Content.ReadFromJsonAsync<ArtistResource>();
 
         var album = new AlbumResource
@@ -58,7 +52,7 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
             QualityProfileId = 1
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v3/albums", album);
+        var response = await Client.PostAsJsonAsync("/api/v3/albums", album);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
         var created = await response.Content.ReadFromJsonAsync<AlbumResource>();
@@ -77,7 +71,7 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
             Monitored = true,
             QualityProfileId = 1
         };
-        var artistResponse = await _client.PostAsJsonAsync("/api/v3/artists/music", artist);
+        var artistResponse = await Client.PostAsJsonAsync("/api/v3/artists/music", artist);
         var createdArtist = await artistResponse.Content.ReadFromJsonAsync<ArtistResource>();
 
         var album = new AlbumResource
@@ -88,11 +82,11 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
             QualityProfileId = 1
         };
 
-        var createResponse = await _client.PostAsJsonAsync("/api/v3/albums", album);
+        var createResponse = await Client.PostAsJsonAsync("/api/v3/albums", album);
         var created = await createResponse.Content.ReadFromJsonAsync<AlbumResource>();
         Assert.NotNull(created);
 
-        var getResponse = await _client.GetAsync($"/api/v3/albums/{created.Id}");
+        var getResponse = await Client.GetAsync($"/api/v3/albums/{created.Id}");
         getResponse.EnsureSuccessStatusCode();
 
         var retrieved = await getResponse.Content.ReadFromJsonAsync<AlbumResource>();
@@ -104,7 +98,7 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
     [Fact]
     public async Task GetAlbum_ReturnsNotFound_WhenDoesNotExist()
     {
-        var response = await _client.GetAsync("/api/v3/albums/99999");
+        var response = await Client.GetAsync("/api/v3/albums/99999");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
@@ -117,7 +111,7 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
             Monitored = true,
             QualityProfileId = 1
         };
-        var artistResponse = await _client.PostAsJsonAsync("/api/v3/artists/music", artist);
+        var artistResponse = await Client.PostAsJsonAsync("/api/v3/artists/music", artist);
         var createdArtist = await artistResponse.Content.ReadFromJsonAsync<ArtistResource>();
 
         var album = new AlbumResource
@@ -128,14 +122,14 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
             QualityProfileId = 1
         };
 
-        var createResponse = await _client.PostAsJsonAsync("/api/v3/albums", album);
+        var createResponse = await Client.PostAsJsonAsync("/api/v3/albums", album);
         var created = await createResponse.Content.ReadFromJsonAsync<AlbumResource>();
         Assert.NotNull(created);
 
         created.Monitored = true;
         created.Description = "Concept album";
 
-        var updateResponse = await _client.PutAsJsonAsync($"/api/v3/albums/{created.Id}", created);
+        var updateResponse = await Client.PutAsJsonAsync($"/api/v3/albums/{created.Id}", created);
         updateResponse.EnsureSuccessStatusCode();
 
         var updated = await updateResponse.Content.ReadFromJsonAsync<AlbumResource>();
@@ -153,7 +147,7 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
             Monitored = true,
             QualityProfileId = 1
         };
-        var artistResponse = await _client.PostAsJsonAsync("/api/v3/artists/music", artist);
+        var artistResponse = await Client.PostAsJsonAsync("/api/v3/artists/music", artist);
         var createdArtist = await artistResponse.Content.ReadFromJsonAsync<ArtistResource>();
 
         var album = new AlbumResource
@@ -164,14 +158,14 @@ public class AlbumControllerTests : IClassFixture<TestWebApplicationFactory>
             QualityProfileId = 1
         };
 
-        var createResponse = await _client.PostAsJsonAsync("/api/v3/albums", album);
+        var createResponse = await Client.PostAsJsonAsync("/api/v3/albums", album);
         var created = await createResponse.Content.ReadFromJsonAsync<AlbumResource>();
         Assert.NotNull(created);
 
-        var deleteResponse = await _client.DeleteAsync($"/api/v3/albums/{created.Id}");
+        var deleteResponse = await Client.DeleteAsync($"/api/v3/albums/{created.Id}");
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
-        var getResponse = await _client.GetAsync($"/api/v3/albums/{created.Id}");
+        var getResponse = await Client.GetAsync($"/api/v3/albums/{created.Id}");
         Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
     }
 }
