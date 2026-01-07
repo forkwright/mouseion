@@ -6,22 +6,31 @@ using Mouseion.Common.EnvironmentInfo;
 
 namespace Mouseion.Common.Tests.Disk;
 
-public class RecycleBinProviderTests
+public class RecycleBinProviderTests : IDisposable
 {
     private readonly RecycleBinProvider _provider;
+    private readonly string _tempDir;
 
     public RecycleBinProviderTests()
     {
         _provider = new RecycleBinProvider();
+        _tempDir = Path.Combine(Path.GetTempPath(), $"mouseion_recycle_test_{Guid.NewGuid()}");
+        Directory.CreateDirectory(_tempDir);
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_tempDir))
+        {
+            Directory.Delete(_tempDir, recursive: true);
+        }
     }
 
     [Fact]
     public void IsAvailable_should_return_true_on_supported_platforms()
     {
-        // IsAvailable depends on actual OS, test that it returns a boolean
         var isAvailable = _provider.IsAvailable;
 
-        // Should be true on Windows, Linux, or macOS
         if (OsInfo.IsWindows || OsInfo.IsLinux || OsInfo.IsOsx)
         {
             Assert.True(isAvailable);
@@ -55,12 +64,116 @@ public class RecycleBinProviderTests
         }
         else if (OsInfo.IsLinux || OsInfo.IsOsx)
         {
-            // Should contain .local/share/Trash if it exists
             if (path != null)
             {
                 Assert.Contains(".local", path);
                 Assert.Contains("Trash", path);
             }
+        }
+    }
+
+    [Fact]
+    public void DeleteFile_should_successfully_delete_existing_file()
+    {
+        var testFile = Path.Combine(_tempDir, "test_file.txt");
+        File.WriteAllText(testFile, "test content");
+
+        var result = _provider.DeleteFile(testFile);
+
+        if (_provider.IsAvailable)
+        {
+            Assert.True(result);
+            Assert.False(File.Exists(testFile));
+        }
+        else
+        {
+            Assert.False(result);
+        }
+    }
+
+    [Fact]
+    public void DeleteFile_should_handle_locked_file_gracefully()
+    {
+        var testFile = Path.Combine(_tempDir, "locked_file.txt");
+        File.WriteAllText(testFile, "test content");
+
+        using var stream = File.Open(testFile, FileMode.Open, FileAccess.Read, FileShare.None);
+        var result = _provider.DeleteFile(testFile);
+
+        Assert.False(result);
+        Assert.True(File.Exists(testFile));
+    }
+
+    [Fact]
+    public void DeleteFile_with_special_characters_should_be_handled()
+    {
+        var testFile = Path.Combine(_tempDir, "file with spaces & special!.txt");
+        File.WriteAllText(testFile, "test content");
+
+        var result = _provider.DeleteFile(testFile);
+
+        if (_provider.IsAvailable)
+        {
+            Assert.True(result);
+            Assert.False(File.Exists(testFile));
+        }
+        else
+        {
+            Assert.False(result);
+        }
+    }
+
+    [Fact]
+    public void DeleteFile_with_readonly_attribute_should_succeed()
+    {
+        var testFile = Path.Combine(_tempDir, "readonly_file.txt");
+        File.WriteAllText(testFile, "test content");
+
+        if (OsInfo.IsWindows)
+        {
+            File.SetAttributes(testFile, FileAttributes.ReadOnly);
+        }
+        else
+        {
+            File.SetUnixFileMode(testFile, UnixFileMode.UserRead);
+        }
+
+        var result = _provider.DeleteFile(testFile);
+
+        if (_provider.IsAvailable)
+        {
+            Assert.True(result);
+            Assert.False(File.Exists(testFile));
+        }
+        else
+        {
+            Assert.False(result);
+        }
+    }
+
+    [Fact]
+    public void Multiple_sequential_deletes_should_succeed()
+    {
+        var file1 = Path.Combine(_tempDir, "file1.txt");
+        var file2 = Path.Combine(_tempDir, "file2.txt");
+        var file3 = Path.Combine(_tempDir, "file3.txt");
+
+        File.WriteAllText(file1, "content1");
+        File.WriteAllText(file2, "content2");
+        File.WriteAllText(file3, "content3");
+
+        var result1 = _provider.DeleteFile(file1);
+        var result2 = _provider.DeleteFile(file2);
+        var result3 = _provider.DeleteFile(file3);
+
+        if (_provider.IsAvailable)
+        {
+            Assert.True(result1);
+            Assert.True(result2);
+            Assert.True(result3);
+            Assert.False(File.Exists(file1));
+            Assert.False(File.Exists(file2));
+            Assert.False(File.Exists(file3));
         }
     }
 }
