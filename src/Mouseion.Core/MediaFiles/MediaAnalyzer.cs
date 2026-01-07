@@ -95,7 +95,7 @@ public class MediaAnalyzer : IMediaAnalyzer
                 var chapFrame = chapterFrames[i];
 
                 // Use chapter ID as title, fallback to numbered chapter
-                // TODO: Extract title from TIT2 subframe when present
+                // Tracked in #48: Implement chapter parsing for M4B and MP3 files (includes TIT2 extraction)
                 var title = !string.IsNullOrEmpty(chapFrame.Id)
                     ? chapFrame.Id
                     : $"Chapter {i + 1}";

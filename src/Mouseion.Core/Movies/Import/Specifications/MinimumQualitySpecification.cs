@@ -24,14 +24,14 @@ public class MinimumQualitySpecification : IMovieImportSpecification
 
     public Task<ImportRejection?> IsSatisfiedByAsync(string filePath, Movie movie, CancellationToken ct = default)
     {
-        // TODO: Implement minimum quality check when QualityDetector and MinimumQualityId are available
+        // Tracked in #44: Implement quality upgrade detection
         _logger.LogDebug("Skipping minimum quality check for {FilePath} - not yet implemented", filePath.SanitizeForLog());
         return Task.FromResult<ImportRejection?>(null);
     }
 
     public ImportRejection? IsSatisfiedBy(string filePath, Movie movie)
     {
-        // TODO: Implement minimum quality check when QualityDetector and MinimumQualityId are available
+        // Tracked in #44: Implement quality upgrade detection
         _logger.LogDebug("Skipping minimum quality check for {FilePath} - not yet implemented", filePath.SanitizeForLog());
         return null;
     }
