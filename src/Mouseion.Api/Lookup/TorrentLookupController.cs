@@ -14,9 +14,9 @@ namespace Mouseion.Api.Lookup;
 [Authorize]
 public class TorrentLookupController : ControllerBase
 {
-    private readonly MyAnonamouseIndexer _myAnonamouseIndexer;
+    private readonly IMyAnonamouseIndexer _myAnonamouseIndexer;
 
-    public TorrentLookupController(MyAnonamouseIndexer myAnonamouseIndexer)
+    public TorrentLookupController(IMyAnonamouseIndexer myAnonamouseIndexer)
     {
         _myAnonamouseIndexer = myAnonamouseIndexer;
     }
