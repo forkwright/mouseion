@@ -228,4 +228,95 @@ public class ImportApprovedMoviesTests
         Assert.Single(results);
         Assert.True(results[0].Success);
     }
+
+    [Fact]
+    public async Task ImportAsync_should_handle_IOException()
+    {
+        var movie = new Movie
+        {
+            Id = 1,
+            Title = "Test Movie",
+            Year = 2025,
+            Path = "/movies/test-movie"
+        };
+
+        var decision = new MovieImportDecision("/downloads/test-movie.mkv", movie);
+
+        _fileImportServiceMock
+            .Setup(x => x.ImportFileAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                null,
+                true))
+            .ThrowsAsync(new IOException("Disk read error"));
+
+        var results = await _service.ImportAsync(new List<MovieImportDecision> { decision });
+
+        Assert.Single(results);
+        Assert.False(results[0].Success);
+        Assert.Equal("Disk read error", results[0].ErrorMessage);
+        _movieFileRepositoryMock.Verify(x => x.InsertAsync(It.IsAny<MovieFile>(), default), Times.Never);
+    }
+
+    [Fact]
+    public async Task ImportAsync_should_handle_InvalidOperationException()
+    {
+        var movie = new Movie
+        {
+            Id = 1,
+            Title = "Test Movie",
+            Year = 2025,
+            Path = "/movies/test-movie"
+        };
+
+        var decision = new MovieImportDecision("/downloads/test-movie.mkv", movie);
+
+        _fileImportServiceMock
+            .Setup(x => x.ImportFileAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                null,
+                true))
+            .ReturnsAsync((string src, string dst, FileStrategy? _, bool __) =>
+                ImportResult.Success(dst, FileStrategy.Hardlink, Mouseion.Common.Disk.TransferMode.HardLink));
+
+        _movieFileRepositoryMock
+            .Setup(x => x.InsertAsync(It.IsAny<MovieFile>(), default))
+            .ThrowsAsync(new InvalidOperationException("Database constraint violation"));
+
+        var results = await _service.ImportAsync(new List<MovieImportDecision> { decision });
+
+        Assert.Single(results);
+        Assert.False(results[0].Success);
+        Assert.Equal("Database constraint violation", results[0].ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ImportAsync_should_handle_UnauthorizedAccessException()
+    {
+        var movie = new Movie
+        {
+            Id = 1,
+            Title = "Test Movie",
+            Year = 2025,
+            Path = "/movies/test-movie"
+        };
+
+        var decision = new MovieImportDecision("/downloads/test-movie.mkv", movie);
+
+        _fileImportServiceMock
+            .Setup(x => x.ImportFileAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                null,
+                true))
+            .ThrowsAsync(new UnauthorizedAccessException("Permission denied"));
+
+        var results = await _service.ImportAsync(new List<MovieImportDecision> { decision });
+
+        Assert.Single(results);
+        Assert.False(results[0].Success);
+        Assert.Equal("Permission denied", results[0].ErrorMessage);
+        _movieFileRepositoryMock.Verify(x => x.InsertAsync(It.IsAny<MovieFile>(), default), Times.Never);
+    }
 }
