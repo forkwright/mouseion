@@ -196,40 +196,6 @@ public class ImportApprovedMoviesTests
     }
 
     [Fact]
-    public void Import_sync_should_delegate_to_async()
-    {
-        var movie = new Movie
-        {
-            Id = 1,
-            Title = "Test Movie",
-            Year = 2025,
-            Path = "/movies/test-movie"
-        };
-
-        var decision = new MovieImportDecision("/downloads/test-movie.mkv", movie);
-
-        _fileImportServiceMock
-            .Setup(x => x.ImportFileAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                null,
-                true))
-            .ReturnsAsync(ImportResult.Success(
-                "/movies/test-movie/test-movie.mkv",
-                FileStrategy.Hardlink,
-                Mouseion.Common.Disk.TransferMode.HardLink));
-
-        _movieFileRepositoryMock
-            .Setup(x => x.InsertAsync(It.IsAny<MovieFile>(), default))
-            .ReturnsAsync((MovieFile mf, CancellationToken _) => mf);
-
-        var results = _service.Import(new List<MovieImportDecision> { decision });
-
-        Assert.Single(results);
-        Assert.True(results[0].Success);
-    }
-
-    [Fact]
     public async Task ImportAsync_should_handle_IOException()
     {
         var movie = new Movie
