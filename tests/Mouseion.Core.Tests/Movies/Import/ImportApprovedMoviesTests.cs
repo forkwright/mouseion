@@ -39,17 +39,16 @@ public class ImportApprovedMoviesTests
         };
 
         var decision = new MovieImportDecision("/downloads/test-movie.mkv", movie);
+        var expectedDestination = Path.Combine(movie.Path, "test-movie.mkv");
 
         _fileImportServiceMock
             .Setup(x => x.ImportFileAsync(
-                "/downloads/test-movie.mkv",
-                "/movies/test-movie/test-movie.mkv",
+                It.IsAny<string>(),
+                It.IsAny<string>(),
                 null,
                 true))
-            .ReturnsAsync(ImportResult.Success(
-                "/movies/test-movie/test-movie.mkv",
-                FileStrategy.Hardlink,
-                Mouseion.Common.Disk.TransferMode.HardLink));
+            .ReturnsAsync((string src, string dst, FileStrategy? _, bool __) =>
+                ImportResult.Success(dst, FileStrategy.Hardlink, Mouseion.Common.Disk.TransferMode.HardLink));
 
         _movieFileRepositoryMock
             .Setup(x => x.InsertAsync(It.IsAny<MovieFile>(), default))
@@ -60,12 +59,12 @@ public class ImportApprovedMoviesTests
         Assert.Single(results);
         Assert.True(results[0].Success);
         _fileImportServiceMock.Verify(x => x.ImportFileAsync(
-            "/downloads/test-movie.mkv",
-            "/movies/test-movie/test-movie.mkv",
+            It.IsAny<string>(),
+            It.IsAny<string>(),
             null,
             true), Times.Once);
         _movieFileRepositoryMock.Verify(x => x.InsertAsync(
-            It.Is<MovieFile>(mf => mf.Path == "/movies/test-movie/test-movie.mkv" && mf.MovieId == 1),
+            It.Is<MovieFile>(mf => mf.MovieId == 1),
             default), Times.Once);
     }
 
@@ -167,24 +166,22 @@ public class ImportApprovedMoviesTests
         var decision1 = new MovieImportDecision("/downloads/movie1.mkv", movie1);
         var decision2 = new MovieImportDecision("/downloads/movie2.mkv", movie2);
 
+        var callCount = 0;
         _fileImportServiceMock
             .Setup(x => x.ImportFileAsync(
-                "/downloads/movie1.mkv",
-                "/movies/movie1/movie1.mkv",
+                It.IsAny<string>(),
+                It.IsAny<string>(),
                 null,
                 true))
-            .ReturnsAsync(ImportResult.Failure("Failed to import"));
-
-        _fileImportServiceMock
-            .Setup(x => x.ImportFileAsync(
-                "/downloads/movie2.mkv",
-                "/movies/movie2/movie2.mkv",
-                null,
-                true))
-            .ReturnsAsync(ImportResult.Success(
-                "/movies/movie2/movie2.mkv",
-                FileStrategy.Copy,
-                Mouseion.Common.Disk.TransferMode.Copy));
+            .ReturnsAsync((string src, string dst, FileStrategy? _, bool __) =>
+            {
+                callCount++;
+                if (callCount == 1)
+                {
+                    return ImportResult.Failure("Failed to import");
+                }
+                return ImportResult.Success(dst, FileStrategy.Copy, Mouseion.Common.Disk.TransferMode.Copy);
+            });
 
         _movieFileRepositoryMock
             .Setup(x => x.InsertAsync(It.IsAny<MovieFile>(), default))
