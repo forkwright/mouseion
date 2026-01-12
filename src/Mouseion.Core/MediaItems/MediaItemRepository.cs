@@ -77,21 +77,35 @@ public class MediaItemRepository : IMediaItemRepository
         using var conn = _database.OpenConnection();
 
         var offset = (page - 1) * pageSize;
-        var whereClause = mediaType.HasValue ? "WHERE \"MediaType\" = @MediaType" : "";
 
-        var query = $@"
-            SELECT ""Id"", ""Title"", ""Year"", ""MediaType"", ""Monitored"", ""QualityProfileId"", ""Path"", ""Added"", ""LastModified""
-            FROM ""MediaItems""
-            {whereClause}
-            ORDER BY ""Added"" DESC
-            LIMIT @PageSize OFFSET @Offset";
+        // Use parameterized query with conditional filtering
+        const string queryWithFilter = """
+            SELECT "Id", "Title", "Year", "MediaType", "Monitored", "QualityProfileId", "Path", "Added", "LastModified"
+            FROM "MediaItems"
+            WHERE "MediaType" = @MediaType
+            ORDER BY "Added" DESC
+            LIMIT @PageSize OFFSET @Offset
+            """;
 
-        var results = await conn.QueryAsync<MediaItemSummary>(query, new
-        {
-            MediaType = mediaType.HasValue ? (int)mediaType.Value : 0,
-            PageSize = pageSize,
-            Offset = offset
-        }).ConfigureAwait(false);
+        const string queryNoFilter = """
+            SELECT "Id", "Title", "Year", "MediaType", "Monitored", "QualityProfileId", "Path", "Added", "LastModified"
+            FROM "MediaItems"
+            ORDER BY "Added" DESC
+            LIMIT @PageSize OFFSET @Offset
+            """;
+
+        var results = mediaType.HasValue
+            ? await conn.QueryAsync<MediaItemSummary>(queryWithFilter, new
+            {
+                MediaType = (int)mediaType.Value,
+                PageSize = pageSize,
+                Offset = offset
+            }).ConfigureAwait(false)
+            : await conn.QueryAsync<MediaItemSummary>(queryNoFilter, new
+            {
+                PageSize = pageSize,
+                Offset = offset
+            }).ConfigureAwait(false);
 
         return results.ToList();
     }
@@ -100,13 +114,12 @@ public class MediaItemRepository : IMediaItemRepository
     {
         using var conn = _database.OpenConnection();
 
-        var whereClause = mediaType.HasValue ? "WHERE \"MediaType\" = @MediaType" : "";
-        var query = $"SELECT COUNT(*) FROM \"MediaItems\" {whereClause}";
+        const string queryWithFilter = """SELECT COUNT(*) FROM "MediaItems" WHERE "MediaType" = @MediaType""";
+        const string queryNoFilter = """SELECT COUNT(*) FROM "MediaItems" """;
 
-        return await conn.ExecuteScalarAsync<int>(query, new
-        {
-            MediaType = mediaType.HasValue ? (int)mediaType.Value : 0
-        }).ConfigureAwait(false);
+        return mediaType.HasValue
+            ? await conn.ExecuteScalarAsync<int>(queryWithFilter, new { MediaType = (int)mediaType.Value }).ConfigureAwait(false)
+            : await conn.ExecuteScalarAsync<int>(queryNoFilter).ConfigureAwait(false);
     }
 
     public async Task DeleteAsync(int id, CancellationToken ct = default)
@@ -119,21 +132,30 @@ public class MediaItemRepository : IMediaItemRepository
     {
         using var conn = _database.OpenConnection();
 
-        var whereClause = mediaType.HasValue
-            ? "WHERE \"LastModified\" > @ModifiedSince AND \"MediaType\" = @MediaType"
-            : "WHERE \"LastModified\" > @ModifiedSince";
+        const string queryWithFilter = """
+            SELECT "Id", "Title", "Year", "MediaType", "Monitored", "QualityProfileId", "Path", "Added", "LastModified"
+            FROM "MediaItems"
+            WHERE "LastModified" > @ModifiedSince AND "MediaType" = @MediaType
+            ORDER BY "LastModified" DESC
+            """;
 
-        var query = $@"
-            SELECT ""Id"", ""Title"", ""Year"", ""MediaType"", ""Monitored"", ""QualityProfileId"", ""Path"", ""Added"", ""LastModified""
-            FROM ""MediaItems""
-            {whereClause}
-            ORDER BY ""LastModified"" DESC";
+        const string queryNoFilter = """
+            SELECT "Id", "Title", "Year", "MediaType", "Monitored", "QualityProfileId", "Path", "Added", "LastModified"
+            FROM "MediaItems"
+            WHERE "LastModified" > @ModifiedSince
+            ORDER BY "LastModified" DESC
+            """;
 
-        var results = await conn.QueryAsync<MediaItemSummary>(query, new
-        {
-            ModifiedSince = modifiedSince,
-            MediaType = mediaType.HasValue ? (int)mediaType.Value : 0
-        }).ConfigureAwait(false);
+        var results = mediaType.HasValue
+            ? await conn.QueryAsync<MediaItemSummary>(queryWithFilter, new
+            {
+                ModifiedSince = modifiedSince,
+                MediaType = (int)mediaType.Value
+            }).ConfigureAwait(false)
+            : await conn.QueryAsync<MediaItemSummary>(queryNoFilter, new
+            {
+                ModifiedSince = modifiedSince
+            }).ConfigureAwait(false);
 
         return results.ToList();
     }

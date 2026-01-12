@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using Microsoft.Extensions.Logging;
+using Mouseion.Common.Extensions;
 using Mouseion.Core.Music;
 using Mouseion.Core.Qualities;
 
@@ -38,7 +39,7 @@ public class UpgradeSpecification : IImportSpecification
         // No existing file = always accept (it's a new file, not an upgrade scenario)
         if (existingFile == null)
         {
-            _logger.LogDebug("No existing file at path, accepting: {Path}", newFile.Path);
+            _logger.LogDebug("No existing file at path, accepting: {Path}", newFile.Path.SanitizeForLog());
             return null;
         }
 
@@ -53,7 +54,7 @@ public class UpgradeSpecification : IImportSpecification
                 "File is not an upgrade. Existing: {ExistingQuality}, New: {NewQuality}, Path: {Path}",
                 existingQuality?.Quality.Name ?? "Unknown",
                 newFile.Quality.Name,
-                newFile.Path);
+                newFile.Path.SanitizeForLog());
 
             return new ImportRejection(
                 ImportRejectionReason.NotQualityUpgrade,
@@ -64,7 +65,7 @@ public class UpgradeSpecification : IImportSpecification
             "File is an upgrade. Existing: {ExistingQuality}, New: {NewQuality}, Path: {Path}",
             existingQuality?.Quality.Name ?? "Unknown",
             newFile.Quality.Name,
-            newFile.Path);
+            newFile.Path.SanitizeForLog());
 
         return null;
     }
