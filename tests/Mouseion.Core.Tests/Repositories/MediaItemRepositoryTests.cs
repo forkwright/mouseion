@@ -192,4 +192,64 @@ public class MediaItemRepositoryTests : RepositoryTestBase
         Assert.Equal("Book 2", result[1].Title);
         Assert.Equal("Book 1", result[2].Title);
     }
+
+    [Fact]
+    public async Task GetPageAsync_WithNoFilter_ReturnsAllTypes()
+    {
+        await _bookRepository.InsertAsync(CreateBook("Book", 2024));
+        await _movieRepository.InsertAsync(CreateMovie("Movie", 2024));
+
+        var result = await _repository.GetPageAsync(1, 10, null);
+
+        Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public async Task CountAsync_WithNoFilter_CountsAllTypes()
+    {
+        await _bookRepository.InsertAsync(CreateBook("Book", 2024));
+        await _movieRepository.InsertAsync(CreateMovie("Movie", 2024));
+
+        var result = await _repository.CountAsync(null);
+
+        Assert.Equal(2, result);
+    }
+
+    [Fact]
+    public async Task GetModifiedSinceAsync_WithNoFilter_ReturnsAllTypes()
+    {
+        var cutoffDate = DateTime.UtcNow.AddHours(-1);
+
+        await _bookRepository.InsertAsync(CreateBook("Book", 2024));
+        await _movieRepository.InsertAsync(CreateMovie("Movie", 2024));
+
+        var result = await _repository.GetModifiedSinceAsync(cutoffDate, null);
+
+        Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public async Task GetPageAsync_SecondPage_ReturnsCorrectOffset()
+    {
+        for (int i = 1; i <= 15; i++)
+        {
+            await _bookRepository.InsertAsync(CreateBook($"Book {i}", 2020 + i));
+        }
+
+        var page2 = await _repository.GetPageAsync(2, 10);
+
+        Assert.Equal(5, page2.Count);
+    }
+
+    [Fact]
+    public async Task FindByIdAsync_UnknownMediaType_ReturnsNull()
+    {
+        // Insert a book and then query for a non-existent ID
+        var book = CreateBook("Test", 2024);
+        await _bookRepository.InsertAsync(book);
+
+        var result = await _repository.FindByIdAsync(99999);
+
+        Assert.Null(result);
+    }
 }

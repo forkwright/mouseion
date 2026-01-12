@@ -267,4 +267,49 @@ public class QualityUpgradeServiceTests
 
         Assert.Equal(a, result);
     }
+
+    [Fact]
+    public void IsUpgradeWithCutoff_BelowCutoffButNotBetter_ReturnsFalse()
+    {
+        var current = new QualityModel(Quality.MusicMP3_256);
+        var candidate = new QualityModel(Quality.MusicMP3_128);
+        var cutoff = new QualityModel(Quality.MusicFLAC_24_96);
+
+        var result = QualityUpgradeService.IsUpgradeWithCutoff(current, candidate, cutoff);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void IsUpgrade_HiResOverCd_ReturnsTrue()
+    {
+        var current = new QualityModel(Quality.MusicFLAC_16_44);
+        var candidate = new QualityModel(Quality.MusicFLAC_24_192);
+
+        var result = QualityUpgradeService.IsUpgrade(current, candidate);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void IsUpgrade_CdOverHiRes_ReturnsFalse()
+    {
+        var current = new QualityModel(Quality.MusicFLAC_24_192);
+        var candidate = new QualityModel(Quality.MusicFLAC_16_44);
+
+        var result = QualityUpgradeService.IsUpgrade(current, candidate);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void GetBetterQuality_DifferentFormats_ReturnsBetter()
+    {
+        var mp3 = new QualityModel(Quality.MusicMP3_320);
+        var flac = new QualityModel(Quality.MusicFLAC_16_44);
+
+        var result = QualityUpgradeService.GetBetterQuality(mp3, flac);
+
+        Assert.Equal(flac, result);
+    }
 }
