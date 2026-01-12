@@ -19,6 +19,23 @@ namespace Mouseion.Core.MediaItems;
 public interface IMediaItemRepository
 {
     Task<MediaItem?> FindByIdAsync(int id, CancellationToken ct = default);
+    Task<List<MediaItemSummary>> GetPageAsync(int page, int pageSize, MediaType? mediaType = null, CancellationToken ct = default);
+    Task<int> CountAsync(MediaType? mediaType = null, CancellationToken ct = default);
+    Task DeleteAsync(int id, CancellationToken ct = default);
+    Task<List<MediaItemSummary>> GetModifiedSinceAsync(DateTime modifiedSince, MediaType? mediaType = null, CancellationToken ct = default);
+}
+
+public class MediaItemSummary
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public int Year { get; set; }
+    public MediaType MediaType { get; set; }
+    public bool Monitored { get; set; }
+    public int QualityProfileId { get; set; }
+    public string Path { get; set; } = string.Empty;
+    public DateTime Added { get; set; }
+    public DateTime? LastModified { get; set; }
 }
 
 public class MediaItemRepository : IMediaItemRepository
@@ -53,5 +70,71 @@ public class MediaItemRepository : IMediaItemRepository
                 new { Id = id }).ConfigureAwait(false),
             _ => null
         };
+    }
+
+    public async Task<List<MediaItemSummary>> GetPageAsync(int page, int pageSize, MediaType? mediaType = null, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+
+        var offset = (page - 1) * pageSize;
+        var whereClause = mediaType.HasValue ? "WHERE \"MediaType\" = @MediaType" : "";
+
+        var query = $@"
+            SELECT ""Id"", ""Title"", ""Year"", ""MediaType"", ""Monitored"", ""QualityProfileId"", ""Path"", ""Added"", ""LastModified""
+            FROM ""MediaItems""
+            {whereClause}
+            ORDER BY ""Added"" DESC
+            LIMIT @PageSize OFFSET @Offset";
+
+        var results = await conn.QueryAsync<MediaItemSummary>(query, new
+        {
+            MediaType = mediaType.HasValue ? (int)mediaType.Value : 0,
+            PageSize = pageSize,
+            Offset = offset
+        }).ConfigureAwait(false);
+
+        return results.ToList();
+    }
+
+    public async Task<int> CountAsync(MediaType? mediaType = null, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+
+        var whereClause = mediaType.HasValue ? "WHERE \"MediaType\" = @MediaType" : "";
+        var query = $"SELECT COUNT(*) FROM \"MediaItems\" {whereClause}";
+
+        return await conn.ExecuteScalarAsync<int>(query, new
+        {
+            MediaType = mediaType.HasValue ? (int)mediaType.Value : 0
+        }).ConfigureAwait(false);
+    }
+
+    public async Task DeleteAsync(int id, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+        await conn.ExecuteAsync("DELETE FROM \"MediaItems\" WHERE \"Id\" = @Id", new { Id = id }).ConfigureAwait(false);
+    }
+
+    public async Task<List<MediaItemSummary>> GetModifiedSinceAsync(DateTime modifiedSince, MediaType? mediaType = null, CancellationToken ct = default)
+    {
+        using var conn = _database.OpenConnection();
+
+        var whereClause = mediaType.HasValue
+            ? "WHERE \"LastModified\" > @ModifiedSince AND \"MediaType\" = @MediaType"
+            : "WHERE \"LastModified\" > @ModifiedSince";
+
+        var query = $@"
+            SELECT ""Id"", ""Title"", ""Year"", ""MediaType"", ""Monitored"", ""QualityProfileId"", ""Path"", ""Added"", ""LastModified""
+            FROM ""MediaItems""
+            {whereClause}
+            ORDER BY ""LastModified"" DESC";
+
+        var results = await conn.QueryAsync<MediaItemSummary>(query, new
+        {
+            ModifiedSince = modifiedSince,
+            MediaType = mediaType.HasValue ? (int)mediaType.Value : 0
+        }).ConfigureAwait(false);
+
+        return results.ToList();
     }
 }
