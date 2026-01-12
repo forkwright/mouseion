@@ -32,24 +32,21 @@ public class BookLookupController : ControllerBase
             return BadRequest(new { error = "At least one search parameter (title, author, or isbn) is required" });
         }
 
-        var results = new List<Book>();
+        var tasks = new List<Task<List<Book>>>();
 
         if (!string.IsNullOrWhiteSpace(title))
-        {
-            results.AddRange(await _bookInfoProvider.SearchByTitleAsync(title, ct).ConfigureAwait(false));
-        }
+            tasks.Add(_bookInfoProvider.SearchByTitleAsync(title, ct));
 
         if (!string.IsNullOrWhiteSpace(author))
-        {
-            results.AddRange(await _bookInfoProvider.SearchByAuthorAsync(author, ct).ConfigureAwait(false));
-        }
+            tasks.Add(_bookInfoProvider.SearchByAuthorAsync(author, ct));
 
         if (!string.IsNullOrWhiteSpace(isbn))
-        {
-            results.AddRange(await _bookInfoProvider.SearchByIsbnAsync(isbn, ct).ConfigureAwait(false));
-        }
+            tasks.Add(_bookInfoProvider.SearchByIsbnAsync(isbn, ct));
 
-        return Ok(results.Distinct().Select(ToResource).ToList());
+        var searchResults = await Task.WhenAll(tasks).ConfigureAwait(false);
+        var results = searchResults.SelectMany(x => x).Distinct();
+
+        return Ok(results.Select(ToResource).ToList());
     }
 
     [HttpGet("{id}")]

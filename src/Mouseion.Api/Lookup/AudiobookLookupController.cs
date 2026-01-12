@@ -34,24 +34,21 @@ public class AudiobookLookupController : ControllerBase
             return BadRequest(new { error = "At least one search parameter (title, author, narrator, or asin) is required" });
         }
 
-        var results = new List<Audiobook>();
+        var tasks = new List<Task<List<Audiobook>>>();
 
         if (!string.IsNullOrWhiteSpace(title))
-        {
-            results.AddRange(await _audiobookInfoProvider.SearchByTitleAsync(title, ct).ConfigureAwait(false));
-        }
+            tasks.Add(_audiobookInfoProvider.SearchByTitleAsync(title, ct));
 
         if (!string.IsNullOrWhiteSpace(author))
-        {
-            results.AddRange(await _audiobookInfoProvider.SearchByAuthorAsync(author, ct).ConfigureAwait(false));
-        }
+            tasks.Add(_audiobookInfoProvider.SearchByAuthorAsync(author, ct));
 
         if (!string.IsNullOrWhiteSpace(narrator))
-        {
-            results.AddRange(await _audiobookInfoProvider.SearchByNarratorAsync(narrator, ct).ConfigureAwait(false));
-        }
+            tasks.Add(_audiobookInfoProvider.SearchByNarratorAsync(narrator, ct));
 
-        return Ok(results.Distinct().Select(ToResource).ToList());
+        var searchResults = await Task.WhenAll(tasks).ConfigureAwait(false);
+        var results = searchResults.SelectMany(x => x).Distinct();
+
+        return Ok(results.Select(ToResource).ToList());
     }
 
     [HttpGet("{asin}")]
