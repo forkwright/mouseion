@@ -16,7 +16,7 @@ Transform Mouseion into a unified media manager replacing the entire *arr ecosys
 - **Bazarr** (subtitles)
 - **Prowlarr** (indexers)
 
-Plus audiobooks, podcasts, and comics in a single application.
+Plus audiobooks, podcasts, comics, manga/webcomics, and news feeds in a single application.
 
 ---
 
@@ -303,6 +303,40 @@ Plus audiobooks, podcasts, and comics in a single application.
 - ⏳ Auto-tagging rules functional
 - ⏳ Controller split (1/8 complete in PR #132, remaining tracked in Issue #119)
 - ⏳ LoggerMessage pattern migration (Issue #121)
+
+---
+
+## Future: Extended Media Types (Phase 9+)
+
+**Goal:** Expand feed-based content management beyond podcasts
+
+### Manga/Webcomics (Issue #137)
+- [ ] Manga/Webcomic/Chapter models
+- [ ] MangaDex, Webtoon, ComicK source integration
+- [ ] Chapter release tracking and notifications
+- [ ] Reading progress sync (Akroasis integration)
+- [ ] Quality preferences (scanlation groups, official vs fan)
+- [ ] Metadata from AniList, MyAnimeList, MangaUpdates
+- [ ] Komga/Kavita integration for existing libraries
+
+### News/Article Aggregation (Issue #137)
+- [ ] Article/Feed models
+- [ ] RSS/Atom feed parsing (reuse podcast infrastructure)
+- [ ] Full-text extraction and archival
+- [ ] Read/unread state sync
+- [ ] Tagging and categorization
+- [ ] Offline reading support
+
+### Comics (Planned)
+- [ ] Comic/Issue models
+- [ ] ComicVine metadata integration
+- [ ] Release tracking by series/publisher
+- [ ] Reading order management
+
+**Technical Considerations:**
+- New MediaTypes: `Manga`, `Webcomic`, `Article`, `Comic`
+- Reuse RSS polling infrastructure from podcasts
+- Quality definitions for manga (raw, translated, official)
 
 ---
 
