@@ -108,6 +108,10 @@ try
         builder.Services.AddSingleton<Mouseion.Core.Tags.ITagRepository, Mouseion.Core.Tags.TagRepository>();
         builder.Services.AddSingleton<Mouseion.Core.Tags.ITagService, Mouseion.Core.Tags.TagService>();
 
+        // Register auto-tagging services
+        builder.Services.AddSingleton<Mouseion.Core.Tags.AutoTagging.IAutoTaggingRuleRepository, Mouseion.Core.Tags.AutoTagging.AutoTaggingRuleRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.Tags.AutoTagging.IAutoTaggingService, Mouseion.Core.Tags.AutoTagging.AutoTaggingService>();
+
         // Register root folder services
         builder.Services.AddSingleton<Mouseion.Core.RootFolders.IRootFolderRepository, Mouseion.Core.RootFolders.RootFolderRepository>();
         builder.Services.AddSingleton<Mouseion.Core.RootFolders.IRootFolderService, Mouseion.Core.RootFolders.RootFolderService>();
