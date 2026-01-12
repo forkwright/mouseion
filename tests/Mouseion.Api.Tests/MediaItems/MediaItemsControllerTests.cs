@@ -115,4 +115,46 @@ public class MediaItemsControllerTests : ControllerTestBase
         Assert.NotNull(result);
         Assert.Equal(1, result.Page);
     }
+
+    [Fact]
+    public async Task GetAll_EnforcesMinPageSize()
+    {
+        var response = await Client.GetAsync("/api/v3/media?pageSize=0");
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<MediaItemResource>>();
+        Assert.NotNull(result);
+        Assert.Equal(50, result.PageSize);
+    }
+
+    [Fact]
+    public async Task GetAll_WithMovieMediaType_ReturnsFilteredResults()
+    {
+        var response = await Client.GetAsync("/api/v3/media?mediaType=Movie");
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<MediaItemResource>>();
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public async Task GetAll_WithAudiobookMediaType_ReturnsFilteredResults()
+    {
+        var response = await Client.GetAsync("/api/v3/media?mediaType=Audiobook");
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<MediaItemResource>>();
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public async Task GetModifiedSince_WithMediaTypeFilter_ReturnsFilteredResults()
+    {
+        var date = DateTime.UtcNow.AddDays(-1).ToString("o");
+        var response = await Client.GetAsync($"/api/v3/media/sync?modifiedSince={date}&mediaType=Book");
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<List<MediaItemResource>>();
+        Assert.NotNull(result);
+    }
 }

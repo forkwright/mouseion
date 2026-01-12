@@ -106,6 +106,36 @@ public class UpgradeSpecificationTests
         Assert.Null(result);
     }
 
+    [Fact]
+    public void IsSatisfiedBy_NotUpgrade_ReturnsRejection()
+    {
+        var existingFile = CreateMusicFile("/music/test.flac", Quality.MusicFLAC_24_96);
+        var newFile = CreateMusicFileInfo("/music/test.flac", Quality.MusicMP3_128);
+
+        _musicFileRepository.Setup(x => x.FindByPath(It.IsAny<string>()))
+            .Returns(existingFile);
+
+        var result = _subject.IsSatisfiedBy(newFile);
+
+        Assert.NotNull(result);
+        Assert.Equal(ImportRejectionReason.NotQualityUpgrade, result.Reason);
+    }
+
+    [Fact]
+    public void IsSatisfiedBy_ExistingFileNullQuality_ReturnsRejectionWhenNotUpgrade()
+    {
+        var existingFile = new MusicFile { RelativePath = "/music/test.flac", Quality = null };
+        var newFile = CreateMusicFileInfo("/music/test.flac", Quality.MusicMP3_128);
+
+        _musicFileRepository.Setup(x => x.FindByPath(It.IsAny<string>()))
+            .Returns(existingFile);
+
+        var result = _subject.IsSatisfiedBy(newFile);
+
+        // When existing has null quality, new file is always an upgrade
+        Assert.Null(result);
+    }
+
     private static MusicFileInfo CreateMusicFileInfo(string path, Quality quality)
     {
         return new MusicFileInfo
