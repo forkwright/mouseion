@@ -265,12 +265,12 @@ Plus audiobooks, podcasts, comics, manga/webcomics, and news feeds in a single a
    - [x] Automatic download on movie import
    - [x] Manual search and download via API
 
-3. **Auto-Tagging Improvements** (Issue #98)
-   - [ ] Genre extraction from metadata providers (TMDb, MusicBrainz, Goodreads)
-   - [ ] Language detection for audio/video files (FFmpeg audio streams)
-   - [ ] Custom tag rules (e.g., "tag as 'Audiophile' if FLAC 24-bit")
-   - [ ] Automatic tag application on import
-   - [ ] Tag management API (add, remove, bulk update)
+3. **Auto-Tagging Improvements** (Issue #98) ✅ (PR #139)
+   - [x] Genre extraction from metadata providers (TMDb, MusicBrainz, Goodreads)
+   - [x] Language detection for audio/video files (Book/Audiobook metadata)
+   - [x] Custom tag rules (7 condition types: GenreContains, LanguageContains, QualityEquals, etc.)
+   - [x] Automatic tag application on import (AddMovieService, AddBookService, AddAudiobookService)
+   - [x] Tag management API (bulk apply/remove, preview, rule CRUD)
 
 4. **Advanced File Import Pipeline** (Issue #99) ✅ (PR #130, #131)
    - [x] Import strategies: hardlink (preferred), copy, move, symlink
