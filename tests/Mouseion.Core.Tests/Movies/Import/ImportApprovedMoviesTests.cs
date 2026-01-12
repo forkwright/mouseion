@@ -39,7 +39,6 @@ public class ImportApprovedMoviesTests
         };
 
         var decision = new MovieImportDecision("/downloads/test-movie.mkv", movie);
-        var expectedDestination = Path.Combine(movie.Path, "test-movie.mkv");
 
         _fileImportServiceMock
             .Setup(x => x.ImportFileAsync(

@@ -99,7 +99,7 @@ public class AudiobookLookupControllerUnitTests
     public async Task GetByAsin_WhenNotFound_ReturnsNotFound()
     {
         _audiobookInfoProviderMock.Setup(x => x.GetByAsinAsync("B0999", default))
-            .ReturnsAsync((Audiobook?)null);
+            .ReturnsAsync(null as Audiobook);
 
         var result = await _controller.GetByAsin("B0999");
 
