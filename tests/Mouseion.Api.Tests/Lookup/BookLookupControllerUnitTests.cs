@@ -99,7 +99,7 @@ public class BookLookupControllerUnitTests
     public async Task GetById_WhenBookNotFound_ReturnsNotFound()
     {
         _bookInfoProviderMock.Setup(x => x.GetByExternalIdAsync("999", default))
-            .ReturnsAsync((Book?)null);
+            .ReturnsAsync(null as Book);
 
         var result = await _controller.GetById("999");
 

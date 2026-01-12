@@ -259,6 +259,9 @@ try
 
         // Register security services
         builder.Services.AddSingleton<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>();
+
+        // Register crypto services
+        builder.Services.AddSingleton<Mouseion.Common.Crypto.IHashProvider, Mouseion.Common.Crypto.HashProvider>();
     }
     else
     {
@@ -493,6 +496,9 @@ try
 
         // Register security services
         container.Register<Mouseion.Common.Security.IPathValidator, Mouseion.Common.Security.PathValidator>(Reuse.Singleton);
+
+        // Register crypto services
+        container.Register<Mouseion.Common.Crypto.IHashProvider, Mouseion.Common.Crypto.HashProvider>(Reuse.Singleton);
 
         // Use DryIoc as service provider
         builder.Host.UseServiceProviderFactory(new DryIocServiceProviderFactory(container));
