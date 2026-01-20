@@ -242,6 +242,13 @@ namespace Mouseion.Core.Qualities
         public static Quality ArticlePDF => new Quality(603, "PDF", QualitySource.ARTICLE, 0);
         public static Quality ArticleArchive => new Quality(604, "Archive", QualitySource.ARTICLE, 0);
 
+        // Comic Qualities (IDs 700-704)
+        public static Quality ComicUnknown => new Quality(700, "Unknown Comic", QualitySource.COMIC, 0);
+        public static Quality ComicCBR => new Quality(701, "CBR", QualitySource.COMIC, 0);
+        public static Quality ComicCBZ => new Quality(702, "CBZ", QualitySource.COMIC, 0);
+        public static Quality ComicPDF => new Quality(703, "PDF", QualitySource.COMIC, 0);
+        public static Quality ComicEPUB => new Quality(704, "EPUB", QualitySource.COMIC, 0);
+
         // Quality Group Names (used in QualityDefinition)
         private const string GroupWeb480P = "WEB 480p";
         private const string GroupWeb720P = "WEB 720p";
@@ -405,7 +412,14 @@ namespace Mouseion.Core.Qualities
                 ArticleWebPage,
                 ArticleFullText,
                 ArticlePDF,
-                ArticleArchive
+                ArticleArchive,
+
+                // Comic qualities
+                ComicUnknown,
+                ComicCBR,
+                ComicCBZ,
+                ComicPDF,
+                ComicEPUB
             };
 
             AllLookup = new Quality[All.Select(v => v.Id).Max() + 1];
@@ -560,7 +574,14 @@ namespace Mouseion.Core.Qualities
                 new QualityDefinition(Quality.ArticleWebPage)  { Weight = 601, MinSize = 0, MaxSize = 5, PreferredSize = 1 },
                 new QualityDefinition(Quality.ArticleFullText) { Weight = 602, MinSize = 0, MaxSize = 5, PreferredSize = 1 },
                 new QualityDefinition(Quality.ArticlePDF)      { Weight = 603, MinSize = 0, MaxSize = 50, PreferredSize = 5 },
-                new QualityDefinition(Quality.ArticleArchive)  { Weight = 604, MinSize = 0, MaxSize = 100, PreferredSize = 10 }
+                new QualityDefinition(Quality.ArticleArchive)  { Weight = 604, MinSize = 0, MaxSize = 100, PreferredSize = 10 },
+
+                // Comic quality definitions (Weight 700+)
+                new QualityDefinition(Quality.ComicUnknown) { Weight = 700, MinSize = 0, MaxSize = 500, PreferredSize = 100 },
+                new QualityDefinition(Quality.ComicCBR)     { Weight = 701, MinSize = 0, MaxSize = 500, PreferredSize = 100 },
+                new QualityDefinition(Quality.ComicCBZ)     { Weight = 702, MinSize = 0, MaxSize = 500, PreferredSize = 100 },
+                new QualityDefinition(Quality.ComicPDF)     { Weight = 703, MinSize = 0, MaxSize = 500, PreferredSize = 100 },
+                new QualityDefinition(Quality.ComicEPUB)    { Weight = 704, MinSize = 0, MaxSize = 500, PreferredSize = 100 }
             };
         }
 
