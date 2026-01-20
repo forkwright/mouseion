@@ -13,6 +13,8 @@ public class TVDBSettings
 {
     public string ApiUrl { get; set; } = "https://api4.thetvdb.com/v4";
     public string? ApiKey { get; set; }
+    public string? Pin { get; set; }
     public int TimeoutSeconds { get; set; } = 30;
     public int MaxRetries { get; set; } = 3;
+    public int TokenRefreshMinutes { get; set; } = 20;
 }
