@@ -1,8 +1,8 @@
 # Mouseion Roadmap
 
-**Last Updated:** 2026-01-12
-**Current Phase:** Phase 8 In Progress - Polish & Enhancements
-**Timeline:** 20 weeks core development complete, Phase 8 polish in progress
+**Last Updated:** 2026-01-19
+**Current Phase:** Phase 8 Complete - Planning Phase 9
+**Timeline:** 24 weeks complete (Phases 0-8), Phase 9 planning
 
 ---
 
@@ -32,7 +32,7 @@ Plus audiobooks, podcasts, comics, manga/webcomics, and news feeds in a single a
 | 5: TV/Podcasts | Weeks 13-14 | Episode tracking, RSS | ✅ Done |
 | 6: Infrastructure | Weeks 15-16 | Download clients, notifications, health checks | ✅ Done |
 | 7: File Scanning | Weeks 17-20 | Music scanning, movie org, history, covers | ✅ Done |
-| 8: Polish & Enhancements | Weeks 21-24 | Movie org, subtitles, auto-tagging, import pipeline | 🚧 In Progress |
+| 8: Polish & Enhancements | Weeks 21-24 | Movie org, subtitles, auto-tagging, import pipeline | ✅ Done |
 
 ---
 
@@ -246,7 +246,7 @@ Plus audiobooks, podcasts, comics, manga/webcomics, and news feeds in a single a
 
 ---
 
-## Phase 8: Polish & Enhancements (Weeks 21-24)
+## Phase 8: Polish & Enhancements (Weeks 21-24) ✅
 
 **Goal:** Production polish and advanced features beyond *arr parity
 
@@ -280,10 +280,10 @@ Plus audiobooks, podcasts, comics, manga/webcomics, and news feeds in a single a
    - [x] Atomic operations with rollback on failure
 
 **Technical Debt (Issues #100-107):**
-- [ ] Quality detection system (UpgradeSpecification.cs)
-- [ ] TVDB API implementation (TVDBProxy.cs)
-- [ ] Notification persistence (NotificationController.cs)
-- [ ] Calendar file checking (MovieCalendarService.cs)
+- [x] Quality detection system (Issue #100) - Complete
+- [x] TVDB API implementation (Issue #101) - Complete
+- [x] Notification persistence (Issue #102) - Complete
+- [x] Calendar file checking (Issue #103) - Complete
 - [x] Chapter parsing M4B/MP3 (Issue #104) - MP3 complete (PR #109), M4B partial (PR #113)
 - [x] Rate limiting middleware (Issue #94) - Complete (PR #112)
 - [x] Path.Combine security review (Issue #62) - Complete (41 instances validated)
@@ -300,9 +300,9 @@ Plus audiobooks, podcasts, comics, manga/webcomics, and news feeds in a single a
 - ✅ File import strategies support all modes (PR #130, #131)
 - ✅ Sync-over-async anti-patterns removed (PR #132)
 - ✅ Catch blocks have logging (PR #127)
-- ⏳ Auto-tagging rules functional
-- ⏳ Controller split (1/8 complete in PR #132, remaining tracked in Issue #119)
-- ⏳ LoggerMessage pattern migration (Issue #121)
+- ✅ Auto-tagging rules functional (PR #139)
+- ✅ Controller split complete (PR #140 - 9 new focused controllers)
+- ⏳ LoggerMessage pattern migration (Issue #121) - Deferred to Phase 9
 
 ---
 
