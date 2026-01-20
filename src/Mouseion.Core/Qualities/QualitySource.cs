@@ -25,5 +25,7 @@ public enum QualitySource
     AUDIOBOOK,
     MUSIC,
     PODCAST,
-    ARTICLE
+    ARTICLE,
+    MANGA,
+    WEBCOMIC
 }

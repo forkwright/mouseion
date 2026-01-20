@@ -278,6 +278,19 @@ try
         builder.Services.AddSingleton<Mouseion.Core.News.RSS.INewsFeedParser, Mouseion.Core.News.RSS.NewsFeedParser>();
         builder.Services.AddSingleton<Mouseion.Core.News.IAddNewsFeedService, Mouseion.Core.News.AddNewsFeedService>();
         builder.Services.AddSingleton<Mouseion.Core.News.IRefreshNewsFeedService, Mouseion.Core.News.RefreshNewsFeedService>();
+
+        // Register manga services
+        builder.Services.AddSingleton<Mouseion.Core.Manga.IMangaSeriesRepository, Mouseion.Core.Manga.MangaSeriesRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.Manga.IMangaChapterRepository, Mouseion.Core.Manga.MangaChapterRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.Manga.MangaDex.IMangaDexClient, Mouseion.Core.Manga.MangaDex.MangaDexClient>();
+        builder.Services.AddSingleton<Mouseion.Core.Manga.AniList.IAniListClient, Mouseion.Core.Manga.AniList.AniListClient>();
+        builder.Services.AddSingleton<Mouseion.Core.Manga.IAddMangaSeriesService, Mouseion.Core.Manga.AddMangaSeriesService>();
+        builder.Services.AddSingleton<Mouseion.Core.Manga.IRefreshMangaSeriesService, Mouseion.Core.Manga.RefreshMangaSeriesService>();
+
+        // Register webcomic services
+        builder.Services.AddSingleton<Mouseion.Core.Webcomic.IWebcomicSeriesRepository, Mouseion.Core.Webcomic.WebcomicSeriesRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.Webcomic.IWebcomicEpisodeRepository, Mouseion.Core.Webcomic.WebcomicEpisodeRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.Webcomic.IAddWebcomicSeriesService, Mouseion.Core.Webcomic.AddWebcomicSeriesService>();
     }
     else
     {
@@ -527,6 +540,19 @@ try
         container.Register<Mouseion.Core.News.RSS.INewsFeedParser, Mouseion.Core.News.RSS.NewsFeedParser>(Reuse.Singleton);
         container.Register<Mouseion.Core.News.IAddNewsFeedService, Mouseion.Core.News.AddNewsFeedService>(Reuse.Singleton);
         container.Register<Mouseion.Core.News.IRefreshNewsFeedService, Mouseion.Core.News.RefreshNewsFeedService>(Reuse.Singleton);
+
+        // Register manga services
+        container.Register<Mouseion.Core.Manga.IMangaSeriesRepository, Mouseion.Core.Manga.MangaSeriesRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Manga.IMangaChapterRepository, Mouseion.Core.Manga.MangaChapterRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Manga.MangaDex.IMangaDexClient, Mouseion.Core.Manga.MangaDex.MangaDexClient>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Manga.AniList.IAniListClient, Mouseion.Core.Manga.AniList.AniListClient>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Manga.IAddMangaSeriesService, Mouseion.Core.Manga.AddMangaSeriesService>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Manga.IRefreshMangaSeriesService, Mouseion.Core.Manga.RefreshMangaSeriesService>(Reuse.Singleton);
+
+        // Register webcomic services
+        container.Register<Mouseion.Core.Webcomic.IWebcomicSeriesRepository, Mouseion.Core.Webcomic.WebcomicSeriesRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Webcomic.IWebcomicEpisodeRepository, Mouseion.Core.Webcomic.WebcomicEpisodeRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Webcomic.IAddWebcomicSeriesService, Mouseion.Core.Webcomic.AddWebcomicSeriesService>(Reuse.Singleton);
 
         // Use DryIoc as service provider
         builder.Host.UseServiceProviderFactory(new DryIocServiceProviderFactory(container));
