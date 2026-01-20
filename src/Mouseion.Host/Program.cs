@@ -266,6 +266,11 @@ try
 
         // Register crypto services
         builder.Services.AddSingleton<Mouseion.Common.Crypto.IHashProvider, Mouseion.Common.Crypto.HashProvider>();
+
+        // Register notification services
+        builder.Services.AddSingleton<Mouseion.Core.Notifications.INotificationRepository, Mouseion.Core.Notifications.NotificationRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.Notifications.INotificationFactory, Mouseion.Core.Notifications.NotificationFactory>();
+        builder.Services.AddSingleton<Mouseion.Core.Notifications.INotificationService, Mouseion.Core.Notifications.NotificationService>();
     }
     else
     {
@@ -503,6 +508,11 @@ try
 
         // Register crypto services
         container.Register<Mouseion.Common.Crypto.IHashProvider, Mouseion.Common.Crypto.HashProvider>(Reuse.Singleton);
+
+        // Register notification services
+        container.Register<Mouseion.Core.Notifications.INotificationRepository, Mouseion.Core.Notifications.NotificationRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Notifications.INotificationFactory, Mouseion.Core.Notifications.NotificationFactory>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Notifications.INotificationService, Mouseion.Core.Notifications.NotificationService>(Reuse.Singleton);
 
         // Use DryIoc as service provider
         builder.Host.UseServiceProviderFactory(new DryIocServiceProviderFactory(container));
