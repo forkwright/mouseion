@@ -224,6 +224,13 @@ namespace Mouseion.Core.Qualities
         public static Quality PodcastAAC_128 => new Quality(405, "AAC-128", QualitySource.PODCAST, 128);
         public static Quality PodcastAAC_256 => new Quality(406, "AAC-256", QualitySource.PODCAST, 256);
 
+        // Article Qualities (IDs 600-604)
+        public static Quality ArticleUnknown => new Quality(600, "Unknown Article", QualitySource.ARTICLE, 0);
+        public static Quality ArticleWebPage => new Quality(601, "Web Page", QualitySource.ARTICLE, 0);
+        public static Quality ArticleFullText => new Quality(602, "Full Text", QualitySource.ARTICLE, 0);
+        public static Quality ArticlePDF => new Quality(603, "PDF", QualitySource.ARTICLE, 0);
+        public static Quality ArticleArchive => new Quality(604, "Archive", QualitySource.ARTICLE, 0);
+
         // Quality Group Names (used in QualityDefinition)
         private const string GroupWeb480P = "WEB 480p";
         private const string GroupWeb720P = "WEB 720p";
@@ -369,7 +376,14 @@ namespace Mouseion.Core.Qualities
                 PodcastMP3_192,
                 PodcastAAC_64,
                 PodcastAAC_128,
-                PodcastAAC_256
+                PodcastAAC_256,
+
+                // Article qualities
+                ArticleUnknown,
+                ArticleWebPage,
+                ArticleFullText,
+                ArticlePDF,
+                ArticleArchive
             };
 
             AllLookup = new Quality[All.Select(v => v.Id).Max() + 1];
@@ -506,7 +520,14 @@ namespace Mouseion.Core.Qualities
                 new QualityDefinition(Quality.PodcastMP3_192) { Weight = 403, MinSize = 0, MaxSize = 300, PreferredSize = 90 },
                 new QualityDefinition(Quality.PodcastAAC_64)  { Weight = 404, MinSize = 0, MaxSize = 100, PreferredSize = 25 },
                 new QualityDefinition(Quality.PodcastAAC_128) { Weight = 405, MinSize = 0, MaxSize = 200, PreferredSize = 50 },
-                new QualityDefinition(Quality.PodcastAAC_256) { Weight = 406, MinSize = 0, MaxSize = 400, PreferredSize = 100 }
+                new QualityDefinition(Quality.PodcastAAC_256) { Weight = 406, MinSize = 0, MaxSize = 400, PreferredSize = 100 },
+
+                // Article quality definitions (Weight 600+)
+                new QualityDefinition(Quality.ArticleUnknown)  { Weight = 600, MinSize = 0, MaxSize = 10, PreferredSize = 1 },
+                new QualityDefinition(Quality.ArticleWebPage)  { Weight = 601, MinSize = 0, MaxSize = 5, PreferredSize = 1 },
+                new QualityDefinition(Quality.ArticleFullText) { Weight = 602, MinSize = 0, MaxSize = 5, PreferredSize = 1 },
+                new QualityDefinition(Quality.ArticlePDF)      { Weight = 603, MinSize = 0, MaxSize = 50, PreferredSize = 5 },
+                new QualityDefinition(Quality.ArticleArchive)  { Weight = 604, MinSize = 0, MaxSize = 100, PreferredSize = 10 }
             };
         }
 

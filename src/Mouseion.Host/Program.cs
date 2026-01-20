@@ -271,6 +271,13 @@ try
         builder.Services.AddSingleton<Mouseion.Core.Notifications.INotificationRepository, Mouseion.Core.Notifications.NotificationRepository>();
         builder.Services.AddSingleton<Mouseion.Core.Notifications.INotificationFactory, Mouseion.Core.Notifications.NotificationFactory>();
         builder.Services.AddSingleton<Mouseion.Core.Notifications.INotificationService, Mouseion.Core.Notifications.NotificationService>();
+
+        // Register news services
+        builder.Services.AddSingleton<Mouseion.Core.News.INewsFeedRepository, Mouseion.Core.News.NewsFeedRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.News.INewsArticleRepository, Mouseion.Core.News.NewsArticleRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.News.RSS.INewsFeedParser, Mouseion.Core.News.RSS.NewsFeedParser>();
+        builder.Services.AddSingleton<Mouseion.Core.News.IAddNewsFeedService, Mouseion.Core.News.AddNewsFeedService>();
+        builder.Services.AddSingleton<Mouseion.Core.News.IRefreshNewsFeedService, Mouseion.Core.News.RefreshNewsFeedService>();
     }
     else
     {
@@ -513,6 +520,13 @@ try
         container.Register<Mouseion.Core.Notifications.INotificationRepository, Mouseion.Core.Notifications.NotificationRepository>(Reuse.Singleton);
         container.Register<Mouseion.Core.Notifications.INotificationFactory, Mouseion.Core.Notifications.NotificationFactory>(Reuse.Singleton);
         container.Register<Mouseion.Core.Notifications.INotificationService, Mouseion.Core.Notifications.NotificationService>(Reuse.Singleton);
+
+        // Register news services
+        container.Register<Mouseion.Core.News.INewsFeedRepository, Mouseion.Core.News.NewsFeedRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.News.INewsArticleRepository, Mouseion.Core.News.NewsArticleRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.News.RSS.INewsFeedParser, Mouseion.Core.News.RSS.NewsFeedParser>(Reuse.Singleton);
+        container.Register<Mouseion.Core.News.IAddNewsFeedService, Mouseion.Core.News.AddNewsFeedService>(Reuse.Singleton);
+        container.Register<Mouseion.Core.News.IRefreshNewsFeedService, Mouseion.Core.News.RefreshNewsFeedService>(Reuse.Singleton);
 
         // Use DryIoc as service provider
         builder.Host.UseServiceProviderFactory(new DryIocServiceProviderFactory(container));
