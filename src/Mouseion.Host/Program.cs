@@ -291,6 +291,13 @@ try
         builder.Services.AddSingleton<Mouseion.Core.Webcomic.IWebcomicSeriesRepository, Mouseion.Core.Webcomic.WebcomicSeriesRepository>();
         builder.Services.AddSingleton<Mouseion.Core.Webcomic.IWebcomicEpisodeRepository, Mouseion.Core.Webcomic.WebcomicEpisodeRepository>();
         builder.Services.AddSingleton<Mouseion.Core.Webcomic.IAddWebcomicSeriesService, Mouseion.Core.Webcomic.AddWebcomicSeriesService>();
+
+        // Register comic services
+        builder.Services.AddSingleton<Mouseion.Core.Comic.IComicSeriesRepository, Mouseion.Core.Comic.ComicSeriesRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.Comic.IComicIssueRepository, Mouseion.Core.Comic.ComicIssueRepository>();
+        builder.Services.AddSingleton<Mouseion.Core.Comic.ComicVine.IComicVineClient, Mouseion.Core.Comic.ComicVine.ComicVineClient>();
+        builder.Services.AddSingleton<Mouseion.Core.Comic.IAddComicSeriesService, Mouseion.Core.Comic.AddComicSeriesService>();
+        builder.Services.AddSingleton<Mouseion.Core.Comic.IRefreshComicSeriesService, Mouseion.Core.Comic.RefreshComicSeriesService>();
     }
     else
     {
@@ -553,6 +560,13 @@ try
         container.Register<Mouseion.Core.Webcomic.IWebcomicSeriesRepository, Mouseion.Core.Webcomic.WebcomicSeriesRepository>(Reuse.Singleton);
         container.Register<Mouseion.Core.Webcomic.IWebcomicEpisodeRepository, Mouseion.Core.Webcomic.WebcomicEpisodeRepository>(Reuse.Singleton);
         container.Register<Mouseion.Core.Webcomic.IAddWebcomicSeriesService, Mouseion.Core.Webcomic.AddWebcomicSeriesService>(Reuse.Singleton);
+
+        // Register comic services
+        container.Register<Mouseion.Core.Comic.IComicSeriesRepository, Mouseion.Core.Comic.ComicSeriesRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Comic.IComicIssueRepository, Mouseion.Core.Comic.ComicIssueRepository>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Comic.ComicVine.IComicVineClient, Mouseion.Core.Comic.ComicVine.ComicVineClient>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Comic.IAddComicSeriesService, Mouseion.Core.Comic.AddComicSeriesService>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Comic.IRefreshComicSeriesService, Mouseion.Core.Comic.RefreshComicSeriesService>(Reuse.Singleton);
 
         // Use DryIoc as service provider
         builder.Host.UseServiceProviderFactory(new DryIocServiceProviderFactory(container));

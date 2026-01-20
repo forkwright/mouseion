@@ -27,5 +27,6 @@ public enum QualitySource
     PODCAST,
     ARTICLE,
     MANGA,
-    WEBCOMIC
+    WEBCOMIC,
+    COMIC
 }
