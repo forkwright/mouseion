@@ -527,10 +527,15 @@ try
     builder.Services.AddAuthorization();
 
     // Add ASP.NET Core services
-    builder.Services.AddControllers();
+    builder.Services.AddControllers(options =>
+    {
+        // Add validation filter for automatic FluentValidation
+        options.Filters.Add<Mouseion.Api.Validation.ValidationFilter>();
+    });
 
     // Add FluentValidation (registers all validators in Mouseion.Api assembly)
     builder.Services.AddValidatorsFromAssemblyContaining<Mouseion.Api.Common.ApiProblemDetails>();
+    builder.Services.AddScoped<Mouseion.Api.Validation.ValidationFilter>();
 
     builder.Services.AddSignalR();
     builder.Services.AddMouseionTelemetry();
