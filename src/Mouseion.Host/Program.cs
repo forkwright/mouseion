@@ -103,6 +103,7 @@ try
         // Register library filtering services
         builder.Services.AddSingleton<Mouseion.Core.Filtering.IFilterQueryBuilder, Mouseion.Core.Filtering.FilterQueryBuilder>();
         builder.Services.AddSingleton<Mouseion.Core.Library.ILibraryFilterService, Mouseion.Core.Library.LibraryFilterService>();
+        builder.Services.AddSingleton<Mouseion.Core.Library.IUnifiedLibraryStatisticsService, Mouseion.Core.Library.UnifiedLibraryStatisticsService>();
 
         // Register tag services
         builder.Services.AddSingleton<Mouseion.Core.Tags.ITagRepository, Mouseion.Core.Tags.TagRepository>();
@@ -216,10 +217,16 @@ try
         builder.Services.AddSingleton<Mouseion.Core.HealthCheck.IHealthCheckService, Mouseion.Core.HealthCheck.HealthCheckService>();
         builder.Services.AddSingleton<Mouseion.Core.HealthCheck.Checks.RootFolderCheck>();
         builder.Services.AddSingleton<Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>();
+        builder.Services.AddSingleton<Mouseion.Core.HealthCheck.Checks.NewsFeedHealthCheck>();
+        builder.Services.AddSingleton<Mouseion.Core.HealthCheck.Checks.MangaLibraryHealthCheck>();
+        builder.Services.AddSingleton<Mouseion.Core.HealthCheck.Checks.WebcomicLibraryHealthCheck>();
         builder.Services.AddSingleton<IEnumerable<Mouseion.Core.HealthCheck.IProvideHealthCheck>>(sp => new Mouseion.Core.HealthCheck.IProvideHealthCheck[]
         {
             sp.GetRequiredService<Mouseion.Core.HealthCheck.Checks.RootFolderCheck>(),
-            sp.GetRequiredService<Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>()
+            sp.GetRequiredService<Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>(),
+            sp.GetRequiredService<Mouseion.Core.HealthCheck.Checks.NewsFeedHealthCheck>(),
+            sp.GetRequiredService<Mouseion.Core.HealthCheck.Checks.MangaLibraryHealthCheck>(),
+            sp.GetRequiredService<Mouseion.Core.HealthCheck.Checks.WebcomicLibraryHealthCheck>()
         });
 
         // Register housekeeping tasks
@@ -370,6 +377,7 @@ try
         // Register library filtering services
         container.Register<Mouseion.Core.Filtering.IFilterQueryBuilder, Mouseion.Core.Filtering.FilterQueryBuilder>(Reuse.Singleton);
         container.Register<Mouseion.Core.Library.ILibraryFilterService, Mouseion.Core.Library.LibraryFilterService>(Reuse.Singleton);
+        container.Register<Mouseion.Core.Library.IUnifiedLibraryStatisticsService, Mouseion.Core.Library.UnifiedLibraryStatisticsService>(Reuse.Singleton);
 
         // Register tag services
         container.Register<Mouseion.Core.Tags.ITagRepository, Mouseion.Core.Tags.TagRepository>(Reuse.Singleton);
@@ -478,10 +486,16 @@ try
         container.Register<Mouseion.Core.HealthCheck.IHealthCheckService, Mouseion.Core.HealthCheck.HealthCheckService>(Reuse.Singleton);
         container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.RootFolderCheck>(Reuse.Singleton, serviceKey: "RootFolder");
         container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.DiskSpaceCheck>(Reuse.Singleton, serviceKey: "DiskSpace");
+        container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.NewsFeedHealthCheck>(Reuse.Singleton, serviceKey: "NewsFeed");
+        container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.MangaLibraryHealthCheck>(Reuse.Singleton, serviceKey: "MangaLibrary");
+        container.Register<Mouseion.Core.HealthCheck.IProvideHealthCheck, Mouseion.Core.HealthCheck.Checks.WebcomicLibraryHealthCheck>(Reuse.Singleton, serviceKey: "WebcomicLibrary");
         container.RegisterDelegate<IEnumerable<Mouseion.Core.HealthCheck.IProvideHealthCheck>>(r => new[]
         {
             r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "RootFolder"),
-            r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "DiskSpace")
+            r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "DiskSpace"),
+            r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "NewsFeed"),
+            r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "MangaLibrary"),
+            r.Resolve<Mouseion.Core.HealthCheck.IProvideHealthCheck>(serviceKey: "WebcomicLibrary")
         }, Reuse.Singleton);
 
         // Register housekeeping tasks
