@@ -9,7 +9,7 @@ using Mouseion.Core.Qualities;
 
 namespace Mouseion.Core.Music;
 
-public class MusicQualityParser : IMusicQualityParser
+public partial class MusicQualityParser : IMusicQualityParser
 {
     private readonly ILogger<MusicQualityParser> _logger;
     private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(5);
@@ -89,7 +89,7 @@ public class MusicQualityParser : IMusicQualityParser
 
     public QualityModel ParseQuality(string name)
     {
-        _logger.LogDebug("Parsing music quality for '{Name}'", name.SanitizeForLog());
+        LogParsingMusicQuality(_logger, name.SanitizeForLog());
 
         if (name.IsNullOrWhiteSpace())
         {
@@ -504,9 +504,7 @@ public class MusicQualityParser : IMusicQualityParser
         }
         catch (Exception ex)
         {
-#pragma warning disable CA1873 // Use 'LoggerMessage' delegates
-            _logger.LogError(ex, "Failed to check if path is music file: {Path}", path);
-#pragma warning restore CA1873
+            LogPathCheckError(_logger, ex, path);
             return false;
         }
     }
@@ -515,4 +513,10 @@ public class MusicQualityParser : IMusicQualityParser
     {
         return path.Any(c => Path.GetInvalidPathChars().Contains(c));
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Parsing music quality for '{Name}'")]
+    private static partial void LogParsingMusicQuality(ILogger logger, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to check if path is music file: {Path}")]
+    private static partial void LogPathCheckError(ILogger logger, Exception ex, string path);
 }

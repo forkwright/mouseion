@@ -18,7 +18,7 @@ using Mouseion.Core.Movies;
 
 namespace Mouseion.Core.MetadataSource;
 
-public class TmdbInfoProxy : IProvideMovieInfo
+public partial class TmdbInfoProxy : IProvideMovieInfo
 {
     private const string BaseUrl = "https://api.themoviedb.org/3";
     private readonly string _apiKey;
@@ -40,7 +40,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
         if (string.IsNullOrWhiteSpace(_apiKey))
         {
-            _logger.LogWarning("TMDb API key not configured. Set TMDb:ApiKey in config or TMDB_API_KEY env var");
+            LogApiKeyNotConfiguredWithInstructions(_logger);
         }
     }
 
@@ -48,7 +48,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
         {
-            _logger.LogWarning("TMDb API key not configured");
+            LogApiKeyNotConfigured(_logger);
             return null;
         }
 
@@ -56,13 +56,13 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
         if (_cache.TryGetValue(cacheKey, out Movie? cached))
         {
-            _logger.LogDebug("Cache hit for TMDb ID: {TmdbId}", tmdbId);
+            LogCacheHitTmdbId(_logger, tmdbId);
             return cached;
         }
 
         try
         {
-            _logger.LogDebug("Fetching movie by TMDb ID: {TmdbId}", tmdbId);
+            LogFetchingByTmdbId(_logger, tmdbId);
 
             var url = $"{BaseUrl}/movie/{tmdbId}?api_key={_apiKey}&append_to_response=credits,release_dates";
             var request = new HttpRequestBuilder(url).Build();
@@ -70,7 +70,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
             var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                _logger.LogWarning("TMDb returned {StatusCode} for TMDb ID {TmdbId}", response.StatusCode, tmdbId);
+                LogTmdbReturnedStatus(_logger, response.StatusCode, tmdbId);
                 return null;
             }
 
@@ -84,17 +84,17 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Network error fetching movie by TMDb ID: {TmdbId}", tmdbId);
+            LogNetworkErrorTmdbId(_logger, ex, tmdbId);
             return null;
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Failed to parse response for movie TMDb ID: {TmdbId}", tmdbId);
+            LogParseErrorTmdbId(_logger, ex, tmdbId);
             return null;
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogWarning(ex, "Request timed out or was cancelled: movie by TMDb ID {TmdbId}", tmdbId);
+            LogTimeoutTmdbId(_logger, ex, tmdbId);
             return null;
         }
     }
@@ -103,7 +103,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
         {
-            _logger.LogWarning("TMDb API key not configured");
+            LogApiKeyNotConfigured(_logger);
             return null;
         }
 
@@ -111,13 +111,13 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
         if (_cache.TryGetValue(cacheKey, out Movie? cached))
         {
-            _logger.LogDebug("Cache hit for IMDB ID: {ImdbId}", imdbId);
+            LogCacheHitImdbId(_logger, imdbId);
             return cached;
         }
 
         try
         {
-            _logger.LogDebug("Fetching movie by IMDB ID: {ImdbId}", imdbId);
+            LogFetchingByImdbId(_logger, imdbId);
 
             var url = $"{BaseUrl}/find/{imdbId}?api_key={_apiKey}&external_source=imdb_id";
             var request = new HttpRequestBuilder(url).Build();
@@ -125,7 +125,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
             var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                _logger.LogWarning("TMDb returned {StatusCode} for IMDB ID {ImdbId}", response.StatusCode, imdbId);
+                LogTmdbReturnedStatusImdb(_logger, response.StatusCode, imdbId);
                 return null;
             }
 
@@ -139,17 +139,17 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Network error fetching movie by IMDB ID: {ImdbId}", imdbId);
+            LogNetworkErrorImdbId(_logger, ex, imdbId);
             return null;
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Failed to parse response for movie IMDB ID: {ImdbId}", imdbId);
+            LogParseErrorImdbId(_logger, ex, imdbId);
             return null;
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogWarning(ex, "Request timed out or was cancelled: movie by IMDB ID {ImdbId}", imdbId);
+            LogTimeoutImdbId(_logger, ex, imdbId);
             return null;
         }
     }
@@ -158,7 +158,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
     {
         if (string.IsNullOrWhiteSpace(_apiKey))
         {
-            _logger.LogWarning("TMDb API key not configured");
+            LogApiKeyNotConfigured(_logger);
             return new List<Movie>();
         }
 
@@ -166,13 +166,13 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
         if (_cache.TryGetValue(cacheKey, out List<Movie>? cached))
         {
-            _logger.LogDebug("Cache hit for movie search: {Title}", title.SanitizeForLog());
+            LogCacheHitSearch(_logger, title.SanitizeForLog());
             return cached ?? new List<Movie>();
         }
 
         try
         {
-            _logger.LogDebug("Searching movies by title: {Title}", title.SanitizeForLog());
+            LogSearchingByTitle(_logger, title.SanitizeForLog());
 
             var url = $"{BaseUrl}/search/movie?api_key={_apiKey}&query={Uri.EscapeDataString(title)}";
             if (year.HasValue)
@@ -185,7 +185,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
             var response = await _httpClient.GetAsync(request).ConfigureAwait(false);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                _logger.LogWarning("TMDb search returned {StatusCode}", response.StatusCode);
+                LogTmdbSearchReturnedStatus(_logger, response.StatusCode);
                 return new List<Movie>();
             }
 
@@ -196,17 +196,17 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Network error searching movies by title: {Title}", title.SanitizeForLog());
+            LogNetworkErrorSearch(_logger, ex, title.SanitizeForLog());
             return new List<Movie>();
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Failed to parse search results for movie title: {Title}", title.SanitizeForLog());
+            LogParseErrorSearch(_logger, ex, title.SanitizeForLog());
             return new List<Movie>();
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogWarning(ex, "Request timed out or was cancelled: movie title search {Title}", title.SanitizeForLog());
+            LogTimeoutSearch(_logger, ex, title.SanitizeForLog());
             return new List<Movie>();
         }
     }
@@ -233,17 +233,17 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Network error fetching trending movies");
+            LogNetworkErrorTrending(_logger, ex);
             return new List<Movie>();
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Failed to parse response for trending movies");
+            LogParseErrorTrending(_logger, ex);
             return new List<Movie>();
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogWarning(ex, "Request timed out or was cancelled: trending movies");
+            LogTimeoutTrending(_logger, ex);
             return new List<Movie>();
         }
     }
@@ -270,17 +270,17 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Network error fetching popular movies");
+            LogNetworkErrorPopular(_logger, ex);
             return new List<Movie>();
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Failed to parse response for popular movies");
+            LogParseErrorPopular(_logger, ex);
             return new List<Movie>();
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogWarning(ex, "Request timed out or was cancelled: popular movies");
+            LogTimeoutPopular(_logger, ex);
             return new List<Movie>();
         }
     }
@@ -307,17 +307,17 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Network error fetching upcoming movies");
+            LogNetworkErrorUpcoming(_logger, ex);
             return new List<Movie>();
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Failed to parse response for upcoming movies");
+            LogParseErrorUpcoming(_logger, ex);
             return new List<Movie>();
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogWarning(ex, "Request timed out or was cancelled: upcoming movies");
+            LogTimeoutUpcoming(_logger, ex);
             return new List<Movie>();
         }
     }
@@ -344,17 +344,17 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Network error fetching now playing movies");
+            LogNetworkErrorNowPlaying(_logger, ex);
             return new List<Movie>();
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Failed to parse response for now playing movies");
+            LogParseErrorNowPlaying(_logger, ex);
             return new List<Movie>();
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogWarning(ex, "Request timed out or was cancelled: now playing movies");
+            LogTimeoutNowPlaying(_logger, ex);
             return new List<Movie>();
         }
     }
@@ -392,7 +392,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Error parsing TMDb movie JSON");
+            LogParseErrorMovieJson(_logger, ex);
             return null;
         }
     }
@@ -415,7 +415,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Error parsing TMDb find result");
+            LogParseErrorFindResult(_logger, ex);
             return null;
         }
     }
@@ -443,7 +443,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "Error parsing TMDb search results");
+            LogParseErrorSearchResults(_logger, ex);
         }
 
         return movies;
@@ -480,7 +480,7 @@ public class TmdbInfoProxy : IProvideMovieInfo
         }
         catch (JsonException ex)
         {
-            _logger.LogWarning(ex, "Error parsing movie from search result");
+            LogParseErrorSearchResultItem(_logger, ex);
             return null;
         }
     }
@@ -588,4 +588,113 @@ public class TmdbInfoProxy : IProvideMovieInfo
 
         return null;
     }
+
+    // LoggerMessage source generators for zero-cost logging when disabled
+    [LoggerMessage(Level = LogLevel.Warning, Message = "TMDb API key not configured. Set TMDb:ApiKey in config or TMDB_API_KEY env var")]
+    private static partial void LogApiKeyNotConfiguredWithInstructions(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "TMDb API key not configured")]
+    private static partial void LogApiKeyNotConfigured(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Cache hit for TMDb ID: {TmdbId}")]
+    private static partial void LogCacheHitTmdbId(ILogger logger, int tmdbId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Fetching movie by TMDb ID: {TmdbId}")]
+    private static partial void LogFetchingByTmdbId(ILogger logger, int tmdbId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "TMDb returned {StatusCode} for TMDb ID {TmdbId}")]
+    private static partial void LogTmdbReturnedStatus(ILogger logger, System.Net.HttpStatusCode statusCode, int tmdbId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Network error fetching movie by TMDb ID: {TmdbId}")]
+    private static partial void LogNetworkErrorTmdbId(ILogger logger, Exception ex, int tmdbId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to parse response for movie TMDb ID: {TmdbId}")]
+    private static partial void LogParseErrorTmdbId(ILogger logger, Exception ex, int tmdbId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Request timed out or was cancelled: movie by TMDb ID {TmdbId}")]
+    private static partial void LogTimeoutTmdbId(ILogger logger, Exception ex, int tmdbId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Cache hit for IMDB ID: {ImdbId}")]
+    private static partial void LogCacheHitImdbId(ILogger logger, string imdbId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Fetching movie by IMDB ID: {ImdbId}")]
+    private static partial void LogFetchingByImdbId(ILogger logger, string imdbId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "TMDb returned {StatusCode} for IMDB ID {ImdbId}")]
+    private static partial void LogTmdbReturnedStatusImdb(ILogger logger, System.Net.HttpStatusCode statusCode, string imdbId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Network error fetching movie by IMDB ID: {ImdbId}")]
+    private static partial void LogNetworkErrorImdbId(ILogger logger, Exception ex, string imdbId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to parse response for movie IMDB ID: {ImdbId}")]
+    private static partial void LogParseErrorImdbId(ILogger logger, Exception ex, string imdbId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Request timed out or was cancelled: movie by IMDB ID {ImdbId}")]
+    private static partial void LogTimeoutImdbId(ILogger logger, Exception ex, string imdbId);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Cache hit for movie search: {Title}")]
+    private static partial void LogCacheHitSearch(ILogger logger, string title);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Searching movies by title: {Title}")]
+    private static partial void LogSearchingByTitle(ILogger logger, string title);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "TMDb search returned {StatusCode}")]
+    private static partial void LogTmdbSearchReturnedStatus(ILogger logger, System.Net.HttpStatusCode statusCode);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Network error searching movies by title: {Title}")]
+    private static partial void LogNetworkErrorSearch(ILogger logger, Exception ex, string title);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to parse search results for movie title: {Title}")]
+    private static partial void LogParseErrorSearch(ILogger logger, Exception ex, string title);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Request timed out or was cancelled: movie title search {Title}")]
+    private static partial void LogTimeoutSearch(ILogger logger, Exception ex, string title);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Network error fetching trending movies")]
+    private static partial void LogNetworkErrorTrending(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to parse response for trending movies")]
+    private static partial void LogParseErrorTrending(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Request timed out or was cancelled: trending movies")]
+    private static partial void LogTimeoutTrending(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Network error fetching popular movies")]
+    private static partial void LogNetworkErrorPopular(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to parse response for popular movies")]
+    private static partial void LogParseErrorPopular(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Request timed out or was cancelled: popular movies")]
+    private static partial void LogTimeoutPopular(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Network error fetching upcoming movies")]
+    private static partial void LogNetworkErrorUpcoming(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to parse response for upcoming movies")]
+    private static partial void LogParseErrorUpcoming(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Request timed out or was cancelled: upcoming movies")]
+    private static partial void LogTimeoutUpcoming(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Network error fetching now playing movies")]
+    private static partial void LogNetworkErrorNowPlaying(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to parse response for now playing movies")]
+    private static partial void LogParseErrorNowPlaying(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Request timed out or was cancelled: now playing movies")]
+    private static partial void LogTimeoutNowPlaying(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error parsing TMDb movie JSON")]
+    private static partial void LogParseErrorMovieJson(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error parsing TMDb find result")]
+    private static partial void LogParseErrorFindResult(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error parsing TMDb search results")]
+    private static partial void LogParseErrorSearchResults(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Error parsing movie from search result")]
+    private static partial void LogParseErrorSearchResultItem(ILogger logger, Exception ex);
 }
