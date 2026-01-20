@@ -305,6 +305,9 @@ try
         builder.Services.AddSingleton<Mouseion.Core.Comic.ComicVine.IComicVineClient, Mouseion.Core.Comic.ComicVine.ComicVineClient>();
         builder.Services.AddSingleton<Mouseion.Core.Comic.IAddComicSeriesService, Mouseion.Core.Comic.AddComicSeriesService>();
         builder.Services.AddSingleton<Mouseion.Core.Comic.IRefreshComicSeriesService, Mouseion.Core.Comic.RefreshComicSeriesService>();
+
+        // Register bulk operations service
+        builder.Services.AddSingleton<Mouseion.Core.Bulk.IBulkOperationsService, Mouseion.Core.Bulk.BulkOperationsService>();
     }
     else
     {
@@ -581,6 +584,9 @@ try
         container.Register<Mouseion.Core.Comic.ComicVine.IComicVineClient, Mouseion.Core.Comic.ComicVine.ComicVineClient>(Reuse.Singleton);
         container.Register<Mouseion.Core.Comic.IAddComicSeriesService, Mouseion.Core.Comic.AddComicSeriesService>(Reuse.Singleton);
         container.Register<Mouseion.Core.Comic.IRefreshComicSeriesService, Mouseion.Core.Comic.RefreshComicSeriesService>(Reuse.Singleton);
+
+        // Register bulk operations service
+        container.Register<Mouseion.Core.Bulk.IBulkOperationsService, Mouseion.Core.Bulk.BulkOperationsService>(Reuse.Singleton);
 
         // Use DryIoc as service provider
         builder.Host.UseServiceProviderFactory(new DryIocServiceProviderFactory(container));
