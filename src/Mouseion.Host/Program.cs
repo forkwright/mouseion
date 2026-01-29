@@ -11,6 +11,7 @@ using Mouseion.Common.Instrumentation;
 using Mouseion.Core.Datastore;
 using Mouseion.Core.Datastore.Migration.Framework;
 using Mouseion.SignalR;
+using OpenTelemetry.Metrics;
 using Serilog;
 using Serilog.Events;
 
@@ -612,7 +613,7 @@ try
     builder.Services.AddScoped<Mouseion.Api.Validation.ValidationFilter>();
 
     builder.Services.AddSignalR();
-    builder.Services.AddMouseionTelemetry();
+    builder.Services.AddMouseionTelemetry(builder.Configuration);
     builder.Services.AddMemoryCache();
 
     // Skip task scheduler in test mode (background services start before database initialization)
@@ -680,6 +681,7 @@ try
 
     // Configure middleware pipeline
     app.UseMiddleware<Mouseion.Api.Middleware.GlobalExceptionHandlerMiddleware>();
+    app.UseMiddleware<Mouseion.Api.Middleware.TelemetryMiddleware>();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
@@ -698,6 +700,12 @@ try
     // Map controllers and SignalR hubs
     app.MapControllers();
     app.MapHub<MessageHub>("/signalr/messages");
+
+    // Expose Prometheus metrics endpoint (if enabled in configuration)
+    if (builder.Configuration.GetValue("Telemetry:EnablePrometheus", true))
+    {
+        app.UseOpenTelemetryPrometheusScrapingEndpoint();
+    }
 
     Log.Information("Mouseion started successfully - listening on {Urls}", string.Join(", ", app.Urls));
     app.Run();
